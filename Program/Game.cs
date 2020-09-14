@@ -5,44 +5,37 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
 using Program.Shaders;
-
+using Boolean = System.Boolean;
 
 namespace Program
 {
     public class Game : GameWindow
     {
 
-        private TexturedObject mainWorld;
+        private List<TexturedObject> mainTexturedObjects = new List<TexturedObject> { };
+        private List<Object> mainObjects = new List<Object> { };
         private Lamp mainLamp;
         private Shader _lampShader, _lightingShader, _textureShader, _2dShader;
-        private float angle1, angle2;
         private Camera _camera;
         private bool _firstMove = true;
         private Vector2 _lastPos;
         private readonly Vector3 _lightPos = new Vector3(-10.0f, 10.0f, 20.0f);
         private int x, y;
-        private Object2D rect;
+        public Boolean RenderLight;
+        public float cameraSpeed = 20f;
+        public float sensitivity = 0.2f;
         public Game(int width, int height, string title)
             : base(width, height, GraphicsMode.Default, title)
         {
         }
         protected override void OnLoad(EventArgs e)
         {
-            GL.ClearColor(0.0f, 0.3f, 0.6f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
-
             _lightingShader = new Shader("Shaders/shader.vert", "Shaders/lighting.frag");
             _lampShader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
             _textureShader = new Shader("Shaders/texture.vert", "Shaders/texture.frag");
             _2dShader = new Shader("Shaders/shader2d.vert", "Shaders/shader2d.frag");
-
-            mainWorld = new TexturedObject("Objs/spiro.obj", _textureShader, "Resources/high.png");
-            mainLamp = new Lamp(new Vector3(0.0f, 0.0f, 10.0f), new Vector3(1f, 1f, 1f), _lampShader);
-            mainWorld.setPositionInSpace(0f, 0f, 0f);
-            //rect = createRectangle(100, 100);
-
-            angle1 = 0; angle2 = 0;
-
+            
             _camera = new Camera(Vector3.UnitZ * 3, Width / (float)Height);
             x = 0; y = 0;
             CursorVisible = false;
@@ -50,14 +43,15 @@ namespace Program
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            //mainWorld.setRotationX(angle1);
-            //mainWorld.setRotationZ(angle2);
-
-            mainWorld.show(_camera, mainLamp, _textureShader);
-            mainLamp.show(_camera, _lampShader);
-            //rect.Show(x, y, _2dShader);
-
+            if (RenderLight) { mainLamp.show(_camera, _lampShader); };
+            foreach (Object obj in mainObjects)
+            {
+                obj.show(_camera);
+            }
+            foreach (TexturedObject obj in mainTexturedObjects)
+            {
+                obj.show(_camera);
+            }
 
             SwapBuffers();
 
@@ -77,14 +71,6 @@ namespace Program
             {
                 Exit();
             }
-
-            //angle1 += 0.01f;
-            //angle2 += 0.02f;
-            x += 1;
-            y += 1;
-
-            const float cameraSpeed = 20f;
-            const float sensitivity = 0.2f;
 
             if (input.IsKeyDown(Key.W))
             {
@@ -142,7 +128,6 @@ namespace Program
         }
         protected override void OnUnload(EventArgs e)
         {
-            WindowState = WindowState.Normal;
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindVertexArray(0);
             GL.UseProgram(0);
@@ -152,8 +137,14 @@ namespace Program
             GL.DeleteProgram(_lampShader.Handle);
             GL.DeleteProgram(_lightingShader.Handle);
 
-            //rect.Dispose();
-            mainWorld.Dispose();
+            foreach(Object obj in mainObjects)
+            {
+                obj.Dispose();
+            }
+            foreach(TexturedObject obj in mainTexturedObjects)
+            {
+                obj.Dispose();
+            }
             mainLamp.Dispose();
             base.OnUnload(e);
         }
@@ -268,8 +259,11 @@ namespace Program
             private int _mainObject;
             private float[] vertices;
             private float rot_x, rot_y, rot_z;
-            private Vector3 pos;
-            public Object(string path, Shader lightingShader)
+            private Vector3 pos, color;
+            private Shader shader;
+            private Lamp lamp;
+            private float Scale = 1.0f;
+            public Object(string path, Shader lightingShader, Lamp _lamp, Vector3 col)
             {
                 vertices = loadObj(path);
 
@@ -291,22 +285,25 @@ namespace Program
                 GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
                 rot_x = 0.0f; rot_y = 0.0f; rot_z = 0.0f;
                 pos = new Vector3(0.0f, 0.0f, 0.0f);
+                shader = lightingShader;
+                lamp = _lamp;
+                color = col;
             }
 
-            public void show(Camera camera, Lamp lamp, Shader lightingShader, Vector3 color)
+            public void show(Camera camera)
             {
                 GL.BindVertexArray(_mainObject);
 
-                lightingShader.Use();
+                shader.Use();
 
 
-                lightingShader.SetMatrix4("model",  (Matrix4.CreateRotationX(rot_x) * Matrix4.CreateRotationX(rot_y) * Matrix4.CreateRotationZ(rot_z)) * Matrix4.CreateTranslation(pos));
-                lightingShader.SetMatrix4("view", camera.GetViewMatrix());
-                lightingShader.SetMatrix4("projection", camera.GetProjectionMatrix());
+                shader.SetMatrix4("model",  (Matrix4.CreateScale(Scale) *  Matrix4.CreateRotationX(rot_x) * Matrix4.CreateRotationX(rot_y) * Matrix4.CreateRotationZ(rot_z)) * Matrix4.CreateTranslation(pos));
+                shader.SetMatrix4("view", camera.GetViewMatrix());
+                shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
-                lightingShader.SetVector3("objectColor", color);
-                lightingShader.SetVector3("lightColor", lamp.lightColor);
-                lightingShader.SetVector3("lightPos", lamp.pos);
+                shader.SetVector3("objectColor", color);
+                shader.SetVector3("lightColor", lamp.lightColor);
+                shader.SetVector3("lightPos", lamp.pos);
 
                 GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length / 6);
             }
@@ -326,12 +323,15 @@ namespace Program
             {
                 pos = new Vector3(x, y, z);
             }
+            public void setScale(float scale)
+            {
+                Scale = scale; 
+            }
             public void Dispose()
             {
                 GL.DeleteBuffer(_vertexBufferObject);
                 GL.DeleteVertexArray(_mainObject);
             }
-
         }
         private class Lamp
         {
@@ -390,6 +390,7 @@ namespace Program
             private float rot_x, rot_y, rot_z;
             private Texture texture;
             private Vector3 pos;
+            private Shader shader;
             public TexturedObject(string path, Shader textureShader, string texturePath)
             {
                 vertices = loadObjTextured(path);
@@ -420,19 +421,20 @@ namespace Program
 
                 rot_x = 0.0f; rot_y = 0.0f; rot_z = 0.0f;
                 pos = new Vector3(0.0f, 0.0f, 0.0f);
+                shader = textureShader;
             }
 
-            public void show(Camera camera, Lamp lamp, Shader textureShader)
+            public void show(Camera camera)
             {
                 GL.BindVertexArray(_mainObject);
 
                 texture.Use();
-                textureShader.Use();
-                
+                shader.Use();
 
-                textureShader.SetMatrix4("model", (Matrix4.CreateRotationX(rot_x) * Matrix4.CreateRotationX(rot_y) * Matrix4.CreateRotationZ(rot_z)) * Matrix4.CreateTranslation(pos));
-                textureShader.SetMatrix4("view", camera.GetViewMatrix());
-                textureShader.SetMatrix4("projection", camera.GetProjectionMatrix());
+
+                shader.SetMatrix4("model", (Matrix4.CreateRotationX(rot_x) * Matrix4.CreateRotationX(rot_y) * Matrix4.CreateRotationZ(rot_z)) * Matrix4.CreateTranslation(pos));
+                shader.SetMatrix4("view", camera.GetViewMatrix());
+                shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
                 //textureShader.SetVector3("lightColor", lamp.lightColor);
                 //textureShader.SetVector3("lightPos", lamp.pos);
@@ -462,53 +464,101 @@ namespace Program
             }
 
         }
-        private class Object2D
+        public int createCube(Vector3 color)
         {
-            Shader shader;
-            int _vertexBufferObject, _vertexArrayObject;
-            float Width, Heigth;
-            public Object2D(float[] vertices, Shader shader, float _Width, float _Height)
-            {
-                _vertexBufferObject = GL.GenBuffer();
-                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-                GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
-
-                _vertexArrayObject = GL.GenVertexArray();
-                GL.BindVertexArray(_vertexArrayObject);
-
-                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-
-                var positionLocation = shader.GetAttribLocation("aPos");
-                GL.EnableVertexAttribArray(positionLocation);
-                GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-
-                Width = _Width;
-                Heigth = _Height;
-            }
-
-            public void Show(float x, float y, Shader _shader)
-            {
-                _shader.Use();
-
-                GL.BindVertexArray(_vertexArrayObject);
-                _shader.SetMatrix4("translation", Matrix4.CreateTranslation(x / Width, -y / Heigth, 0));
-
-                GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
-            }
-
-            public void Dispose()
-            {
-                GL.DeleteBuffer(_vertexBufferObject);
-                GL.DeleteVertexArray(_vertexArrayObject);
-            }
+            mainObjects.Add(new Object("Objs/cube.obj", _lightingShader, mainLamp, color));
+            return mainObjects.Count - 1;
         }
-        private Object2D createRectangle(float width, float height)
+        public int createSphere(Vector3 color)
         {
-            float w = width / Width;
-            float h = height / Height;
+            mainObjects.Add(new Object("Objs/sphere.obj", _lightingShader, mainLamp, color));
+            return mainObjects.Count - 1;
+        }
+        public int createTorus(Vector3 color)
+        {
+            mainObjects.Add(new Object("Objs/torus.obj", _lightingShader, mainLamp, color));
+            return mainObjects.Count - 1;
+        }
+        public int createCilinder(Vector3 color)
+        {
+            mainObjects.Add(new Object("Objs/cilinder.obj", _lightingShader, mainLamp, color));
+            return mainObjects.Count - 1;
+        }
+        public void openTexturedObj(string Obj, string Texture)
+        {
+            mainTexturedObjects.Add(new TexturedObject(Obj, _textureShader, Texture));
+        }
+        public void createMainLight(Vector3 pos, Vector3 color)
+        {
+            mainLamp = new Lamp(pos, color, _lampShader);
+        }
+        public void rotateObject(float x, float y, float z, int handle)
+        {
+            mainObjects[handle].setRotationX(x);
+            mainObjects[handle].setRotationY(y);
+            mainObjects[handle].setRotationZ(z);
+        }
+        public void scaleObject(float scale, int handle)
+        {
+            mainObjects[handle].setScale(scale);
+        }
+        public void translateObject(float x, float y, float z, int handle)
+        {
+            mainObjects[handle].setPositionInSpace(x, y, z);
+        }
+    }
+    
+}
 
-            float[] _vertices =
-            {
+/*
+private class Object2D
+{
+    int _vertexBufferObject, _vertexArrayObject;
+    PrimitiveType primitiveType;
+    float Width, Heigth;
+    public Object2D(float[] vertices, Shader shader, float _Width, float _Height, PrimitiveType primType)
+    {
+        _vertexBufferObject = GL.GenBuffer();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+
+        _vertexArrayObject = GL.GenVertexArray();
+        GL.BindVertexArray(_vertexArrayObject);
+
+        GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+
+        var positionLocation = shader.GetAttribLocation("aPos");
+        GL.EnableVertexAttribArray(positionLocation);
+        GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+        Width = _Width;
+        Heigth = _Height;
+        primitiveType = primType;
+    }
+
+    public void Show(float x, float y, Shader _shader)
+    {
+        _shader.Use();
+
+        GL.BindVertexArray(_vertexArrayObject);
+        _shader.SetMatrix4("translation", Matrix4.CreateTranslation(x / Width, -y / Heigth, 0));
+
+        GL.DrawArrays(primitiveType, 0, 6);
+    }
+
+    public void Dispose()
+    {
+        GL.DeleteBuffer(_vertexBufferObject);
+        GL.DeleteVertexArray(_vertexArrayObject);
+    }
+}
+private Object2D createRectangle(float width, float height)
+{
+    float w = width / Width;
+    float h = height / Height;
+
+    float[] _vertices =
+    {
                 -1f,  1f, 0.0f, // top right
                 -1f,  1f - h, 0.0f, // bottom right
                 -1f + w, 1f, 0.0f, // top left
@@ -519,9 +569,7 @@ namespace Program
                 
             };
 
-            return new Object2D(_vertices, _2dShader, Width, Height);
-        }
-    }
-
-
+    return new Object2D(_vertices, _2dShader, Width, Height, PrimitiveType.Triangles);
 }
+
+*/ //2D stuff

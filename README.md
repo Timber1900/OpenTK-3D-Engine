@@ -2,7 +2,7 @@
 
 ## Todo
 
-- [ ] Add simple Cube and Sphere functions,
+- [x] Add simple Cube and Sphere functions,
 
 - [ ] Add drawPolygon Function (p5.js Triangle strip style),
 
