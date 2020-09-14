@@ -1,6 +1,9 @@
-# OpenTK3DEnngine
+# OpenTK3DEngine
 
-## Todo:
-* Add simple Cube and Sphere functions,
+## Todo
 
-- [ ] Test 
+- [ ] Add simple Cube and Sphere functions,
+
+- [ ] Add drawPolygon Function (p5.js Triangle strip style),
+
+- [ ] Add 2D rendering

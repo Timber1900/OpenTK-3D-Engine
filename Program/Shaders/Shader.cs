@@ -98,10 +98,21 @@ namespace Program.Shaders
             GL.UseProgram(Handle);
             GL.UniformMatrix4(_uniformLocations[name], true, ref data);
         }
+
+        public void SetMatrix3(string name, Matrix3 data)
+        {
+            GL.UseProgram(Handle);
+            GL.UniformMatrix3(_uniformLocations[name], true, ref data);
+        }
         public void SetVector3(string name, Vector3 data)
         {
             GL.UseProgram(Handle);
             GL.Uniform3(_uniformLocations[name], data);
+        }
+        public void SetVector4(string name, Vector4 data)
+        {
+            GL.UseProgram(Handle);
+            GL.Uniform4(_uniformLocations[name], data);
         }
     }
 }

@@ -12,57 +12,57 @@ namespace Program
     public class Game : GameWindow
     {
 
-        private Object mainWorld;
+        private TexturedObject mainWorld;
         private Lamp mainLamp;
-        private Shader _lampShader, _lightingShader, _textureShader;
+        private Shader _lampShader, _lightingShader, _textureShader, _2dShader;
         private float angle1, angle2;
         private Camera _camera;
         private bool _firstMove = true;
         private Vector2 _lastPos;
         private readonly Vector3 _lightPos = new Vector3(-10.0f, 10.0f, 20.0f);
-
-
+        private int x, y;
+        private Object2D rect;
         public Game(int width, int height, string title)
             : base(width, height, GraphicsMode.Default, title)
         {
         }
-
         protected override void OnLoad(EventArgs e)
         {
-            GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            GL.ClearColor(0.0f, 0.3f, 0.6f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
 
             _lightingShader = new Shader("Shaders/shader.vert", "Shaders/lighting.frag");
             _lampShader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
             _textureShader = new Shader("Shaders/texture.vert", "Shaders/texture.frag");
+            _2dShader = new Shader("Shaders/shader2d.vert", "Shaders/shader2d.frag");
 
-            mainWorld = new Object("Objs/knot.obj", _lightingShader);
+            mainWorld = new TexturedObject("Objs/spiro.obj", _textureShader, "Resources/high.png");
             mainLamp = new Lamp(new Vector3(0.0f, 0.0f, 10.0f), new Vector3(1f, 1f, 1f), _lampShader);
             mainWorld.setPositionInSpace(0f, 0f, 0f);
+            //rect = createRectangle(100, 100);
+
             angle1 = 0; angle2 = 0;
 
             _camera = new Camera(Vector3.UnitZ * 3, Width / (float)Height);
-
+            x = 0; y = 0;
             CursorVisible = false;
         }
-
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            mainWorld.setRotationX(angle1);
-            mainWorld.setRotationZ(angle2);
+            //mainWorld.setRotationX(angle1);
+            //mainWorld.setRotationZ(angle2);
 
-            mainWorld.show(_camera, mainLamp, _lightingShader, new Vector3(1.0f, 1.0f, 1.0f));
+            mainWorld.show(_camera, mainLamp, _textureShader);
             mainLamp.show(_camera, _lampShader);
+            //rect.Show(x, y, _2dShader);
 
-            
 
             SwapBuffers();
 
             base.OnRenderFrame(e);
         }
-
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
 
@@ -78,8 +78,10 @@ namespace Program
                 Exit();
             }
 
-            angle1 += 0.01f;
-            angle2 += 0.02f;
+            //angle1 += 0.01f;
+            //angle2 += 0.02f;
+            x += 1;
+            y += 1;
 
             const float cameraSpeed = 20f;
             const float sensitivity = 0.2f;
@@ -133,13 +135,11 @@ namespace Program
             Mouse.SetPosition(1920 / 2, 1080 / 2);
             base.OnUpdateFrame(e);
         }
-
         protected override void OnResize(EventArgs e)
         {
             GL.Viewport(0, 0, Width, Height);
             base.OnResize(e);
         }
-
         protected override void OnUnload(EventArgs e)
         {
             WindowState = WindowState.Normal;
@@ -152,6 +152,7 @@ namespace Program
             GL.DeleteProgram(_lampShader.Handle);
             GL.DeleteProgram(_lightingShader.Handle);
 
+            //rect.Dispose();
             mainWorld.Dispose();
             mainLamp.Dispose();
             base.OnUnload(e);
@@ -261,7 +262,6 @@ namespace Program
 
             return final.ToArray();
         }
-
         private class Object
         {
             private int _vertexBufferObject;
@@ -422,7 +422,7 @@ namespace Program
                 pos = new Vector3(0.0f, 0.0f, 0.0f);
             }
 
-            public void show(Camera camera, Lamp lamp, Shader textureShader, Vector3 color)
+            public void show(Camera camera, Lamp lamp, Shader textureShader)
             {
                 GL.BindVertexArray(_mainObject);
 
@@ -462,8 +462,65 @@ namespace Program
             }
 
         }
+        private class Object2D
+        {
+            Shader shader;
+            int _vertexBufferObject, _vertexArrayObject;
+            float Width, Heigth;
+            public Object2D(float[] vertices, Shader shader, float _Width, float _Height)
+            {
+                _vertexBufferObject = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+                GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
 
+                _vertexArrayObject = GL.GenVertexArray();
+                GL.BindVertexArray(_vertexArrayObject);
 
+                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+
+                var positionLocation = shader.GetAttribLocation("aPos");
+                GL.EnableVertexAttribArray(positionLocation);
+                GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+                Width = _Width;
+                Heigth = _Height;
+            }
+
+            public void Show(float x, float y, Shader _shader)
+            {
+                _shader.Use();
+
+                GL.BindVertexArray(_vertexArrayObject);
+                _shader.SetMatrix4("translation", Matrix4.CreateTranslation(x / Width, -y / Heigth, 0));
+
+                GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+            }
+
+            public void Dispose()
+            {
+                GL.DeleteBuffer(_vertexBufferObject);
+                GL.DeleteVertexArray(_vertexArrayObject);
+            }
+        }
+        private Object2D createRectangle(float width, float height)
+        {
+            float w = width / Width;
+            float h = height / Height;
+
+            float[] _vertices =
+            {
+                -1f,  1f, 0.0f, // top right
+                -1f,  1f - h, 0.0f, // bottom right
+                -1f + w, 1f, 0.0f, // top left
+
+                -1f,  1f - h, 0.0f, // bottom right
+                -1f + w, 1f, 0.0f, // top left
+                -1f + w, 1f - h, 0.0f, // bottom left
+                
+            };
+
+            return new Object2D(_vertices, _2dShader, Width, Height);
+        }
     }
 
 
