@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
@@ -35,7 +36,11 @@ namespace Program
             _lampShader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
             _textureShader = new Shader("Shaders/texture.vert", "Shaders/texture.frag");
             _2dShader = new Shader("Shaders/shader2d.vert", "Shaders/shader2d.frag");
-            
+            _lightingShader.Use();
+            _lampShader.Use();
+            _textureShader.Use();
+            _2dShader.Use();
+                                                        
             _camera = new Camera(Vector3.UnitZ * 3, Width / (float)Height);
             x = 0; y = 0;
             CursorVisible = false;
@@ -136,6 +141,8 @@ namespace Program
 
             GL.DeleteProgram(_lampShader.Handle);
             GL.DeleteProgram(_lightingShader.Handle);
+            GL.DeleteProgram(_2dShader.Handle);
+            GL.DeleteProgram(_textureShader.Handle);
 
             foreach(Object obj in mainObjects)
             {
@@ -145,7 +152,10 @@ namespace Program
             {
                 obj.Dispose();
             }
-            mainLamp.Dispose();
+            if(mainLamp != null) { mainLamp.Dispose(); }
+
+
+
             base.OnUnload(e);
         }
         public static float[] loadObj(string Path)
@@ -289,7 +299,32 @@ namespace Program
                 lamp = _lamp;
                 color = col;
             }
+            public Object(float[] _vertices, Shader lightingShader, Lamp _lamp, Vector3 col)
+            {
+                vertices = _vertices;
 
+                _vertexBufferObject = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+                GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+
+                _mainObject = GL.GenVertexArray();
+                GL.BindVertexArray(_mainObject);
+
+                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+
+                var positionLocation = lightingShader.GetAttribLocation("aPos");
+                GL.EnableVertexAttribArray(positionLocation);
+                GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+
+                var normalLocation = lightingShader.GetAttribLocation("aNormal");
+                GL.EnableVertexAttribArray(normalLocation);
+                GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
+                rot_x = 0.0f; rot_y = 0.0f; rot_z = 0.0f;
+                pos = new Vector3(0.0f, 0.0f, 0.0f);
+                shader = lightingShader;
+                lamp = _lamp;
+                color = col;
+            }
             public void show(Camera camera)
             {
                 GL.BindVertexArray(_mainObject);
@@ -484,6 +519,28 @@ namespace Program
             mainObjects.Add(new Object("Objs/cilinder.obj", _lightingShader, mainLamp, color));
             return mainObjects.Count - 1;
         }
+        public int createPlane(float x1, float y1, float z1,
+                               float x2, float y2, float z2,
+                               float x3, float y3, float z3,
+                               float x4, float y4, float z4, Vector3 color)
+        {
+            Vector3 l1 = new Vector3(x2 - x1, y2 - y1, z2 - z1);
+            Vector3 l2 = new Vector3(x3 - x1, y3 - y1, z3 - z1);
+            Vector3 normal = Vector3.Cross(l1, l2);
+
+            float[] vertices =
+            {
+                x1, y1, z1, normal.X,  normal.Y, normal.Z,
+                x2, y2, z2, normal.X,  normal.Y, normal.Z,
+                x3, y3, z3, normal.X,  normal.Y, normal.Z,
+
+                x4, y4, z4, normal.X,  normal.Y, normal.Z,
+                x2, y2, z2, normal.X,  normal.Y, normal.Z,
+                x3, y3, z3, normal.X,  normal.Y, normal.Z,
+            };
+            mainObjects.Add(new Object(vertices, _lightingShader, mainLamp, color));
+            return mainObjects.Count - 1;
+        }
         public void openTexturedObj(string Obj, string Texture)
         {
             mainTexturedObjects.Add(new TexturedObject(Obj, _textureShader, Texture));
@@ -507,69 +564,9 @@ namespace Program
             mainObjects[handle].setPositionInSpace(x, y, z);
         }
     }
+
+   
+
     
+
 }
-
-/*
-private class Object2D
-{
-    int _vertexBufferObject, _vertexArrayObject;
-    PrimitiveType primitiveType;
-    float Width, Heigth;
-    public Object2D(float[] vertices, Shader shader, float _Width, float _Height, PrimitiveType primType)
-    {
-        _vertexBufferObject = GL.GenBuffer();
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
-
-        _vertexArrayObject = GL.GenVertexArray();
-        GL.BindVertexArray(_vertexArrayObject);
-
-        GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
-
-        var positionLocation = shader.GetAttribLocation("aPos");
-        GL.EnableVertexAttribArray(positionLocation);
-        GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-
-        Width = _Width;
-        Heigth = _Height;
-        primitiveType = primType;
-    }
-
-    public void Show(float x, float y, Shader _shader)
-    {
-        _shader.Use();
-
-        GL.BindVertexArray(_vertexArrayObject);
-        _shader.SetMatrix4("translation", Matrix4.CreateTranslation(x / Width, -y / Heigth, 0));
-
-        GL.DrawArrays(primitiveType, 0, 6);
-    }
-
-    public void Dispose()
-    {
-        GL.DeleteBuffer(_vertexBufferObject);
-        GL.DeleteVertexArray(_vertexArrayObject);
-    }
-}
-private Object2D createRectangle(float width, float height)
-{
-    float w = width / Width;
-    float h = height / Height;
-
-    float[] _vertices =
-    {
-                -1f,  1f, 0.0f, // top right
-                -1f,  1f - h, 0.0f, // bottom right
-                -1f + w, 1f, 0.0f, // top left
-
-                -1f,  1f - h, 0.0f, // bottom right
-                -1f + w, 1f, 0.0f, // top left
-                -1f + w, 1f - h, 0.0f, // bottom left
-                
-            };
-
-    return new Object2D(_vertices, _2dShader, Width, Height, PrimitiveType.Triangles);
-}
-
-*/ //2D stuff
