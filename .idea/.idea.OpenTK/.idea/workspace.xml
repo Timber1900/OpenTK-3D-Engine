@@ -4,15 +4,51 @@
     <projectFile>Program/Program.csproj</projectFile>
     <projectFile>Game/Game.csproj</projectFile>
   </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="" />
+    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Program/Shader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/MainRenderWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/MainRenderWindow.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/Program/bin/Debug/netcoreapp3.1/Shaders/Shader.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Program/MainRenderWindow.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
@@ -24,18 +60,23 @@
         <option value="$PROJECT_DIR$/Program/Final.cs" />
         <option value="$PROJECT_DIR$/Game/Program.cs" />
         <option value="$PROJECT_DIR$/Game/Game.cs" />
-        <option value="$PROJECT_DIR$/Program/MainRenderWindow.cs" />
         <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/Program/Shader.cs" />
+        <option value="$PROJECT_DIR$/Program/MainRenderWindow.cs" />
       </list>
     </option>
   </component>
   <component name="ProjectId" id="1hhW4e3zDaYRjSFh5R9AiEL75qQ" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="autoscrollToSource" value="true" />
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="node.js.detected.package.eslint" value="true" />
@@ -96,7 +137,11 @@
       <workItem from="1600463646984" duration="187000" />
       <workItem from="1600466543859" duration="605000" />
       <workItem from="1600467187832" duration="5157000" />
-      <workItem from="1600511288899" duration="3033000" />
+      <workItem from="1600511288899" duration="3698000" />
+      <workItem from="1600515801183" duration="604000" />
+      <workItem from="1600521635939" duration="56000" />
+      <workItem from="1600521743208" duration="2000" />
+      <workItem from="1600522497899" duration="1368000" />
     </task>
     <servers />
   </component>
@@ -105,26 +150,39 @@
   </component>
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1600512278950">
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1600514989541">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600512278950" />
-    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1600512278950">
+    <state width="1877" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600514989541" />
+    <state width="1877" height="282" key="GridCell.Tab.0.center" timestamp="1600514989541">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600512278950" />
-    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1600512278950">
+    <state width="1877" height="282" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600514989541" />
+    <state width="1877" height="282" key="GridCell.Tab.0.left" timestamp="1600514989540">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600512278950" />
-    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1600512278950">
+    <state width="1877" height="282" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600514989540" />
+    <state width="1877" height="282" key="GridCell.Tab.0.right" timestamp="1600514989541">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600512278950" />
+    <state width="1877" height="282" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600514989541" />
     <state x="552" y="251" key="Rider.ProjectTemplateDialog.Size" timestamp="1600512321730">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

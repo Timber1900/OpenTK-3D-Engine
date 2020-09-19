@@ -21,14 +21,7 @@
           </e>
         </e>
         <e p="Program.csproj" t="IncludeRecursive" />
-        <e p="Resources" t="Include">
-          <e p="container.png" t="Include" />
-        </e>
-        <e p="Shaders" t="Include">
-          <e p="Shader.cs" t="Include" />
-          <e p="shader.frag" t="Include" />
-          <e p="shader.vert" t="Include" />
-        </e>
+        <e p="Shader.cs" t="Include" />
         <e p="Texture.cs" t="Include" />
       </e>
     </e>

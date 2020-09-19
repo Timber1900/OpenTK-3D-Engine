@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
-using Program.Shaders;
 using Boolean = System.Boolean;
 
 namespace Program
@@ -705,14 +705,15 @@ namespace Program
                 var rad = i * step;
                 tempVertices[i] = new Vector3(((float) Math.Cos(rad) * radiusXNorm) + xNorm, ((float) Math.Sin(rad) * radiusYNorm) + yNorm, 0.0f);
             }
+            
 
-            var tempVerticesList = new List<float> {xNorm, yNorm, 0f};
+            var tempVerticesList = new List<float> {xNorm, yNorm, 0f,};
             for (var i = 0; i < numEllipseVertices; i++)
             {
-                tempVerticesList.Add(tempVertices[i].X);
-                tempVerticesList.Add(tempVertices[i].Y);
-                tempVerticesList.Add(tempVertices[i].Z);
-
+                tempVerticesList.AddRange(new []
+                {
+                    tempVertices[i].X, tempVertices[i].Y, tempVertices[i].Z,
+                });
             }
 
             var vertices = tempVerticesList.ToArray();
@@ -739,10 +740,54 @@ namespace Program
             _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
             
             _2dShader.Use();
-            GL.DrawArrays(PrimitiveType.TriangleFan, 0, vertices.Length);
+            GL.DrawArrays(PrimitiveType.TriangleFan, 0, numEllipseVertices + 1);
         }
 
-        
+        public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Color4 color)
+        {
+            float x1Trans = x1 - (Width / 2);
+            float y1Trans = y1 - (Height / 2);
+            float x1Norm = x1Trans / (Width / 2);
+            float y1Norm = y1Trans / (Height / 2);
+            float x2Trans = x2 - (Width / 2);
+            float y2Trans = y2 - (Height / 2);
+            float x2Norm = x2Trans / (Width / 2);
+            float y2Norm = y2Trans / (Height / 2);
+            float x3Trans = x3 - (Width / 2);
+            float y3Trans = y3 - (Height / 2);
+            float x3Norm = x3Trans / (Width / 2);
+            float y3Norm = y3Trans / (Height / 2);
+            float[] vertices =
+            {
+                x1Norm, -y1Norm, 0f,
+                x2Norm, -y2Norm, 0f,
+                x3Norm, -y3Norm, 0f,
+            };
+
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
+
+            _2dShader.Use();
+            
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
+
+            var positionLocation = _2dShader.GetAttribLocation("aPos");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+            
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            GL.BindVertexArray(mainObject);
+            
+            _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
+            
+            _2dShader.Use();
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+
+        }
         protected void Clear()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
