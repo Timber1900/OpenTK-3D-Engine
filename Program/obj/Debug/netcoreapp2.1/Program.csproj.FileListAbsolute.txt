@@ -1,0 +1,9 @@
+C:\Users\35196\source\repos\OpenTK3DEngine-master\Program\obj\Debug\netcoreapp2.1\Program.csprojAssemblyReference.cache
+C:\Users\35196\source\repos\OpenTK3DEngine-master\Program\obj\Debug\netcoreapp2.1\Program.AssemblyInfoInputs.cache
+C:\Users\35196\source\repos\OpenTK3DEngine-master\Program\obj\Debug\netcoreapp2.1\Program.AssemblyInfo.cs
+C:\Users\35196\source\repos\OpenTK3DEngine-master\Program\obj\Debug\netcoreapp2.1\Program.csproj.CoreCompileInputs.cache
+C:\Users\35196\source\repos\OpenTK3DEngine-master\Program\bin\Debug\netcoreapp2.1\Program.deps.json
+C:\Users\35196\source\repos\OpenTK3DEngine-master\Program\bin\Debug\netcoreapp2.1\Program.dll
+C:\Users\35196\source\repos\OpenTK3DEngine-master\Program\bin\Debug\netcoreapp2.1\Program.pdb
+C:\Users\35196\source\repos\OpenTK3DEngine-master\Program\obj\Debug\netcoreapp2.1\Program.dll
+C:\Users\35196\source\repos\OpenTK3DEngine-master\Program\obj\Debug\netcoreapp2.1\Program.pdb
