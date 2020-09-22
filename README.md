@@ -50,7 +50,7 @@ namespace yourNameSpace
         {
             Clear();
 
-            drawEllipse(500, 500, 10f, 10f, new Color4(1.0f, 1.0f, 1.0f, 1.0f)) //Draws a circle
+            drawEllipse(500, 500, 10f, 10f, new Color4(1.0f, 1.0f, 1.0f, 1.0f)); //Draws a circle
 
             base.OnRenderFrame(e);
 
