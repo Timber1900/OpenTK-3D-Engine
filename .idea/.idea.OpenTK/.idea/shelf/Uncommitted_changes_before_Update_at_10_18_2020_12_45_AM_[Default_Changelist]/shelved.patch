@@ -1,0 +1,783 @@
+Index: Program/MainRenderWindow.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using System;\r\nusing System.Collections.Generic;\r\nusing System.Globalization;\r\nusing OpenTK;\r\nusing OpenTK.Graphics;\r\nusing OpenTK.Graphics.OpenGL4;\r\nusing OpenTK.Input;\r\nusing Boolean = System.Boolean;\r\n\r\nnamespace Program\r\n{\r\n    public class MainRenderWindow : GameWindow\r\n    {\r\n\r\n        private readonly List<TexturedObject> _mainTexturedObjects = new List<TexturedObject>();\r\n        private readonly List<Object> _mainObjects = new List<Object>();\r\n        private Lamp _mainLamp;\r\n        private Shader _lampShader, _lightingShader, _textureShader, _2dShader;\r\n        private Camera _camera;\r\n        private bool _firstMove = true;\r\n        private Vector2 _lastPos;\r\n        protected Boolean RenderLight = false;\r\n        private float cameraSpeed = 20f;\r\n        private float sensitivity = 0.2f;\r\n        protected Boolean UseDepthTest = true;\r\n        protected Boolean UseAlpha = true;\r\n        protected Boolean KeyboardAndMouseInput = true;\r\n        protected MainRenderWindow(int width, int height, string title)\r\n            : base(width, height, GraphicsMode.Default, title)\r\n        {\r\n        }\r\n        protected override void OnLoad(EventArgs e)\r\n        {\r\n            if(UseDepthTest) {GL.Enable(EnableCap.DepthTest);}\r\n            if(UseAlpha) {GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);}\r\n            GL.Enable(EnableCap.Blend);\r\n            _lightingShader = new Shader(\"Shaders/shader.vert\", \"Shaders/lighting.frag\");\r\n            _lampShader = new Shader(\"Shaders/shader.vert\", \"Shaders/shader.frag\");\r\n            _textureShader = new Shader(\"Shaders/texture.vert\", \"Shaders/texture.frag\");\r\n            _2dShader = new Shader(\"Shaders/shader2d.vert\", \"Shaders/shader2d.frag\");\r\n            _lightingShader.Use();\r\n            _lampShader.Use();\r\n            _textureShader.Use();\r\n            _2dShader.Use();\r\n                                                        \r\n            _camera = new Camera(Vector3.UnitZ * 3, Width / (float)Height);\r\n            CursorVisible = !KeyboardAndMouseInput;\r\n            \r\n        }\r\n\r\n        protected void setClearColor(Color4 color)\r\n        {\r\n            GL.ClearColor(color);\r\n\r\n        }\r\n        protected override void OnRenderFrame(FrameEventArgs e)\r\n        {\r\n            if (RenderLight) { _mainLamp.show(_camera, _lampShader); }\r\n\r\n            foreach (Object obj in _mainObjects)\r\n            {\r\n                obj.show(_camera);\r\n            }\r\n            foreach (TexturedObject obj in _mainTexturedObjects)\r\n            {\r\n                obj.show(_camera);\r\n            }\r\n\r\n            SwapBuffers();\r\n\r\n            base.OnRenderFrame(e);\r\n        }\r\n        protected override void OnUpdateFrame(FrameEventArgs e)\r\n        {\r\n\r\n            if (!Focused) // check to see if the window is focused\r\n            {\r\n                return;\r\n            }\r\n            var input = Keyboard.GetState();\r\n            \r\n            if (input.IsKeyDown(Key.Escape))\r\n            {\r\n                Exit();\r\n            }\r\n\r\n            if (KeyboardAndMouseInput)\r\n            {\r\n                \r\n                if (input.IsKeyDown(Key.W))\r\n                {\r\n                    _camera.Position += _camera.Front * cameraSpeed * (float) e.Time; // Forward\r\n                }\r\n\r\n                if (input.IsKeyDown(Key.S))\r\n                {\r\n                    _camera.Position -= _camera.Front * cameraSpeed * (float) e.Time; // Backwards\r\n                }\r\n\r\n                if (input.IsKeyDown(Key.A))\r\n                {\r\n                    _camera.Position -= _camera.Right * cameraSpeed * (float) e.Time; // Left\r\n                }\r\n\r\n                if (input.IsKeyDown(Key.D))\r\n                {\r\n                    _camera.Position += _camera.Right * cameraSpeed * (float) e.Time; // Right\r\n                }\r\n\r\n                if (input.IsKeyDown(Key.Space))\r\n                {\r\n                    _camera.Position += _camera.Up * cameraSpeed * (float) e.Time; // Up\r\n                }\r\n\r\n                if (input.IsKeyDown(Key.LShift))\r\n                {\r\n                    _camera.Position -= _camera.Up * cameraSpeed * (float) e.Time; // Down\r\n                }\r\n\r\n                // Get the mouse state\r\n                var mouse = Mouse.GetState();\r\n\r\n                if (_firstMove) // this bool variable is initially set to true\r\n                {\r\n                    _lastPos = new Vector2(mouse.X, mouse.Y);\r\n                    _firstMove = false;\r\n                }\r\n                else\r\n                {\r\n                    // Calculate the offset of the mouse position\r\n                    var deltaX = mouse.X - _lastPos.X;\r\n                    var deltaY = mouse.Y - _lastPos.Y;\r\n                    _lastPos = new Vector2(mouse.X, mouse.Y);\r\n\r\n                    // Apply the camera pitch and yaw (we clamp the pitch in the camera class)\r\n                    _camera.Yaw += deltaX * sensitivity;\r\n                    _camera.Pitch -= deltaY * sensitivity; // reversed since y-coordinates range from bottom to top\r\n                }\r\n\r\n                Mouse.SetPosition(1920 / 2, 1080 / 2);\r\n            }\r\n            base.OnUpdateFrame(e);\r\n        }\r\n        protected override void OnResize(EventArgs e)\r\n        {\r\n            GL.Viewport(0, 0, Width, Height);\r\n            base.OnResize(e);\r\n        }\r\n        protected override void OnUnload(EventArgs e)\r\n        {\r\n            GL.BindBuffer(BufferTarget.ArrayBuffer, 0);\r\n            GL.BindVertexArray(0);\r\n            GL.UseProgram(0);\r\n\r\n            \r\n\r\n            GL.DeleteProgram(_lampShader.Handle);\r\n            GL.DeleteProgram(_lightingShader.Handle);\r\n            GL.DeleteProgram(_2dShader.Handle);\r\n            GL.DeleteProgram(_textureShader.Handle);\r\n\r\n            foreach(Object obj in _mainObjects)\r\n            {\r\n                obj.Dispose();\r\n            }\r\n            foreach(TexturedObject obj in _mainTexturedObjects)\r\n            {\r\n                obj.Dispose();\r\n            }\r\n\r\n            _mainLamp?.Dispose();\r\n\r\n\r\n\r\n            base.OnUnload(e);\r\n        }\r\n        private static float[] loadObj(string path)\r\n        {\r\n            string[] lines = System.IO.File.ReadAllLines(path);\r\n            List<float[]> vertices = new List<float[]>();\r\n            List<float> final = new List<float>();\r\n            foreach (string line in lines)\r\n            {\r\n                string[] lineSlitted = line.Split(\" \");\r\n                if (lineSlitted[0] == \"v\")\r\n                {\r\n                    float[] toAdd = new float[3];\r\n                    toAdd[0] = (float.Parse(lineSlitted[1]));\r\n                    toAdd[1] = (float.Parse(lineSlitted[2]));\r\n                    toAdd[2] = (float.Parse(lineSlitted[3]));\r\n                    vertices.Add(toAdd);\r\n                }\r\n                if (lineSlitted[0] == \"f\")\r\n                {\r\n                    string[] t1 = lineSlitted[1].Split(\"//\");\r\n                    string[] t2 = lineSlitted[2].Split(\"//\");\r\n                    string[] t3 = lineSlitted[3].Split(\"//\");\r\n\r\n\r\n\r\n                    float[] v1 = vertices[int.Parse(t1[0]) - 1];\r\n                    float[] v2 = vertices[int.Parse(t2[0]) - 1];\r\n                    float[] v3 = vertices[int.Parse(t3[0]) - 1];\r\n\r\n                    Vector3 v01 = new Vector3(v1[0], v1[1], v1[2]);\r\n                    Vector3 v02 = new Vector3(v2[0], v2[1], v2[2]);\r\n                    Vector3 v03 = new Vector3(v3[0], v3[1], v3[2]);\r\n\r\n                    Vector3 l1 = v02 - v01;\r\n                    Vector3 l2 = v03 - v01;\r\n\r\n                    Vector3 n = Vector3.Cross(l2, l1);\r\n\r\n                    final.Add(v1[0]); final.Add(v1[1]); final.Add(v1[2]); final.Add(n.X); final.Add(n.Y); final.Add(n.Z);\r\n                    final.Add(v2[0]); final.Add(v2[1]); final.Add(v2[2]); final.Add(n.X); final.Add(n.Y); final.Add(n.Z);\r\n                    final.Add(v3[0]); final.Add(v3[1]); final.Add(v3[2]); final.Add(n.X); final.Add(n.Y); final.Add(n.Z);\r\n                }\r\n\r\n            }\r\n\r\n\r\n            return final.ToArray();\r\n        }\r\n        private static float[] loadObjTextured(string path)\r\n        {\r\n            string[] lines = System.IO.File.ReadAllLines(path);\r\n            List<float[]> vertices = new List<float[]>();\r\n            List<float[]> textureCords = new List<float[]>();\r\n            List<float> final = new List<float>();\r\n            foreach (string line in lines)\r\n            {\r\n                string[] lineSlitted = line.Split(\" \");\r\n                if (lineSlitted[0] == \"v\")\r\n                {\r\n                    float[] toAdd = new float[3];\r\n                    toAdd[0] = (float.Parse(lineSlitted[1]));\r\n                    toAdd[1] = (float.Parse(lineSlitted[2]));\r\n                    toAdd[2] = (float.Parse(lineSlitted[3]));\r\n                    vertices.Add(toAdd);\r\n                }\r\n                if (lineSlitted[0] == \"vt\")\r\n                {\r\n                    float[] toAdd = new float[2];\r\n                    toAdd[0] = (float.Parse(lineSlitted[1]));\r\n                    toAdd[1] = (-(float.Parse(lineSlitted[2]) - 1));\r\n                    textureCords.Add(toAdd);\r\n                }\r\n                if (lineSlitted[0] == \"f\")\r\n                {\r\n                    string[] t1 = lineSlitted[1].Split(\"/\");\r\n                    string[] t2 = lineSlitted[2].Split(\"/\");\r\n                    string[] t3 = lineSlitted[3].Split(\"/\");\r\n\r\n\r\n\r\n                    float[] v1 = vertices[int.Parse(t1[0]) - 1];\r\n                    if (int.Parse(t2[0]) - 1 >= 0 && vertices.Count > int.Parse(t2[0]) - 1)\r\n                    {\r\n                        float[] v2 = vertices[int.Parse(t2[0]) - 1];\r\n                        float[] v3 = vertices[int.Parse(t3[0]) - 1];\r\n                        float[] tex1 = textureCords[int.Parse(t1[1]) - 1];\r\n                        float[] tex2 = textureCords[int.Parse(t2[1]) - 1];\r\n                        float[] tex3 = textureCords[int.Parse(t3[1]) - 1];\r\n\r\n                        Vector3 v01 = new Vector3(v1[0], v1[1], v1[2]);\r\n                        Vector3 v02 = new Vector3(v2[0], v2[1], v2[2]);\r\n                        Vector3 v03 = new Vector3(v3[0], v3[1], v3[2]);\r\n\r\n                        Vector3 l1 = v02 - v01;\r\n                        Vector3 l2 = v03 - v01;\r\n\r\n                        Vector3 n = Vector3.Cross(l2, l1);\r\n\r\n                        final.Add(v1[0]); final.Add(v1[1]); final.Add(v1[2]); final.Add(n.X); final.Add(n.Y); final.Add(n.Z); final.Add(tex1[0]); final.Add(tex1[1]);\r\n                        final.Add(v2[0]); final.Add(v2[1]); final.Add(v2[2]); final.Add(n.X); final.Add(n.Y); final.Add(n.Z); final.Add(tex2[0]); final.Add(tex2[1]);\r\n                        final.Add(v3[0]); final.Add(v3[1]); final.Add(v3[2]); final.Add(n.X); final.Add(n.Y); final.Add(n.Z); final.Add(tex3[0]); final.Add(tex3[1]);\r\n                    }\r\n                }\r\n\r\n            }\r\n\r\n\r\n            return final.ToArray();\r\n        }\r\n        private class Object\r\n        {\r\n            private readonly int _vertexBufferObject;\r\n            private readonly int _mainObject;\r\n            private readonly float[] _vertices;\r\n            private float _rotX, _rotY, _rotZ;\r\n            private Vector3 _pos;\r\n            private readonly Vector3 _color;\r\n            private readonly Shader _shader;\r\n            private readonly Lamp _lamp;\r\n            private float _scale = 1.0f;\r\n            public Object(string path, Shader lightingShader, Lamp lamp, Vector3 col)\r\n            {\r\n                _vertices = loadObj(path);\r\n\r\n                _vertexBufferObject = GL.GenBuffer();\r\n                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);\r\n                GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);\r\n\r\n                _mainObject = GL.GenVertexArray();\r\n                GL.BindVertexArray(_mainObject);\r\n\r\n                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);\r\n\r\n                var positionLocation = lightingShader.GetAttribLocation(\"aPos\");\r\n                GL.EnableVertexAttribArray(positionLocation);\r\n                GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);\r\n\r\n                var normalLocation = lightingShader.GetAttribLocation(\"aNormal\");\r\n                GL.EnableVertexAttribArray(normalLocation);\r\n                GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));\r\n                _rotX = 0.0f; _rotY = 0.0f; _rotZ = 0.0f;\r\n                _pos = new Vector3(0.0f, 0.0f, 0.0f);\r\n                _shader = lightingShader;\r\n                _lamp = lamp;\r\n                _color = col;\r\n            }\r\n            public Object(float[] vertices, Shader lightingShader, Lamp lamp, Vector3 col)\r\n            {\r\n                _vertices = vertices;\r\n\r\n                _vertexBufferObject = GL.GenBuffer();\r\n                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);\r\n                GL.BufferData(BufferTarget.ArrayBuffer, this._vertices.Length * sizeof(float), this._vertices, BufferUsageHint.StaticDraw);\r\n\r\n                _mainObject = GL.GenVertexArray();\r\n                GL.BindVertexArray(_mainObject);\r\n\r\n                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);\r\n\r\n                var positionLocation = lightingShader.GetAttribLocation(\"aPos\");\r\n                GL.EnableVertexAttribArray(positionLocation);\r\n                GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);\r\n\r\n                var normalLocation = lightingShader.GetAttribLocation(\"aNormal\");\r\n                GL.EnableVertexAttribArray(normalLocation);\r\n                GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));\r\n                _rotX = 0.0f; _rotY = 0.0f; _rotZ = 0.0f;\r\n                _pos = new Vector3(0.0f, 0.0f, 0.0f);\r\n                _shader = lightingShader;\r\n                _lamp = lamp;\r\n                _color = col;\r\n            }\r\n            public void show(Camera camera)\r\n            {\r\n                GL.BindVertexArray(_mainObject);\r\n\r\n                _shader.Use();\r\n\r\n\r\n                _shader.SetMatrix4(\"model\",  (Matrix4.CreateScale(_scale) *  Matrix4.CreateRotationX(_rotX) * Matrix4.CreateRotationX(_rotY) * Matrix4.CreateRotationZ(_rotZ)) * Matrix4.CreateTranslation(_pos));\r\n                _shader.SetMatrix4(\"view\", camera.GetViewMatrix());\r\n                _shader.SetMatrix4(\"projection\", camera.GetProjectionMatrix());\r\n\r\n                _shader.SetVector3(\"objectColor\", _color);\r\n                _shader.SetVector3(\"lightColor\", _lamp.LightColor);\r\n                _shader.SetVector3(\"lightPos\", _lamp.Pos);\r\n\r\n                GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Length / 6);\r\n            }\r\n            public void setRotationX(float angle)\r\n            {\r\n                _rotX = angle;\r\n            }\r\n            public void setRotationY(float angle)\r\n            {\r\n                _rotY = angle;\r\n            }\r\n            public void setRotationZ(float angle)\r\n            {\r\n                _rotZ = angle;\r\n            }\r\n            public void setPositionInSpace(float x, float y, float z)\r\n            {\r\n                _pos = new Vector3(x, y, z);\r\n            }\r\n            public void setScale(float scale)\r\n            {\r\n                _scale = scale; \r\n            }\r\n            public void Dispose()\r\n            {\r\n                GL.DeleteBuffer(_vertexBufferObject);\r\n                GL.DeleteVertexArray(_mainObject);\r\n            }\r\n        }\r\n        private class Lamp\r\n        {\r\n            private readonly int _vertexBufferObject;\r\n            private readonly int _mainObject;\r\n            public readonly Vector3 Pos;\r\n            public readonly Vector3 LightColor;\r\n            private readonly float[] _vertices;\r\n            public Lamp(Vector3 pos, Vector3 lightColor, Shader lampShader)\r\n            {\r\n                Pos = pos;\r\n                LightColor = lightColor;\r\n                _vertices = loadObj(\"Objs/sphere.obj\");\r\n\r\n                _vertexBufferObject = GL.GenBuffer();\r\n                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);\r\n                GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);\r\n\r\n                _mainObject = GL.GenVertexArray();\r\n                GL.BindVertexArray(_mainObject);\r\n\r\n                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);\r\n\r\n                var positionLocation = lampShader.GetAttribLocation(\"aPos\");\r\n                GL.EnableVertexAttribArray(positionLocation);\r\n                GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);\r\n\r\n                lampShader.SetVector3(\"lightColor\", lightColor);\r\n            }\r\n            public void show(Camera camera, Shader lampShader)\r\n            {\r\n                GL.BindVertexArray(_mainObject);\r\n\r\n                lampShader.Use();\r\n\r\n                Matrix4 lampMatrix = Matrix4.Identity;\r\n                lampMatrix *= Matrix4.CreateScale(0.2f);\r\n                lampMatrix *= Matrix4.CreateTranslation(Pos);\r\n\r\n                lampShader.SetMatrix4(\"model\", lampMatrix);\r\n                lampShader.SetMatrix4(\"view\", camera.GetViewMatrix());\r\n                lampShader.SetMatrix4(\"projection\", camera.GetProjectionMatrix());\r\n\r\n                GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Length / 6);\r\n            }\r\n            public void Dispose()\r\n            {\r\n                GL.DeleteBuffer(_vertexBufferObject);\r\n                GL.DeleteVertexArray(_mainObject);\r\n            }\r\n        }\r\n        private class TexturedObject\r\n        {\r\n            private readonly int _vertexBufferObject;\r\n            private readonly int _mainObject;\r\n            private readonly float[] _vertices;\r\n            private float _rotX, _rotY, _rotZ;\r\n            private readonly Texture _texture;\r\n            private Vector3 _pos;\r\n            private readonly Shader _shader;\r\n            public TexturedObject(string path, Shader textureShader, string texturePath)\r\n            {\r\n                _vertices = loadObjTextured(path);\r\n\r\n                _vertexBufferObject = GL.GenBuffer();\r\n                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);\r\n                GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);\r\n\r\n                _mainObject = GL.GenVertexArray();\r\n                GL.BindVertexArray(_mainObject);\r\n\r\n                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);\r\n\r\n                var positionLocation = textureShader.GetAttribLocation(\"aPos\");\r\n                GL.EnableVertexAttribArray(positionLocation);\r\n                GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);\r\n\r\n                var normalLocation = textureShader.GetAttribLocation(\"aNormal\");\r\n                GL.EnableVertexAttribArray(normalLocation);\r\n                GL.VertexAttribPointer(normalLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 3 * sizeof(float));\r\n\r\n                var textureLocation = textureShader.GetAttribLocation(\"aTexture\");\r\n                GL.EnableVertexAttribArray(textureLocation);\r\n                GL.VertexAttribPointer(textureLocation, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));\r\n\r\n                _texture = new Texture(texturePath);\r\n                _texture.Use();\r\n\r\n                _rotX = 0.0f; _rotY = 0.0f; _rotZ = 0.0f;\r\n                _pos = new Vector3(0.0f, 0.0f, 0.0f);\r\n                _shader = textureShader;\r\n            }\r\n\r\n            public void show(Camera camera)\r\n            {\r\n                GL.BindVertexArray(_mainObject);\r\n\r\n                _texture.Use();\r\n                _shader.Use();\r\n\r\n\r\n                _shader.SetMatrix4(\"model\", (Matrix4.CreateRotationX(_rotX) * Matrix4.CreateRotationX(_rotY) * Matrix4.CreateRotationZ(_rotZ)) * Matrix4.CreateTranslation(_pos));\r\n                _shader.SetMatrix4(\"view\", camera.GetViewMatrix());\r\n                _shader.SetMatrix4(\"projection\", camera.GetProjectionMatrix());\r\n\r\n                //textureShader.SetVector3(\"lightColor\", lamp.lightColor);\r\n                //textureShader.SetVector3(\"lightPos\", lamp.pos);\r\n                GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Length / 8);\r\n            }\r\n            public void setRotationX(float angle)\r\n            {\r\n                _rotX = angle;\r\n            }\r\n            public void setRotationY(float angle)\r\n            {\r\n                _rotY = angle;\r\n            }\r\n            public void setRotationZ(float angle)\r\n            {\r\n                _rotZ = angle;\r\n            }\r\n            public void setPositionInSpace(float x, float y, float z)\r\n            {\r\n                _pos = new Vector3(x, y, z);\r\n            }\r\n            public void Dispose()\r\n            {\r\n                GL.DeleteBuffer(_vertexBufferObject);\r\n                GL.DeleteVertexArray(_mainObject);\r\n                GL.DeleteTexture(_texture.Handle);\r\n            }\r\n\r\n        }\r\n        public int createCube(Vector3 color)\r\n        {\r\n            _mainObjects.Add(new Object(\"Objs/cube.obj\", _lightingShader, _mainLamp, color));\r\n            return _mainObjects.Count - 1;\r\n        }\r\n        public int createSphere(Vector3 color)\r\n        {\r\n            _mainObjects.Add(new Object(\"Objs/sphere.obj\", _lightingShader, _mainLamp, color));\r\n            return _mainObjects.Count - 1;\r\n        }\r\n        public int createTorus(Vector3 color)\r\n        {\r\n            _mainObjects.Add(new Object(\"Objs/torus.obj\", _lightingShader, _mainLamp, color));\r\n            return _mainObjects.Count - 1;\r\n        }\r\n        public int createCylinder(Vector3 color)\r\n        {\r\n            _mainObjects.Add(new Object(\"Objs/cilinder.obj\", _lightingShader, _mainLamp, color));\r\n            return _mainObjects.Count - 1;\r\n        }\r\n        public int createPlane(float x1, float y1, float z1,\r\n                               float x2, float y2, float z2,\r\n                               float x3, float y3, float z3,\r\n                               float x4, float y4, float z4, Vector3 color)\r\n        {\r\n            Vector3 l1 = new Vector3(x2 - x1, y2 - y1, z2 - z1);\r\n            Vector3 l2 = new Vector3(x3 - x1, y3 - y1, z3 - z1);\r\n            Vector3 normal = Vector3.Cross(l1, l2);\r\n\r\n            float[] vertices =\r\n            {\r\n                x1, y1, z1, normal.X,  normal.Y, normal.Z,\r\n                x2, y2, z2, normal.X,  normal.Y, normal.Z,\r\n                x3, y3, z3, normal.X,  normal.Y, normal.Z,\r\n\r\n                x4, y4, z4, normal.X,  normal.Y, normal.Z,\r\n                x2, y2, z2, normal.X,  normal.Y, normal.Z,\r\n                x3, y3, z3, normal.X,  normal.Y, normal.Z,\r\n            };\r\n            _mainObjects.Add(new Object(vertices, _lightingShader, _mainLamp, color));\r\n            return _mainObjects.Count - 1;\r\n        }\r\n        public void openTexturedObj(string obj, string texture)\r\n        {\r\n            _mainTexturedObjects.Add(new TexturedObject(obj, _textureShader, texture));\r\n        }\r\n        public void openObj(string obj, Vector3 color)\r\n        {\r\n            _mainObjects.Add(new Object(obj, _lightingShader, _mainLamp, color));\r\n        }\r\n        public void createMainLight(Vector3 pos, Vector3 color)\r\n        {\r\n            _mainLamp = new Lamp(pos, color, _lampShader);\r\n        }\r\n        public void rotateObject(float x, float y, float z, int handle)\r\n        {\r\n            _mainObjects[handle].setRotationX(x);\r\n            _mainObjects[handle].setRotationY(y);\r\n            _mainObjects[handle].setRotationZ(z);\r\n        }\r\n        public void rotateTexturedObject(float x, float y, float z, int handle)\r\n        {\r\n            _mainTexturedObjects[handle].setRotationX(x);\r\n            _mainTexturedObjects[handle].setRotationY(y);\r\n            _mainTexturedObjects[handle].setRotationZ(z);\r\n        }\r\n        public void scaleObject(float scale, int handle)\r\n        {\r\n            _mainObjects[handle].setScale(scale);\r\n        }\r\n        public void translateObject(float x, float y, float z, int handle)\r\n        {\r\n            _mainObjects[handle].setPositionInSpace(x, y, z);\r\n        }\r\n        public void translateTexturedObject(float x, float y, float z, int handle)\r\n        {\r\n            _mainTexturedObjects[handle].setPositionInSpace(x, y, z);\r\n        }\r\n        public void drawRectangle(float x1, float y1, float x2, float y2, Color4 color)\r\n        {\r\n            float x1Trans = x1 - (Width / 2);\r\n            float y1Trans = y1 - (Height / 2);\r\n            float x1Norm = x1Trans / (Width / 2);\r\n            float y1Norm = y1Trans / (Height / 2);\r\n            float x2Trans = x2 - (Width / 2);\r\n            float y2Trans = y2 - (Height / 2);\r\n            float x2Norm = x2Trans / (Width / 2);\r\n            float y2Norm = y2Trans / (Height / 2);\r\n            float[] vertices =\r\n            {\r\n                x1Norm, -y1Norm, 0f,\r\n                x2Norm, -y1Norm, 0f,\r\n                x1Norm, -y2Norm, 0f,\r\n                \r\n                x2Norm, -y1Norm, 0f,\r\n                x2Norm, -y2Norm, 0f,\r\n                x1Norm, -y2Norm, 0f\r\n            };\r\n\r\n            var vertexBufferObject = GL.GenBuffer();\r\n            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);\r\n            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);\r\n\r\n            _2dShader.Use();\r\n            \r\n            var mainObject = GL.GenVertexArray();\r\n            GL.BindVertexArray(mainObject);\r\n\r\n            var positionLocation = _2dShader.GetAttribLocation(\"aPos\");\r\n            GL.EnableVertexAttribArray(positionLocation);\r\n            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);\r\n\r\n            \r\n            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);\r\n\r\n            GL.BindVertexArray(mainObject);\r\n            \r\n            _2dShader.SetVector4(\"lightColor\", new Vector4(color.R, color.G, color.B, color.A));\r\n            \r\n            _2dShader.Use();\r\n            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);\r\n\r\n        }\r\n\r\n        protected void drawLine(float x1, float y1, float x2, float y2, Color4 color)\r\n        {\r\n            float x1Trans = x1 - (Width / 2);\r\n            float y1Trans = y1 - (Height / 2);\r\n            float x1Norm = x1Trans / (Width / 2);\r\n            float y1Norm = y1Trans / (Height / 2);\r\n            float x2Trans = x2 - (Width / 2);\r\n            float y2Trans = y2 - (Height / 2);\r\n            float x2Norm = x2Trans / (Width / 2);\r\n            float y2Norm = y2Trans / (Height / 2);\r\n            float[] vertices =\r\n            {\r\n                x1Norm, -y1Norm, 0f,\r\n                \r\n                x2Norm, -y2Norm, 0f\r\n            };\r\n\r\n            var vertexBufferObject = GL.GenBuffer();\r\n            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);\r\n            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);\r\n\r\n            _2dShader.Use();\r\n            \r\n            var mainObject = GL.GenVertexArray();\r\n            GL.BindVertexArray(mainObject);\r\n\r\n            var positionLocation = _2dShader.GetAttribLocation(\"aPos\");\r\n            GL.EnableVertexAttribArray(positionLocation);\r\n            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);\r\n\r\n            \r\n            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);\r\n\r\n            GL.BindVertexArray(mainObject);\r\n            \r\n            _2dShader.SetVector4(\"lightColor\", new Vector4(color.R, color.G, color.B, color.A));\r\n            \r\n            _2dShader.Use();\r\n            GL.DrawArrays(PrimitiveType.Lines, 0, 2);\r\n        }\r\n        \r\n        protected void drawEllipse(float x, float y, float radiusX, float radiusY, Color4 color)\r\n        {\r\n            int numEllipseVertices = (int)Math.Floor(Math.Sqrt(radiusX * radiusX + radiusY * radiusY));\r\n            Vector3[] tempVertices = new Vector3[numEllipseVertices];\r\n            \r\n            float xTrans = x - (Width / 2);\r\n            float yTrans = y - (Height / 2);\r\n            float xNorm = xTrans / (Width / 2);\r\n            float yNorm = yTrans / (Height / 2);\r\n            float radiusXNorm = radiusX / (Width / 2);\r\n            float radiusYNorm = radiusY / (Height / 2);\r\n\r\n\r\n            var step = (float)(Math.PI * 2) / (numEllipseVertices - 1);\r\n            \r\n            for(var i=0; i < numEllipseVertices; i++)\r\n            {\r\n                var rad = i * step;\r\n                tempVertices[i] = new Vector3(((float) Math.Cos(rad) * radiusXNorm) + xNorm, ((float) Math.Sin(rad) * radiusYNorm) + yNorm, 0.0f);\r\n            }\r\n            \r\n\r\n            var tempVerticesList = new List<float> {xNorm, yNorm, 0f,};\r\n            for (var i = 0; i < numEllipseVertices; i++)\r\n            {\r\n                tempVerticesList.AddRange(new []\r\n                {\r\n                    tempVertices[i].X, tempVertices[i].Y, tempVertices[i].Z,\r\n                });\r\n            }\r\n\r\n            var vertices = tempVerticesList.ToArray();\r\n            \r\n\r\n            var vertexBufferObject = GL.GenBuffer();\r\n            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);\r\n            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);\r\n\r\n            _2dShader.Use();\r\n            \r\n            var mainObject = GL.GenVertexArray();\r\n            GL.BindVertexArray(mainObject);\r\n\r\n            var positionLocation = _2dShader.GetAttribLocation(\"aPos\");\r\n            GL.EnableVertexAttribArray(positionLocation);\r\n            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);\r\n\r\n            \r\n            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);\r\n\r\n            GL.BindVertexArray(mainObject);\r\n            \r\n            _2dShader.SetVector4(\"lightColor\", new Vector4(color.R, color.G, color.B, color.A));\r\n            \r\n            _2dShader.Use();\r\n            GL.DrawArrays(PrimitiveType.TriangleFan, 0, numEllipseVertices + 1);\r\n        }\r\n\r\n        public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Color4 color)\r\n        {\r\n            float x1Trans = x1 - (Width / 2);\r\n            float y1Trans = y1 - (Height / 2);\r\n            float x1Norm = x1Trans / (Width / 2);\r\n            float y1Norm = y1Trans / (Height / 2);\r\n            float x2Trans = x2 - (Width / 2);\r\n            float y2Trans = y2 - (Height / 2);\r\n            float x2Norm = x2Trans / (Width / 2);\r\n            float y2Norm = y2Trans / (Height / 2);\r\n            float x3Trans = x3 - (Width / 2);\r\n            float y3Trans = y3 - (Height / 2);\r\n            float x3Norm = x3Trans / (Width / 2);\r\n            float y3Norm = y3Trans / (Height / 2);\r\n            float[] vertices =\r\n            {\r\n                x1Norm, -y1Norm, 0f,\r\n                x2Norm, -y2Norm, 0f,\r\n                x3Norm, -y3Norm, 0f,\r\n            };\r\n\r\n            var vertexBufferObject = GL.GenBuffer();\r\n            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);\r\n            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);\r\n\r\n            _2dShader.Use();\r\n            \r\n            var mainObject = GL.GenVertexArray();\r\n            GL.BindVertexArray(mainObject);\r\n\r\n            var positionLocation = _2dShader.GetAttribLocation(\"aPos\");\r\n            GL.EnableVertexAttribArray(positionLocation);\r\n            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);\r\n\r\n            \r\n            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);\r\n\r\n            GL.BindVertexArray(mainObject);\r\n            \r\n            _2dShader.SetVector4(\"lightColor\", new Vector4(color.R, color.G, color.B, color.A));\r\n            \r\n            _2dShader.Use();\r\n            GL.DrawArrays(PrimitiveType.Triangles, 0, 3);\r\n\r\n        }\r\n        protected void Clear()\r\n        {\r\n            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Program/MainRenderWindow.cs	(revision 0be4641441043e1b22e752c98e31ffd95df540b7)
++++ Program/MainRenderWindow.cs	(date 1600796860655)
+@@ -1,6 +1,5 @@
+ using System;
+ using System.Collections.Generic;
+-using System.Globalization;
+ using OpenTK;
+ using OpenTK.Graphics;
+ using OpenTK.Graphics.OpenGL4;
+@@ -15,7 +14,7 @@
+         private readonly List<TexturedObject> _mainTexturedObjects = new List<TexturedObject>();
+         private readonly List<Object> _mainObjects = new List<Object>();
+         private Lamp _mainLamp;
+-        private Shader _lampShader, _lightingShader, _textureShader, _2dShader;
++        private Shader _lampShader, _lightingShader, _textureShader, _2dShader, _2dTextured;
+         private Camera _camera;
+         private bool _firstMove = true;
+         private Vector2 _lastPos;
+@@ -38,14 +37,15 @@
+             _lampShader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
+             _textureShader = new Shader("Shaders/texture.vert", "Shaders/texture.frag");
+             _2dShader = new Shader("Shaders/shader2d.vert", "Shaders/shader2d.frag");
++            _2dTextured = new Shader("Shaders/texture2d.vert", "Shaders/texture2d.frag");
+             _lightingShader.Use();
+             _lampShader.Use();
+             _textureShader.Use();
+             _2dShader.Use();
++            _2dTextured.Use();
+                                                         
+             _camera = new Camera(Vector3.UnitZ * 3, Width / (float)Height);
+             CursorVisible = !KeyboardAndMouseInput;
+-            
+         }
+ 
+         protected void setClearColor(Color4 color)
+@@ -457,9 +457,7 @@
+ 
+                 _mainObject = GL.GenVertexArray();
+                 GL.BindVertexArray(_mainObject);
+-
+-                GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
+-
++                
+                 var positionLocation = textureShader.GetAttribLocation("aPos");
+                 GL.EnableVertexAttribArray(positionLocation);
+                 GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 8 * sizeof(float), 0);
+@@ -472,7 +470,7 @@
+                 GL.EnableVertexAttribArray(textureLocation);
+                 GL.VertexAttribPointer(textureLocation, 2, VertexAttribPointerType.Float, false, 8 * sizeof(float), 6 * sizeof(float));
+ 
+-                _texture = new Texture(texturePath);
++                _texture = new Texture(texturePath, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+                 _texture.Use();
+ 
+                 _rotX = 0.0f; _rotY = 0.0f; _rotZ = 0.0f;
+@@ -598,7 +596,111 @@
+         {
+             _mainTexturedObjects[handle].setPositionInSpace(x, y, z);
+         }
+-        public void drawRectangle(float x1, float y1, float x2, float y2, Color4 color)
++        
++        
++        protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)
++        {
++            Texture texture = new Texture(texturePath, min, mag);
++            float x1Trans = x1 - (Width / 2);
++            float y1Trans = y1 - (Height / 2);
++            float x1Norm = x1Trans / (Width / 2);
++            float y1Norm = y1Trans / (Height / 2);
++            float x2Trans = x2 - (Width / 2);
++            float y2Trans = y2 - (Height / 2);
++            float x2Norm = x2Trans / (Width / 2);
++            float y2Norm = y2Trans / (Height / 2);
++            
++            float[] vertices =
++            {
++                x1Norm, -y1Norm, 0f, u1, v1,
++                x2Norm, -y1Norm, 0f, u1, v2,
++                x1Norm, -y2Norm, 0f, u2, v1,
++                
++                x2Norm, -y1Norm, 0f, u1, v2,
++                x2Norm, -y2Norm, 0f, u2, v2,
++                x1Norm, -y2Norm, 0f, u2, v1
++            };
++            
++            var vertexBufferObject = GL.GenBuffer();
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
++            
++            texture.Use();
++            _2dTextured.Use();
++            
++            var mainObject = GL.GenVertexArray();
++            GL.BindVertexArray(mainObject);
++            
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++
++            var positionLocation = _2dTextured.GetAttribLocation("aPosition");
++            GL.EnableVertexAttribArray(positionLocation);
++            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
++
++            var texCoordLocation = _2dTextured.GetAttribLocation("aTexCoord");
++            GL.EnableVertexAttribArray(texCoordLocation);
++            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
++            
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++            
++            GL.BindVertexArray(mainObject);
++            
++            texture.Use();
++            _2dTextured.Use();
++            
++            _2dTextured.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
++
++            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
++            
++            GL.DeleteBuffer(vertexBufferObject);
++            GL.DeleteTexture(texture.Handle);
++            GL.DeleteVertexArray(mainObject);
++
++        }
++        protected void drawLine(float x1, float y1, float x2, float y2, Color4 color)
++        {
++            float x1Trans = x1 - (Width / 2);
++            float y1Trans = y1 - (Height / 2);
++            float x1Norm = x1Trans / (Width / 2);
++            float y1Norm = y1Trans / (Height / 2);
++            float x2Trans = x2 - (Width / 2);
++            float y2Trans = y2 - (Height / 2);
++            float x2Norm = x2Trans / (Width / 2);
++            float y2Norm = y2Trans / (Height / 2);
++            float[] vertices =
++            {
++                x1Norm, -y1Norm, 0f,
++                
++                x2Norm, -y2Norm, 0f
++            };
++
++            var vertexBufferObject = GL.GenBuffer();
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
++
++            _2dShader.Use();
++            
++            var mainObject = GL.GenVertexArray();
++            GL.BindVertexArray(mainObject);
++
++            var positionLocation = _2dShader.GetAttribLocation("aPos");
++            GL.EnableVertexAttribArray(positionLocation);
++            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
++
++            
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++
++            GL.BindVertexArray(mainObject);
++            
++            _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
++            
++            _2dShader.Use();
++            GL.DrawArrays(PrimitiveType.Lines, 0, 2);
++            
++            GL.DeleteBuffer(vertexBufferObject);
++            GL.DeleteVertexArray(mainObject);
++        }
++        protected void drawRectangle(float x1, float y1, float x2, float y2, Color4 color)
+         {
+             float x1Trans = x1 - (Width / 2);
+             float y1Trans = y1 - (Height / 2);
+@@ -641,10 +743,12 @@
+             
+             _2dShader.Use();
+             GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+-
+-        }
++            
++            GL.DeleteBuffer(vertexBufferObject);
++            GL.DeleteVertexArray(mainObject);
+ 
+-        protected void drawLine(float x1, float y1, float x2, float y2, Color4 color)
++        }
++        protected void drawTexturedLine(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
+         {
+             float x1Trans = x1 - (Width / 2);
+             float y1Trans = y1 - (Height / 2);
+@@ -656,34 +760,180 @@
+             float y2Norm = y2Trans / (Height / 2);
+             float[] vertices =
+             {
+-                x1Norm, -y1Norm, 0f,
++                x1Norm, -y1Norm, 0f, u1, v1,
+                 
+-                x2Norm, -y2Norm, 0f
++                x2Norm, -y2Norm, 0f, u2, v2
++            };
++            
++            var vertexBufferObject = GL.GenBuffer();
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
++            
++            texture.Use();
++            _2dTextured.Use();
++            
++            var mainObject = GL.GenVertexArray();
++            GL.BindVertexArray(mainObject);
++            
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++
++            var positionLocation = _2dTextured.GetAttribLocation("aPosition");
++            GL.EnableVertexAttribArray(positionLocation);
++            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
++
++            var texCoordLocation = _2dTextured.GetAttribLocation("aTexCoord");
++            GL.EnableVertexAttribArray(texCoordLocation);
++            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
++            
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++            
++            GL.BindVertexArray(mainObject);
++            
++            texture.Use();
++            _2dTextured.Use();
++            
++            _2dTextured.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
++            
++            GL.DrawArrays(PrimitiveType.Lines, 0, 2);
++            
++            GL.DeleteBuffer(vertexBufferObject);
++            GL.DeleteVertexArray(mainObject);
++        }
++        
++        protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1, 
++                                      float x2, float y2, float z2, float u2, float v2, 
++                                      float x3, float y3, float z3, float u3, float v3,
++                                      float x4, float y4, float z4, float u4, float v4, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)
++        {
++            Texture texture = new Texture(texturePath, min, mag);
++            float x1Trans = x1 - (Width / 2);
++            float y1Trans = y1 - (Height / 2);
++            float x1Norm = x1Trans / (Width / 2);
++            float y1Norm = y1Trans / (Height / 2);
++            float x2Trans = x2 - (Width / 2);
++            float y2Trans = y2 - (Height / 2);
++            float x2Norm = x2Trans / (Width / 2);
++            float y2Norm = y2Trans / (Height / 2);
++            float x3Trans = x3 - (Width / 2);
++            float y3Trans = y3 - (Height / 2);
++            float x3Norm = x3Trans / (Width / 2);
++            float y3Norm = y3Trans / (Height / 2);
++            float x4Trans = x4 - (Width / 2);
++            float y4Trans = y4 - (Height / 2);
++            float x4Norm = x4Trans / (Width / 2);
++            float y4Norm = y4Trans / (Height / 2);
++            
++            float[] vertices =
++            {
++                x1Norm, -y1Norm, z1, u1, v1,
++                x2Norm, -y2Norm, z2, u2, v2,
++                x3Norm, -y3Norm, z3, u3, v3,
++                
++                x2Norm, -y2Norm, z2, u2, v2,
++                x3Norm, -y3Norm, z3, u3, v3,
++                x4Norm, -y4Norm, z4, u4, v4
+             };
+-
++            
+             var vertexBufferObject = GL.GenBuffer();
+             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
+-
+-            _2dShader.Use();
+-            
+-            var mainObject = GL.GenVertexArray();
+-            GL.BindVertexArray(mainObject);
+-
+-            var positionLocation = _2dShader.GetAttribLocation("aPos");
+-            GL.EnableVertexAttribArray(positionLocation);
+-            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+-
+-            
+-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+-
+-            GL.BindVertexArray(mainObject);
+-            
+-            _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
+-            
+-            _2dShader.Use();
+-            GL.DrawArrays(PrimitiveType.Lines, 0, 2);
+-        }
++            
++            texture.Use();
++            _2dTextured.Use();
++            
++            var mainObject = GL.GenVertexArray();
++            GL.BindVertexArray(mainObject);
++            
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++
++            var positionLocation = _2dTextured.GetAttribLocation("aPosition");
++            GL.EnableVertexAttribArray(positionLocation);
++            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
++
++            var texCoordLocation = _2dTextured.GetAttribLocation("aTexCoord");
++            GL.EnableVertexAttribArray(texCoordLocation);
++            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
++            
++            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++            
++            GL.BindVertexArray(mainObject);
++            
++            texture.Use();
++            _2dTextured.Use();
++            
++            _2dTextured.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
++
++            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
++            
++            GL.DeleteBuffer(vertexBufferObject);
++            GL.DeleteTexture(texture.Handle);
++            GL.DeleteVertexArray(mainObject);
++
++        }
++
++        protected void drawQuad(float x1, float y1, float z1, 
++                                float x2, float y2, float z2, 
++                                float x3, float y3, float z3,
++                                float x4, float y4, float z4, Color4 color)
++                {
++                    float x1Trans = x1 - (Width / 2);
++                    float y1Trans = y1 - (Height / 2);
++                    float x1Norm = x1Trans / (Width / 2);
++                    float y1Norm = y1Trans / (Height / 2);
++                    float x2Trans = x2 - (Width / 2);
++                    float y2Trans = y2 - (Height / 2);
++                    float x2Norm = x2Trans / (Width / 2);
++                    float y2Norm = y2Trans / (Height / 2);
++                    float x3Trans = x3 - (Width / 2);
++                    float y3Trans = y3 - (Height / 2);
++                    float x3Norm = x3Trans / (Width / 2);
++                    float y3Norm = y3Trans / (Height / 2);
++                    float x4Trans = x4 - (Width / 2);
++                    float y4Trans = y4 - (Height / 2);
++                    float x4Norm = x4Trans / (Width / 2);
++                    float y4Norm = y4Trans / (Height / 2);
++                    
++                    float[] vertices =
++                    {
++                        x1Norm, -y1Norm, z1,
++                        x2Norm, -y2Norm, z2,
++                        x3Norm, -y3Norm, z3,
++                        
++                        x2Norm, -y2Norm, z2,
++                        x3Norm, -y3Norm, z3,
++                        x4Norm, -y4Norm, z4
++                    };
++                    
++                    var vertexBufferObject = GL.GenBuffer();
++                    GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++                    GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
++                    
++                    _2dShader.Use();
++                    
++                    var mainObject = GL.GenVertexArray();
++                    GL.BindVertexArray(mainObject);
++                    
++                    GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++        
++                    var positionLocation = _2dShader.GetAttribLocation("aPos");
++                    GL.EnableVertexAttribArray(positionLocation);
++                    GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
++                    
++                    
++                    GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
++                    
++                    GL.BindVertexArray(mainObject);
++                    
++                    _2dShader.Use();
++                    
++                    _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
++        
++                    GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
++                    
++                    GL.DeleteBuffer(vertexBufferObject);
++                    GL.DeleteVertexArray(mainObject);
++        
++                }
+         
+         protected void drawEllipse(float x, float y, float radiusX, float radiusY, Color4 color)
+         {
+@@ -703,11 +953,11 @@
+             for(var i=0; i < numEllipseVertices; i++)
+             {
+                 var rad = i * step;
+-                tempVertices[i] = new Vector3(((float) Math.Cos(rad) * radiusXNorm) + xNorm, ((float) Math.Sin(rad) * radiusYNorm) + yNorm, 0.0f);
++                tempVertices[i] = new Vector3(((float) Math.Cos(rad) * radiusXNorm) + xNorm, ((float) Math.Sin(rad) * radiusYNorm) - yNorm, 0.0f);
+             }
+             
+ 
+-            var tempVerticesList = new List<float> {xNorm, yNorm, 0f,};
++            var tempVerticesList = new List<float> {xNorm, -yNorm, 0f,};
+             for (var i = 0; i < numEllipseVertices; i++)
+             {
+                 tempVerticesList.AddRange(new []
+@@ -741,6 +991,9 @@
+             
+             _2dShader.Use();
+             GL.DrawArrays(PrimitiveType.TriangleFan, 0, numEllipseVertices + 1);
++            
++            GL.DeleteBuffer(vertexBufferObject);
++            GL.DeleteVertexArray(mainObject);
+         }
+ 
+         public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Color4 color)
+@@ -786,6 +1039,9 @@
+             
+             _2dShader.Use();
+             GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
++            
++            GL.DeleteBuffer(vertexBufferObject);
++            GL.DeleteVertexArray(mainObject);
+ 
+         }
+         protected void Clear()
+Index: Program/Texture.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using System.Collections.Generic;\r\nusing System.Drawing;\r\nusing System.Drawing.Imaging;\r\nusing OpenTK.Graphics.OpenGL4;\r\n\r\nusing PixelFormat = OpenTK.Graphics.OpenGL4.PixelFormat;\r\n\r\nnamespace Program\r\n{\r\n    public class Texture\r\n    {\r\n        public readonly int Handle;\r\n\r\n        public Texture(string path)\r\n        {\r\n\r\n            Handle = GL.GenTexture();\r\n            Use();\r\n            using (var image = new Bitmap(path))\r\n            {\r\n                var data = image.LockBits(\r\n                    new Rectangle(0, 0, image.Width, image.Height),\r\n                    ImageLockMode.ReadOnly,\r\n                    System.Drawing.Imaging.PixelFormat.Format32bppArgb);\r\n\r\n                GL.TexImage2D(TextureTarget.Texture2D,\r\n                    0,\r\n                    PixelInternalFormat.Rgba,\r\n                    image.Width,\r\n                    image.Height,\r\n                    0,\r\n                    PixelFormat.Bgra,\r\n                    PixelType.UnsignedByte,\r\n                    data.Scan0);\r\n            }\r\n            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);\r\n            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);\r\n            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);\r\n            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);\r\n\r\n            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);\r\n        }\r\n\r\n            public void Use(TextureUnit unit = TextureUnit.Texture0)\r\n        {\r\n            GL.BindTexture(TextureTarget.Texture2D, Handle);\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Program/Texture.cs	(revision 0be4641441043e1b22e752c98e31ffd95df540b7)
++++ Program/Texture.cs	(date 1600602163299)
+@@ -11,7 +11,7 @@
+     {
+         public readonly int Handle;
+ 
+-        public Texture(string path)
++        public Texture(string path, TextureMinFilter min, TextureMagFilter mag)
+         {
+ 
+             Handle = GL.GenTexture();
+@@ -33,8 +33,8 @@
+                     PixelType.UnsignedByte,
+                     data.Scan0);
+             }
+-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
++            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)min);
++            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)mag);
+             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+ 
+Index: Shaders/shader2d.frag
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Shaders/shader2d.frag	(date 1600468237649)
++++ Shaders/shader2d.frag	(date 1600468237649)
+@@ -0,0 +1,9 @@
++#version 330 core
++out vec4 FragColor;
++uniform vec4 lightColor;
++
++void main()
++{
++    FragColor = lightColor; 
++
++}
+\ No newline at end of file
+Index: Shaders/shader2d.vert
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Shaders/shader2d.vert	(date 1600467763201)
++++ Shaders/shader2d.vert	(date 1600467763201)
+@@ -0,0 +1,9 @@
++#version 330 core
++layout (location = 0) in vec3 aPos;
++
++
++void main(void)
++{
++    gl_Position = vec4(aPos, 1f);
++    
++}
+\ No newline at end of file
+Index: Shaders/texture.frag
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Shaders/texture.frag	(date 1600190302000)
++++ Shaders/texture.frag	(date 1600190302000)
+@@ -0,0 +1,24 @@
++#version 330 core
++out vec4 FragColor;
++
++//In order to calculate some basic lighting we need a few things per model basis, and a few things per fragment basis:
++// uniform vec3 lightColor; //The color of the light.
++// uniform vec3 lightPos; //The position of the light.
++uniform sampler2D texture0;
++
++in vec3 Normal; //The normal of the fragment is calculated in the vertex shader.
++in vec3 FragPos; //The fragment position.
++in vec2 textureCords;
++
++void main()
++{
++    // float ambientStrength = 0.1;
++    // vec3 ambient = ambientStrength * lightColor;
++    // vec3 norm = normalize(Normal);
++    // vec3 lightDir = normalize(lightPos - FragPos);
++    // float diff = max(dot(norm, lightDir), 0.0);
++    // vec3 diffuse = diff * lightColor;
++    // vec3 result = (ambient + diffuse) * vec3(texture(texture0, textureCords));
++    // FragColor = vec4(result, 1);
++    FragColor = texture(texture0, textureCords);
++}
+\ No newline at end of file
+Index: .idea/.idea.OpenTK/.idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoGeneratedRunConfigurationManager\">\r\n    <projectFile>Program/Program.csproj</projectFile>\r\n    <projectFile>Game/Game.csproj</projectFile>\r\n  </component>\r\n  <component name=\"BranchesTreeState\">\r\n    <expand>\r\n      <path>\r\n        <item name=\"ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"LOCAL_ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n      </path>\r\n      <path>\r\n        <item name=\"ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"REMOTE_ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n      </path>\r\n      <path>\r\n        <item name=\"ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"REMOTE_ROOT\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n        <item name=\"GROUP_NODE:origin\" type=\"e8cecc67:BranchNodeDescriptor\" />\r\n      </path>\r\n    </expand>\r\n    <select />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"c3dcaea8-337b-400d-b616-a33adbf7aef1\" name=\"Default Changelist\" comment=\"\">\r\n      <change afterPath=\"$PROJECT_DIR$/Program/Shader.cs\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/MainRenderWindow.cs\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/MainRenderWindow.cs\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"HighlightingSettingsPerFile\">\r\n    <setting file=\"file://$PROJECT_DIR$/Program/MainRenderWindow.cs\" root0=\"FORCE_HIGHLIGHTING\" />\r\n  </component>\r\n  <component name=\"IdeDocumentHistory\">\r\n    <option name=\"CHANGED_PATHS\">\r\n      <list>\r\n        <option value=\"$PROJECT_DIR$/Program/bin/Debug/netcoreapp3.1/Shaders/shader2d.vert\" />\r\n        <option value=\"$PROJECT_DIR$/Program/bin/Debug/netcoreapp3.1/Shaders/shader2d.frag\" />\r\n        <option value=\"$PROJECT_DIR$/Program/Game.cs\" />\r\n        <option value=\"$PROJECT_DIR$/Program/Final.cs\" />\r\n        <option value=\"$PROJECT_DIR$/Game/Program.cs\" />\r\n        <option value=\"$PROJECT_DIR$/Game/Game.cs\" />\r\n        <option value=\"$PROJECT_DIR$/README.md\" />\r\n        <option value=\"$PROJECT_DIR$/Program/Shader.cs\" />\r\n        <option value=\"$PROJECT_DIR$/Program/MainRenderWindow.cs\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"1hhW4e3zDaYRjSFh5R9AiEL75qQ\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\">\r\n    <ConfirmationsSetting value=\"2\" id=\"Add\" />\r\n  </component>\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"autoscrollToSource\" value=\"true\" />\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"ASKED_ADD_EXTERNAL_FILES\" value=\"true\" />\r\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\r\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\r\n    <property name=\"node.js.detected.package.eslint\" value=\"true\" />\r\n    <property name=\"node.js.detected.package.tslint\" value=\"true\" />\r\n    <property name=\"node.js.path.for.package.eslint\" value=\"project\" />\r\n    <property name=\"node.js.path.for.package.tslint\" value=\"project\" />\r\n    <property name=\"node.js.selected.package.eslint\" value=\"(autodetect)\" />\r\n    <property name=\"node.js.selected.package.tslint\" value=\"(autodetect)\" />\r\n    <property name=\"settings.editor.selected.configurable\" value=\"preferences.sourceCode.C#\" />\r\n    <property name=\"vue.rearranger.settings.migration\" value=\"true\" />\r\n  </component>\r\n  <component name=\"RunManager\" selected=\".NET Project.Program\">\r\n    <configuration name=\"Game\" type=\"DotNetProject\" factoryName=\".NET Project\">\r\n      <option name=\"EXE_PATH\" value=\"\" />\r\n      <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"\" />\r\n      <option name=\"PASS_PARENT_ENVS\" value=\"1\" />\r\n      <option name=\"USE_EXTERNAL_CONSOLE\" value=\"0\" />\r\n      <option name=\"USE_MONO\" value=\"0\" />\r\n      <option name=\"RUNTIME_ARGUMENTS\" value=\"\" />\r\n      <option name=\"PROJECT_PATH\" value=\"$PROJECT_DIR$/Game/Game.csproj\" />\r\n      <option name=\"PROJECT_EXE_PATH_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_ARGUMENTS_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_WORKING_DIRECTORY_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_KIND\" value=\"DotNetCore\" />\r\n      <option name=\"PROJECT_TFM\" value=\"\" />\r\n      <method v=\"2\">\r\n        <option name=\"Build\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"Program\" type=\"DotNetProject\" factoryName=\".NET Project\">\r\n      <option name=\"EXE_PATH\" value=\"$PROJECT_DIR$/Game/bin/Debug/netcoreapp2.1/Game.dll\" />\r\n      <option name=\"PROGRAM_PARAMETERS\" value=\"\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$/Game/bin/Debug/netcoreapp2.1\" />\r\n      <option name=\"PASS_PARENT_ENVS\" value=\"1\" />\r\n      <option name=\"USE_EXTERNAL_CONSOLE\" value=\"0\" />\r\n      <option name=\"USE_MONO\" value=\"0\" />\r\n      <option name=\"RUNTIME_ARGUMENTS\" value=\"\" />\r\n      <option name=\"PROJECT_PATH\" value=\"$PROJECT_DIR$/Game/Game.csproj\" />\r\n      <option name=\"PROJECT_EXE_PATH_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_ARGUMENTS_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_WORKING_DIRECTORY_TRACKING\" value=\"1\" />\r\n      <option name=\"PROJECT_KIND\" value=\"DotNetCore\" />\r\n      <option name=\"PROJECT_TFM\" value=\".NETCoreApp,Version=v2.1\" />\r\n      <method v=\"2\">\r\n        <option name=\"Build\" />\r\n      </method>\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"c3dcaea8-337b-400d-b616-a33adbf7aef1\" name=\"Default Changelist\" comment=\"\" />\r\n      <created>1600463617511</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1600463617511</updated>\r\n      <workItem from=\"1600463646984\" duration=\"187000\" />\r\n      <workItem from=\"1600466543859\" duration=\"605000\" />\r\n      <workItem from=\"1600467187832\" duration=\"5157000\" />\r\n      <workItem from=\"1600511288899\" duration=\"3698000\" />\r\n      <workItem from=\"1600515801183\" duration=\"604000\" />\r\n      <workItem from=\"1600521635939\" duration=\"56000\" />\r\n      <workItem from=\"1600521743208\" duration=\"2000\" />\r\n      <workItem from=\"1600522497899\" duration=\"1368000\" />\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"UnityProjectConfiguration\" hasMinimizedUI=\"false\" />\r\n  <component name=\"UnityUnitTestConfiguration\" currentTestLauncher=\"NUnit\" />\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n    <option name=\"oldMeFiltersMigrated\" value=\"true\" />\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <option name=\"ADD_EXTERNAL_FILES_SILENTLY\" value=\"true\" />\r\n    <option name=\"CLEAR_INITIAL_COMMIT_MESSAGE\" value=\"true\" />\r\n  </component>\r\n  <component name=\"WindowStateProjectService\">\r\n    <state width=\"1877\" height=\"282\" key=\"GridCell.Tab.0.bottom\" timestamp=\"1600514989541\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state width=\"1877\" height=\"282\" key=\"GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040\" timestamp=\"1600514989541\" />\r\n    <state width=\"1877\" height=\"282\" key=\"GridCell.Tab.0.center\" timestamp=\"1600514989541\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state width=\"1877\" height=\"282\" key=\"GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040\" timestamp=\"1600514989541\" />\r\n    <state width=\"1877\" height=\"282\" key=\"GridCell.Tab.0.left\" timestamp=\"1600514989540\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state width=\"1877\" height=\"282\" key=\"GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040\" timestamp=\"1600514989540\" />\r\n    <state width=\"1877\" height=\"282\" key=\"GridCell.Tab.0.right\" timestamp=\"1600514989541\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state width=\"1877\" height=\"282\" key=\"GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040\" timestamp=\"1600514989541\" />\r\n    <state x=\"552\" y=\"251\" key=\"Rider.ProjectTemplateDialog.Size\" timestamp=\"1600512321730\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"552\" y=\"251\" key=\"Rider.ProjectTemplateDialog.Size/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040\" timestamp=\"1600512321730\" />\r\n    <state x=\"461\" y=\"164\" key=\"SettingsEditor\" timestamp=\"1600466624705\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"461\" y=\"164\" key=\"SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040\" timestamp=\"1600466624705\" />\r\n    <state x=\"623\" y=\"225\" width=\"672\" height=\"678\" key=\"search.everywhere.popup\" timestamp=\"1600468610316\">\r\n      <screen x=\"0\" y=\"0\" width=\"1920\" height=\"1040\" />\r\n    </state>\r\n    <state x=\"623\" y=\"225\" width=\"672\" height=\"678\" key=\"search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040\" timestamp=\"1600468610316\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/.idea.OpenTK/.idea/workspace.xml	(revision 0be4641441043e1b22e752c98e31ffd95df540b7)
++++ .idea/.idea.OpenTK/.idea/workspace.xml	(date 1602978325995)
+@@ -23,19 +23,25 @@
+     <select />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="">
+-      <change afterPath="$PROJECT_DIR$/Program/Shader.cs" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml" afterDir="false" />
++    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="drawEllipse fix">
++      <change afterPath="$PROJECT_DIR$/Shaders/lighting.frag" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Shaders/shader.frag" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Shaders/shader.vert" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Shaders/shader2d.frag" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Shaders/shader2d.vert" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Shaders/texture.frag" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Shaders/texture.vert" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Shaders/texture2d.frag" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/Shaders/texture2d.vert" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/MainRenderWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/MainRenderWindow.cs" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/Program/Texture.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/Texture.cs" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
+@@ -62,6 +68,8 @@
+         <option value="$PROJECT_DIR$/Game/Game.cs" />
+         <option value="$PROJECT_DIR$/README.md" />
+         <option value="$PROJECT_DIR$/Program/Shader.cs" />
++        <option value="$PROJECT_DIR$/Program/Texture.cs" />
++        <option value="$PROJECT_DIR$/Shaders/test.resx" />
+         <option value="$PROJECT_DIR$/Program/MainRenderWindow.cs" />
+       </list>
+     </option>
+@@ -119,7 +127,7 @@
+       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
+       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+       <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
+-      <option name="PROJECT_KIND" value="DotNetCore" />
++      <option name="PROJECT_KIND" value="Unloaded" />
+       <option name="PROJECT_TFM" value=".NETCoreApp,Version=v2.1" />
+       <method v="2">
+         <option name="Build" />
+@@ -141,8 +149,23 @@
+       <workItem from="1600515801183" duration="604000" />
+       <workItem from="1600521635939" duration="56000" />
+       <workItem from="1600521743208" duration="2000" />
+-      <workItem from="1600522497899" duration="1368000" />
++      <workItem from="1600522497899" duration="1641000" />
++      <workItem from="1600524310773" duration="672000" />
++      <workItem from="1600531116019" duration="660000" />
++      <workItem from="1600542246451" duration="5329000" />
++      <workItem from="1600549162809" duration="672000" />
++      <workItem from="1600601928856" duration="414000" />
++      <workItem from="1600795217327" duration="1247000" />
++      <workItem from="1600796583447" duration="474000" />
+     </task>
++    <task id="LOCAL-00001" summary="drawEllipse fix">
++      <created>1600524127878</created>
++      <option name="number" value="00001" />
++      <option name="presentableId" value="LOCAL-00001" />
++      <option name="project" value="LOCAL" />
++      <updated>1600524127878</updated>
++    </task>
++    <option name="localTasksCounter" value="2" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+@@ -165,6 +188,8 @@
+   <component name="VcsManagerConfiguration">
+     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
++    <MESSAGE value="drawEllipse fix" />
++    <option name="LAST_COMMIT_MESSAGE" value="drawEllipse fix" />
+   </component>
+   <component name="WindowStateProjectService">
+     <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1600514989541">
+@@ -191,6 +216,14 @@
+       <screen x="0" y="0" width="1920" height="1040" />
+     </state>
+     <state x="461" y="164" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600466624705" />
++    <state x="92" y="92" width="1736" height="856" key="VCS.FileHistoryDialog" timestamp="1600796046096">
++      <screen x="0" y="0" width="1920" height="1040" />
++    </state>
++    <state x="92" y="92" width="1736" height="856" key="VCS.FileHistoryDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600796046096" />
++    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1600524132759">
++      <screen x="0" y="0" width="1920" height="1040" />
++    </state>
++    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600524132759" />
+     <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1600468610316">
+       <screen x="0" y="0" width="1920" height="1040" />
+     </state>
+Index: Shaders/texture.vert
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Shaders/texture.vert	(date 1600190302000)
++++ Shaders/texture.vert	(date 1600190302000)
+@@ -0,0 +1,20 @@
++#version 330 core
++layout (location = 0) in vec3 aPos;
++layout (location = 1) in vec3 aNormal;
++layout (location = 2) in vec2 aTexture;
++
++uniform mat4 model;
++uniform mat4 view;
++uniform mat4 projection;
++
++out vec3 Normal;
++out vec3 FragPos;
++out vec2 textureCords;
++
++void main()
++{
++    gl_Position = vec4(aPos, 1.0) * model * view * projection;
++    textureCords = aTexture;
++    FragPos = vec3(vec4(aPos, 1.0) * model);
++    Normal = -(aNormal * mat3(transpose(inverse(model))));
++}
+\ No newline at end of file
+Index: Shaders/texture2d.frag
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Shaders/texture2d.frag	(date 1600549144636)
++++ Shaders/texture2d.frag	(date 1600549144636)
+@@ -0,0 +1,14 @@
++#version 330
++
++out vec4 outputColor;
++
++in vec2 texCoord;
++uniform vec4 lightColor;
++
++uniform sampler2D texture0;
++
++void main()
++{
++    outputColor = texture(texture0, texCoord) * lightColor;
++    //outputColor = vec4(1f, 1f, 1f, 1f);
++}
+\ No newline at end of file
+Index: Shaders/texture2d.vert
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Shaders/texture2d.vert	(date 1600546086242)
++++ Shaders/texture2d.vert	(date 1600546086242)
+@@ -0,0 +1,14 @@
++#version 330 core
++
++layout(location = 0) in vec3 aPosition;
++
++layout(location = 1) in vec2 aTexCoord;
++
++out vec2 texCoord;
++
++void main(void)
++{
++    texCoord = aTexCoord;
++
++    gl_Position = vec4(aPosition, 1.0);
++}
+\ No newline at end of file
+Index: Shaders/lighting.frag
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Shaders/lighting.frag	(date 1600190302000)
++++ Shaders/lighting.frag	(date 1600190302000)
+@@ -0,0 +1,22 @@
++#version 330 core
++out vec4 FragColor;
++
++//In order to calculate some basic lighting we need a few things per model basis, and a few things per fragment basis:
++uniform vec3 objectColor; //The color of the object.
++uniform vec3 lightColor; //The color of the light.
++uniform vec3 lightPos; //The position of the light.
++
++in vec3 Normal; //The normal of the fragment is calculated in the vertex shader.
++in vec3 FragPos; //The fragment position.
++
++void main()
++{
++    float ambientStrength = 0.25;
++    vec3 ambient = ambientStrength * lightColor;
++    vec3 norm = normalize(Normal);
++    vec3 lightDir = normalize(lightPos - FragPos);
++    float diff = max(dot(norm, lightDir), 0.0) * 0.75;
++    vec3 diffuse = diff * lightColor;
++    vec3 result = (ambient + diffuse) * objectColor;
++    FragColor = vec4(result, 1.0);
++}
+\ No newline at end of file
+Index: Shaders/shader.frag
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Shaders/shader.frag	(date 1600190302000)
++++ Shaders/shader.frag	(date 1600190302000)
+@@ -0,0 +1,8 @@
++#version 330 core
++out vec4 FragColor;
++uniform vec3 lightColor;
++
++void main()
++{
++    FragColor = vec4(lightColor, 1.0); // set all 4 vector values to 1.0
++}
+\ No newline at end of file
+Index: Shaders/shader.vert
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- Shaders/shader.vert	(date 1600190302000)
++++ Shaders/shader.vert	(date 1600190302000)
+@@ -0,0 +1,17 @@
++#version 330 core
++layout (location = 0) in vec3 aPos;
++layout (location = 1) in vec3 aNormal;
++
++uniform mat4 model;
++uniform mat4 view;
++uniform mat4 projection;
++
++out vec3 Normal;
++out vec3 FragPos;
++
++void main()
++{
++    gl_Position = vec4(aPos, 1.0) * model * view * projection;
++    FragPos = vec3(vec4(aPos, 1.0) * model);
++    Normal = -(aNormal * mat3(transpose(inverse(model))));
++}
+\ No newline at end of file

@@ -1,0 +1,49 @@
+﻿<changelist name="Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]" date="1602978345320" recycled="true" deleted="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Update at 10/18/2020 12:45 AM [Default Changelist]" />
+  <binary>
+    <option name="BEFORE_PATH" value="Program/bin/Release/netcoreapp3.1/Program.dll" />
+    <option name="AFTER_PATH" value="Program/bin/Release/netcoreapp3.1/Program.dll" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program.dll" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="Program/obj/Release/netcoreapp3.1/Program.pdb" />
+    <option name="AFTER_PATH" value="Program/obj/Release/netcoreapp3.1/Program.pdb" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program.pdb" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="Program/bin/Release/netcoreapp2.1/Program.pdb" />
+    <option name="AFTER_PATH" value="Program/bin/Release/netcoreapp2.1/Program.pdb" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program1.pdb" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="Program/bin/Release/netcoreapp2.1/Program.dll" />
+    <option name="AFTER_PATH" value="Program/bin/Release/netcoreapp2.1/Program.dll" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program1.dll" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="Program/obj/Release/netcoreapp3.1/Program.dll" />
+    <option name="AFTER_PATH" value="Program/obj/Release/netcoreapp3.1/Program.dll" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program2.dll" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" />
+    <option name="AFTER_PATH" value="Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program.csprojAssemblyReference.cache" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="Program/bin/Release/netcoreapp3.1/Program.pdb" />
+    <option name="AFTER_PATH" value="Program/bin/Release/netcoreapp3.1/Program.pdb" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program2.pdb" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="Program/obj/Release/netcoreapp2.1/Program.pdb" />
+    <option name="AFTER_PATH" value="Program/obj/Release/netcoreapp2.1/Program.pdb" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program3.pdb" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="Program/obj/Release/netcoreapp2.1/Program.dll" />
+    <option name="AFTER_PATH" value="Program/obj/Release/netcoreapp2.1/Program.dll" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program3.dll" />
+  </binary>
+</changelist>

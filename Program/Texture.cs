@@ -11,7 +11,7 @@ namespace Program
     {
         public readonly int Handle;
 
-        public Texture(string path)
+        public Texture(string path, TextureMinFilter min, TextureMagFilter mag)
         {
 
             Handle = GL.GenTexture();
@@ -33,8 +33,8 @@ namespace Program
                     PixelType.UnsignedByte,
                     data.Scan0);
             }
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)min);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)mag);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 

@@ -23,19 +23,25 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Program/Shader.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml" afterDir="false" />
+    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="drawEllipse fix">
+      <change afterPath="$PROJECT_DIR$/Shaders/lighting.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Shaders/shader.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Shaders/shader.vert" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Shaders/shader2d.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Shaders/shader2d.vert" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Shaders/texture.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Shaders/texture.vert" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Shaders/texture2d.frag" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Shaders/texture2d.vert" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/MainRenderWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/MainRenderWindow.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/Texture.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/Texture.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
@@ -62,6 +68,8 @@
         <option value="$PROJECT_DIR$/Game/Game.cs" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/Program/Shader.cs" />
+        <option value="$PROJECT_DIR$/Program/Texture.cs" />
+        <option value="$PROJECT_DIR$/Shaders/test.resx" />
         <option value="$PROJECT_DIR$/Program/MainRenderWindow.cs" />
       </list>
     </option>
@@ -119,7 +127,7 @@
       <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
       <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
       <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
-      <option name="PROJECT_KIND" value="DotNetCore" />
+      <option name="PROJECT_KIND" value="Unloaded" />
       <option name="PROJECT_TFM" value=".NETCoreApp,Version=v2.1" />
       <method v="2">
         <option name="Build" />
@@ -141,8 +149,23 @@
       <workItem from="1600515801183" duration="604000" />
       <workItem from="1600521635939" duration="56000" />
       <workItem from="1600521743208" duration="2000" />
-      <workItem from="1600522497899" duration="1368000" />
+      <workItem from="1600522497899" duration="1641000" />
+      <workItem from="1600524310773" duration="672000" />
+      <workItem from="1600531116019" duration="660000" />
+      <workItem from="1600542246451" duration="5329000" />
+      <workItem from="1600549162809" duration="672000" />
+      <workItem from="1600601928856" duration="414000" />
+      <workItem from="1600795217327" duration="1247000" />
+      <workItem from="1600796583447" duration="474000" />
     </task>
+    <task id="LOCAL-00001" summary="drawEllipse fix">
+      <created>1600524127878</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1600524127878</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -165,6 +188,8 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+    <MESSAGE value="drawEllipse fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="drawEllipse fix" />
   </component>
   <component name="WindowStateProjectService">
     <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1600514989541">
@@ -191,6 +216,14 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="164" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600466624705" />
+    <state x="92" y="92" width="1736" height="856" key="VCS.FileHistoryDialog" timestamp="1600796046096">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="92" y="92" width="1736" height="856" key="VCS.FileHistoryDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600796046096" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1600524132759">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600524132759" />
     <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1600468610316">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
