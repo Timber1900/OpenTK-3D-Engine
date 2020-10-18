@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <PackageId>OpenTK.3D.Library</PackageId>
+    <Authors>Hugo Humberto Martins Teixeira</Authors>
+    <Company />
+    <Product>3D Engine</Product>
+    <Description>OpenTK 3D/2D engine, very fast for both 3D and 2D applications</Description>
+    <PackageTags>3D, 2D, OpenTK, Engine</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

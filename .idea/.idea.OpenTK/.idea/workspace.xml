@@ -23,28 +23,32 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="drawEllipse fix">
-      <change afterPath="$PROJECT_DIR$/Shaders/lighting.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shaders/shader.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shaders/shader.vert" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shaders/shader2d.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shaders/shader2d.vert" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shaders/texture.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shaders/texture.vert" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shaders/texture2d.frag" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Shaders/texture2d.vert" afterDir="false" />
+    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/Main Release/Microsoft.Win32.SystemEvents.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/OpenTK.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/Program.deps.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/Program.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/Program.pdb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/SixLabors.ImageSharp.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/System.Drawing.Common.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/System.Runtime.CompilerServices.Unsafe.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/runtimes/unix/lib/netcoreapp2.0/System.Drawing.Common.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/runtimes/win/lib/netcoreapp2.0/Microsoft.Win32.SystemEvents.dll" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Main Release/runtimes/win/lib/netcoreapp2.0/System.Drawing.Common.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/MainRenderWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/MainRenderWindow.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/Texture.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/Texture.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.dgspec.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.targets" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.assets.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csprojAssemblyReference.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/project.assets.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/project.nuget.cache" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +100,11 @@
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode.C#" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
-  <component name="RunManager" selected=".NET Project.Program">
+  <component name="RunManager" selected="Publish to folder.Main Release">
+    <configuration name="Main Release" type="DotNetFolderPublish" factoryName="Publish to folder" temporary="true">
+      <riderPublish self_contained="true" target_folder="$PROJECT_DIR$/Main Release" target_framework="netcoreapp2.1" uuid_high="-8205420224830422425" uuid_low="-6786141174981661103" />
+      <method v="2" />
+    </configuration>
     <configuration name="Game" type="DotNetProject" factoryName=".NET Project">
       <option name="EXE_PATH" value="" />
       <option name="PROGRAM_PARAMETERS" value="" />
@@ -133,6 +141,16 @@
         <option name="Build" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue=".NET Project.Game" />
+      <item itemvalue=".NET Project.Program" />
+      <item itemvalue="Publish to folder.Main Release" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Publish to folder.Main Release" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -157,6 +175,7 @@
       <workItem from="1600601928856" duration="414000" />
       <workItem from="1600795217327" duration="1247000" />
       <workItem from="1600796583447" duration="474000" />
+      <workItem from="1602978317646" duration="1437000" />
     </task>
     <task id="LOCAL-00001" summary="drawEllipse fix">
       <created>1600524127878</created>
@@ -192,6 +211,10 @@
     <option name="LAST_COMMIT_MESSAGE" value="drawEllipse fix" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="414" y="174" width="1092" height="739" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1602979705454">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="414" y="174" width="1092" height="739" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1602979705454" />
     <state width="1877" height="282" key="GridCell.Tab.0.bottom" timestamp="1600514989541">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -224,6 +247,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1600524132759" />
+    <state x="777" y="433" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1602978351653">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="777" y="433" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1602978351653" />
     <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1600468610316">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

@@ -983,7 +983,7 @@
     "version": "1.0.0",
     "restore": {
       "projectUniqueName": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj",
-      "projectName": "Program",
+      "projectName": "OpenTK.3D.Library",
       "projectPath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj",
       "packagesPath": "C:\\Users\\35196\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\obj\\",
