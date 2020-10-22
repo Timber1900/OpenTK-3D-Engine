@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using OpenTK;
@@ -24,9 +25,8 @@ namespace Program
         protected Boolean RenderLight = false;
         private float cameraSpeed = 20f;
         private float sensitivity = 0.2f;
-        protected Boolean UseDepthTest = true;
-        protected Boolean UseAlpha = true;
-        protected Boolean KeyboardAndMouseInput = true, loadedFont = false;
+        protected Boolean UseDepthTest = true, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true;
+
 
         protected MainRenderWindow(int width, int height, string title)
             : base(width, height, GraphicsMode.Default, title)
@@ -74,6 +74,11 @@ namespace Program
                 obj.show(_camera);
             }
 
+            if (showSet)
+            {
+                showSettings(set);
+            }
+
             SwapBuffers();
 
             base.OnRenderFrame(e);
@@ -86,11 +91,24 @@ namespace Program
                 return;
             }
             var input = Keyboard.GetState();
-            
-            if (input.IsKeyDown(Key.Escape))
+            var mouse = Mouse.GetState();
+
+            if (input.IsKeyDown(Key.Escape) && lastTime)
             {
-                Exit();
+                //Exit();
+                showSet = !showSet;
+                lastTime = false;
             }
+            if (input.IsKeyUp(Key.Escape))
+            {
+                lastTime = true;
+            }
+
+            if (mouse.IsButtonDown(MouseButton.Left))
+            {
+                checkClicks(set);
+            }
+
 
             if (KeyboardAndMouseInput)
             {
@@ -126,7 +144,6 @@ namespace Program
                 }
 
                 // Get the mouse state
-                var mouse = Mouse.GetState();
 
                 if (_firstMove) // this bool variable is initially set to true
                 {
@@ -144,6 +161,8 @@ namespace Program
                     _camera.Yaw += deltaX * sensitivity;
                     _camera.Pitch -= deltaY * sensitivity; // reversed since y-coordinates range from bottom to top
                 }
+
+                
 
                 Mouse.SetPosition(1920 / 2, 1080 / 2);
             }
@@ -1388,5 +1407,64 @@ namespace Program
                 file.Close();
             }
         }
+        public Settings set = new Settings();
+        public void SetSettings(Settings s)
+        {
+            set = s;
+        }
+
+        public void showSettings(Settings s)
+        {
+            Vector2 pos = new Vector2((Width - s.width) / 2, (Height - s.height) / 2);
+            drawRectangle(pos.X, pos.Y, pos.X + s.width, pos.Y + s.height, Color4.Aqua);
+            foreach (Settings.Button b in s.buttons)
+            {
+                var x = b.pos.X + pos.X;
+                var y = b.pos.Y + pos.Y;
+                drawRectangle(pos.X, pos.Y, pos.X + b.width, pos.Y + b.height, Color4.Red);
+                
+            }
+        }
+
+        public class Settings
+        {
+            public int width, height;
+            public List<Button> buttons = new List<Button>();
+            public Settings(int w = 200, int h = 300)
+            {
+                width = w;
+                height = h;
+            }
+
+            public struct Button
+            {
+                public Vector2 pos;
+                public int width, height;
+                public Func<int> squareLambda;
+            }
+
+            public void addButton(float x, float y, int w, int h, Func<int> func)
+            {
+                buttons.Add(new Button { pos = new Vector2(x, y), width = w, height = h, squareLambda = func });
+            }
+
+        }
+
+        private void checkClicks(Settings s)
+        {
+            foreach(Settings.Button b in s.buttons)
+            {
+                Vector2 pos = new Vector2((Width - s.width) / 2, (Height - s.height) / 2);
+                var mouseState = Mouse.GetCursorState();
+                var x = mouseState.X - X - 8 - pos.X;
+                var y = -((mouseState.Y - Y - 30 - pos.Y) - pos.Y);
+
+                if(x >= b.pos.X && x <= b.pos.X + Width && y >= b.pos.Y && y <= b.pos.Y + b.height && showSet)
+                {
+                    Console.WriteLine("CLICK");
+                }
+            }
+        }
+
     }
 }
