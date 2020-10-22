@@ -26,7 +26,7 @@ namespace Program
         private float sensitivity = 0.2f;
         protected Boolean UseDepthTest = true;
         protected Boolean UseAlpha = true;
-        protected Boolean KeyboardAndMouseInput = true;
+        protected Boolean KeyboardAndMouseInput = true, loadedFont = false;
 
         protected MainRenderWindow(int width, int height, string title)
             : base(width, height, GraphicsMode.Default, title)
@@ -176,10 +176,10 @@ namespace Program
             }
 
             _mainLamp?.Dispose();
-            GL.DeleteTexture(font.Handle);
-
-
-
+            if (loadedFont)
+            {
+                GL.DeleteTexture(font.Handle);
+            }
             base.OnUnload(e);
         }
         private static float[] loadObj(string path)
@@ -620,13 +620,13 @@ namespace Program
             
             float[] vertices =
             {
-                x1Norm, -y1Norm, 0f, u1, v1,
-                x2Norm, -y1Norm, 0f, u1, v2,
-                x1Norm, -y2Norm, 0f, u2, v1,
+                x1Norm, y1Norm, 0f, u1, v2,
+                x1Norm, y2Norm, 0f, u1, v1,
+                x2Norm, y2Norm, 0f, u2, v1,
                 
-                x2Norm, -y1Norm, 0f, u1, v2,
-                x2Norm, -y2Norm, 0f, u2, v2,
-                x1Norm, -y2Norm, 0f, u2, v1
+                x1Norm, y1Norm, 0f, u1, v2,
+                x2Norm, y1Norm, 0f, u2, v2,
+                x2Norm, y2Norm, 0f, u2, v1
             };
             
             var vertexBufferObject = GL.GenBuffer();
@@ -679,13 +679,13 @@ namespace Program
 
             float[] vertices =
             {
-                x1Norm, -y1Norm, 0f, u1, v1,
-                x2Norm, -y1Norm, 0f, u1, v2,
-                x1Norm, -y2Norm, 0f, u2, v1,
+                x1Norm, y1Norm, 0f, u1, v2,
+                x1Norm, y2Norm, 0f, u1, v1,
+                x2Norm, y2Norm, 0f, u2, v1,
 
-                x2Norm, -y1Norm, 0f, u1, v2,
-                x2Norm, -y2Norm, 0f, u2, v2,
-                x1Norm, -y2Norm, 0f, u2, v1
+                x1Norm, y1Norm, 0f, u1, v2,
+                x2Norm, y1Norm, 0f, u2, v2,
+                x2Norm, y2Norm, 0f, u2, v1
             };
 
             var vertexBufferObject = GL.GenBuffer();
@@ -737,13 +737,13 @@ namespace Program
 
             float[] vertices =
             {
-                x1Norm, -y1Norm, 0f, u1, v1,
-                x2Norm, -y1Norm, 0f, u1, v2,
-                x1Norm, -y2Norm, 0f, u2, v1,
+                x1Norm, y1Norm, 0f, u1, v2,
+                x1Norm, y2Norm, 0f, u1, v1,
+                x2Norm, y2Norm, 0f, u2, v1,
 
-                x2Norm, -y1Norm, 0f, u1, v2,
-                x2Norm, -y2Norm, 0f, u2, v2,
-                x1Norm, -y2Norm, 0f, u2, v1
+                x1Norm, y1Norm, 0f, u1, v2,
+                x2Norm, y1Norm, 0f, u2, v2,
+                x2Norm, y2Norm, 0f, u2, v1
             };
 
             var vertexBufferObject = GL.GenBuffer();
@@ -794,9 +794,9 @@ namespace Program
             float y2Norm = y2Trans / (Height / 2);
             float[] vertices =
             {
-                x1Norm, -y1Norm, 0f,
+                x1Norm, y1Norm, 0f,
                 
-                x2Norm, -y2Norm, 0f
+                x2Norm, y2Norm, 0f
             };
 
             var vertexBufferObject = GL.GenBuffer();
@@ -837,13 +837,13 @@ namespace Program
             float y2Norm = y2Trans / (Height / 2);
             float[] vertices =
             {
-                x1Norm, -y1Norm, 0f,
-                x2Norm, -y1Norm, 0f,
-                x1Norm, -y2Norm, 0f,
+                x1Norm, y1Norm, 0f,
+                x2Norm, y1Norm, 0f,
+                x1Norm, y2Norm, 0f,
                 
-                x2Norm, -y1Norm, 0f,
-                x2Norm, -y2Norm, 0f,
-                x1Norm, -y2Norm, 0f
+                x2Norm, y1Norm, 0f,
+                x2Norm, y2Norm, 0f,
+                x1Norm, y2Norm, 0f
             };
 
             var vertexBufferObject = GL.GenBuffer();
@@ -885,9 +885,9 @@ namespace Program
             float y2Norm = y2Trans / (Height / 2);
             float[] vertices =
             {
-                x1Norm, -y1Norm, 0f, u1, v1,
+                x1Norm, y1Norm, 0f, u1, v1,
                 
-                x2Norm, -y2Norm, 0f, u2, v2
+                x2Norm, y2Norm, 0f, u2, v2
             };
             
             var vertexBufferObject = GL.GenBuffer();
@@ -947,18 +947,18 @@ namespace Program
             float y4Trans = y4 - (Height / 2);
             float x4Norm = x4Trans / (Width / 2);
             float y4Norm = y4Trans / (Height / 2);
-            
+
             float[] vertices =
             {
-                x1Norm, -y1Norm, z1, u1, v1,
-                x2Norm, -y2Norm, z2, u2, v2,
-                x3Norm, -y3Norm, z3, u3, v3,
-                
-                x2Norm, -y2Norm, z2, u2, v2,
-                x3Norm, -y3Norm, z3, u3, v3,
-                x4Norm, -y4Norm, z4, u4, v4
+                x1Norm, y1Norm, z1, u1, -(v1 - 1),
+                x2Norm, y2Norm, z2, u2, -(v2 - 1),
+                x3Norm, y3Norm, z3, u3, -(v3 - 1),
+
+                x1Norm, y1Norm, z2, u1, -(v1 - 1),
+                x3Norm, y3Norm, z3, u3, -(v3 - 1),
+                x4Norm, y4Norm, z4, u4, -(v4 - 1)
             };
-            
+
             var vertexBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
@@ -1021,13 +1021,13 @@ namespace Program
 
             float[] vertices =
             {
-                x1Norm, -y1Norm, z1, u1, v1,
-                x2Norm, -y2Norm, z2, u2, v2,
-                x3Norm, -y3Norm, z3, u3, v3,
+                x1Norm, y1Norm, z1, u1, -(v1 - 1),
+                x2Norm, y2Norm, z2, u2, -(v2 - 1),
+                x3Norm, y3Norm, z3, u3, -(v3 - 1),
 
-                x2Norm, -y2Norm, z2, u2, v2,
-                x3Norm, -y3Norm, z3, u3, v3,
-                x4Norm, -y4Norm, z4, u4, v4
+                x1Norm, y1Norm, z2, u1, -(v1 - 1),
+                x3Norm, y3Norm, z3, u3, -(v3 - 1),
+                x4Norm, y4Norm, z4, u4, -(v4 - 1)
             };
 
             var vertexBufferObject = GL.GenBuffer();
@@ -1091,13 +1091,13 @@ namespace Program
 
             float[] vertices =
             {
-                x1Norm, -y1Norm, z1, u1, v1,
-                x2Norm, -y2Norm, z2, u2, v2,
-                x3Norm, -y3Norm, z3, u3, v3,
+                x1Norm, y1Norm, z1, u1, -(v1 - 1),
+                x2Norm, y2Norm, z2, u2, -(v2 - 1),
+                x3Norm, y3Norm, z3, u3, -(v3 - 1),
 
-                x2Norm, -y2Norm, z2, u2, v2,
-                x3Norm, -y3Norm, z3, u3, v3,
-                x4Norm, -y4Norm, z4, u4, v4
+                x1Norm, y1Norm, z2, u1, -(v1 - 1),
+                x3Norm, y3Norm, z3, u3, -(v3 - 1),
+                x4Norm, y4Norm, z4, u4, -(v4 - 1)
             };
 
             var vertexBufferObject = GL.GenBuffer();
@@ -1140,65 +1140,65 @@ namespace Program
                                 float x2, float y2, float z2, 
                                 float x3, float y3, float z3,
                                 float x4, float y4, float z4, Color4 color)
-                {
-                    float x1Trans = x1 - (Width / 2);
-                    float y1Trans = y1 - (Height / 2);
-                    float x1Norm = x1Trans / (Width / 2);
-                    float y1Norm = y1Trans / (Height / 2);
-                    float x2Trans = x2 - (Width / 2);
-                    float y2Trans = y2 - (Height / 2);
-                    float x2Norm = x2Trans / (Width / 2);
-                    float y2Norm = y2Trans / (Height / 2);
-                    float x3Trans = x3 - (Width / 2);
-                    float y3Trans = y3 - (Height / 2);
-                    float x3Norm = x3Trans / (Width / 2);
-                    float y3Norm = y3Trans / (Height / 2);
-                    float x4Trans = x4 - (Width / 2);
-                    float y4Trans = y4 - (Height / 2);
-                    float x4Norm = x4Trans / (Width / 2);
-                    float y4Norm = y4Trans / (Height / 2);
+        {
+            float x1Trans = x1 - (Width / 2);
+            float y1Trans = y1 - (Height / 2);
+            float x1Norm = x1Trans / (Width / 2);
+            float y1Norm = y1Trans / (Height / 2);
+            float x2Trans = x2 - (Width / 2);
+            float y2Trans = y2 - (Height / 2);
+            float x2Norm = x2Trans / (Width / 2);
+            float y2Norm = y2Trans / (Height / 2);
+            float x3Trans = x3 - (Width / 2);
+            float y3Trans = y3 - (Height / 2);
+            float x3Norm = x3Trans / (Width / 2);
+            float y3Norm = y3Trans / (Height / 2);
+            float x4Trans = x4 - (Width / 2);
+            float y4Trans = y4 - (Height / 2);
+            float x4Norm = x4Trans / (Width / 2);
+            float y4Norm = y4Trans / (Height / 2);
                     
-                    float[] vertices =
-                    {
-                        x1Norm, -y1Norm, z1,
-                        x2Norm, -y2Norm, z2,
-                        x3Norm, -y3Norm, z3,
+            float[] vertices =
+            {
+                x1Norm, y1Norm, z1,
+                x2Norm, y2Norm, z2,
+                x3Norm, y3Norm, z3,
                         
-                        x2Norm, -y2Norm, z2,
-                        x3Norm, -y3Norm, z3,
-                        x4Norm, -y4Norm, z4
-                    };
+                x2Norm, y2Norm, z2,
+                x3Norm, y3Norm, z3,
+                x4Norm, y4Norm, z4
+            };
                     
-                    var vertexBufferObject = GL.GenBuffer();
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
-                    GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
                     
-                    _2dShader.Use();
+            _2dShader.Use();
                     
-                    var mainObject = GL.GenVertexArray();
-                    GL.BindVertexArray(mainObject);
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
                     
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
         
-                    var positionLocation = _2dShader.GetAttribLocation("aPos");
-                    GL.EnableVertexAttribArray(positionLocation);
-                    GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            var positionLocation = _2dShader.GetAttribLocation("aPos");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
                     
                     
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
                     
-                    GL.BindVertexArray(mainObject);
+            GL.BindVertexArray(mainObject);
                     
-                    _2dShader.Use();
+            _2dShader.Use();
                     
-                    _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
+            _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
         
-                    GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
                     
-                    GL.DeleteBuffer(vertexBufferObject);
-                    GL.DeleteVertexArray(mainObject);
+            GL.DeleteBuffer(vertexBufferObject);
+            GL.DeleteVertexArray(mainObject);
         
-                }
+        }
         
         protected void drawEllipse(float x, float y, float radiusX, float radiusY, Color4 color)
         {
@@ -1314,8 +1314,6 @@ namespace Program
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 
-
-        
         public void drawText(string text, Vector2 pos, Color4 col)
         {
             byte[] ids = Encoding.ASCII.GetBytes(text);
@@ -1328,13 +1326,13 @@ namespace Program
                 int width = data["widths"][i];
                 int height = data["heights"][i];
                 float uoff = u + ((float)width / 256f);
-                float voff = v + ((float)height / 256f);
+                float voff = v - ((float)height / 256f);
 
                 drawTexturedQuad(
-                    pos.X + width + xoff, pos.Y + height, 1f, uoff, voff,
-                    pos.X + width + xoff, pos.Y         , 1f, uoff, v   ,
-                    pos.X + xoff        , pos.Y + height, 1f, u   , voff,
-                    pos.X + xoff        , pos.Y         , 1f, u   , v   , font, col, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+                    pos.X + xoff        , pos.Y         , 1f, u   , voff,
+                    pos.X + xoff        , pos.Y + height, 1f, u   , v,
+                    pos.X + width + xoff, pos.Y + height, 1f, uoff, v,
+                    pos.X + width + xoff, pos.Y         , 1f, uoff, voff, font, col, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
 
                 xoff += width;            
             }
@@ -1345,6 +1343,7 @@ namespace Program
 
         public void loadFont(string path, string path2)
         {
+            loadedFont = true;
             data = new Dictionary<string, int[]>();
             font = new Texture(path2, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
             using (StreamReader file = new StreamReader(path))
@@ -1375,7 +1374,7 @@ namespace Program
                         }
                         ids.Add(f[0]);
                         xs.Add(f[1]);
-                        ys.Add(f[2]);
+                        ys.Add(-(f[2] - 256));
                         widths.Add(f[3]);
                         heights.Add(f[4]);
                     }

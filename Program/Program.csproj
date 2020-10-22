@@ -10,7 +10,7 @@
 
 Documentation at https://www.nuget.org/packages/OpenTK.3D.Library</Description>
     <PackageTags>3D, 2D, OpenTK, Engine</PackageTags>
-    <Version>1.4.4</Version>
+    <Version>1.5.0</Version>
     <PackageReleaseNotes>drawText() WORKS</PackageReleaseNotes>
   </PropertyGroup>
 
