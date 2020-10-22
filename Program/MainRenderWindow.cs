@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 using OpenTK;
 using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using Boolean = System.Boolean;
 
@@ -10,7 +14,6 @@ namespace Program
 {
     public class MainRenderWindow : GameWindow
     {
-
         private readonly List<TexturedObject> _mainTexturedObjects = new List<TexturedObject>();
         private readonly List<Object> _mainObjects = new List<Object>();
         private Lamp _mainLamp;
@@ -24,20 +27,24 @@ namespace Program
         protected Boolean UseDepthTest = true;
         protected Boolean UseAlpha = true;
         protected Boolean KeyboardAndMouseInput = true;
+
         protected MainRenderWindow(int width, int height, string title)
             : base(width, height, GraphicsMode.Default, title)
         {
         }
+        
         protected override void OnLoad(EventArgs e)
         {
             if(UseDepthTest) {GL.Enable(EnableCap.DepthTest);}
             if(UseAlpha) {GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);}
             GL.Enable(EnableCap.Blend);
-            _lightingShader = new Shader("Shaders/shader.vert", "Shaders/lighting.frag");
-            _lampShader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
-            _textureShader = new Shader("Shaders/texture.vert", "Shaders/texture.frag");
-            _2dShader = new Shader("Shaders/shader2d.vert", "Shaders/shader2d.frag");
-            _2dTextured = new Shader("Shaders/texture2d.vert", "Shaders/texture2d.frag");
+            _lightingShader = new Shader(Shaders.ShaderVert, Shaders.LightingFrag);
+            _lampShader = new Shader(Shaders.ShaderVert, Shaders.ShaderFrag);
+           
+            _2dShader = new Shader(Shaders.Shader2DVert, Shaders.Shader2DFrag);
+            _textureShader = new Shader(Shaders.TextureVert, Shaders.TextureFrag);
+
+            _2dTextured = new Shader(Shaders.Texture2DVert, Shaders.Texture2DFrag);
             _lightingShader.Use();
             _lampShader.Use();
             _textureShader.Use();
@@ -45,6 +52,7 @@ namespace Program
             _2dTextured.Use();
                                                         
             _camera = new Camera(Vector3.UnitZ * 3, Width / (float)Height);
+            
             CursorVisible = !KeyboardAndMouseInput;
         }
 
@@ -152,7 +160,6 @@ namespace Program
             GL.BindVertexArray(0);
             GL.UseProgram(0);
 
-            
 
             GL.DeleteProgram(_lampShader.Handle);
             GL.DeleteProgram(_lightingShader.Handle);
@@ -169,6 +176,7 @@ namespace Program
             }
 
             _mainLamp?.Dispose();
+            GL.DeleteTexture(font.Handle);
 
 
 
@@ -657,6 +665,123 @@ namespace Program
             GL.DeleteVertexArray(mainObject);
 
         }
+        protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)
+        {
+            Texture texture = new Texture(textureBitmap, min, mag);
+            float x1Trans = x1 - (Width / 2);
+            float y1Trans = y1 - (Height / 2);
+            float x1Norm = x1Trans / (Width / 2);
+            float y1Norm = y1Trans / (Height / 2);
+            float x2Trans = x2 - (Width / 2);
+            float y2Trans = y2 - (Height / 2);
+            float x2Norm = x2Trans / (Width / 2);
+            float y2Norm = y2Trans / (Height / 2);
+
+            float[] vertices =
+            {
+                x1Norm, -y1Norm, 0f, u1, v1,
+                x2Norm, -y1Norm, 0f, u1, v2,
+                x1Norm, -y2Norm, 0f, u2, v1,
+
+                x2Norm, -y1Norm, 0f, u1, v2,
+                x2Norm, -y2Norm, 0f, u2, v2,
+                x1Norm, -y2Norm, 0f, u2, v1
+            };
+
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
+
+            texture.Use();
+            _2dTextured.Use();
+
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            var positionLocation = _2dTextured.GetAttribLocation("aPosition");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+
+            var texCoordLocation = _2dTextured.GetAttribLocation("aTexCoord");
+            GL.EnableVertexAttribArray(texCoordLocation);
+            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            GL.BindVertexArray(mainObject);
+
+            texture.Use();
+            _2dTextured.Use();
+
+            _2dTextured.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
+
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+
+            GL.DeleteBuffer(vertexBufferObject);
+            GL.DeleteTexture(texture.Handle);
+            GL.DeleteVertexArray(mainObject);
+
+        }
+        protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
+        {
+            float x1Trans = x1 - (Width / 2);
+            float y1Trans = y1 - (Height / 2);
+            float x1Norm = x1Trans / (Width / 2);
+            float y1Norm = y1Trans / (Height / 2);
+            float x2Trans = x2 - (Width / 2);
+            float y2Trans = y2 - (Height / 2);
+            float x2Norm = x2Trans / (Width / 2);
+            float y2Norm = y2Trans / (Height / 2);
+
+            float[] vertices =
+            {
+                x1Norm, -y1Norm, 0f, u1, v1,
+                x2Norm, -y1Norm, 0f, u1, v2,
+                x1Norm, -y2Norm, 0f, u2, v1,
+
+                x2Norm, -y1Norm, 0f, u1, v2,
+                x2Norm, -y2Norm, 0f, u2, v2,
+                x1Norm, -y2Norm, 0f, u2, v1
+            };
+
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
+
+            texture.Use();
+            _2dTextured.Use();
+
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            var positionLocation = _2dTextured.GetAttribLocation("aPosition");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+
+            var texCoordLocation = _2dTextured.GetAttribLocation("aTexCoord");
+            GL.EnableVertexAttribArray(texCoordLocation);
+            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            GL.BindVertexArray(mainObject);
+
+            texture.Use();
+            _2dTextured.Use();
+
+            _2dTextured.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
+
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+
+            GL.DeleteBuffer(vertexBufferObject);
+            GL.DeleteVertexArray(mainObject);
+
+        }
+
         protected void drawLine(float x1, float y1, float x2, float y2, Color4 color)
         {
             float x1Trans = x1 - (Width / 2);
@@ -871,6 +996,146 @@ namespace Program
 
         }
 
+        protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1,
+                                      float x2, float y2, float z2, float u2, float v2,
+                                      float x3, float y3, float z3, float u3, float v3,
+                                      float x4, float y4, float z4, float u4, float v4, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)
+        {
+            Texture texture = new Texture(textureBitmap, min, mag);
+            float x1Trans = x1 - (Width / 2);
+            float y1Trans = y1 - (Height / 2);
+            float x1Norm = x1Trans / (Width / 2);
+            float y1Norm = y1Trans / (Height / 2);
+            float x2Trans = x2 - (Width / 2);
+            float y2Trans = y2 - (Height / 2);
+            float x2Norm = x2Trans / (Width / 2);
+            float y2Norm = y2Trans / (Height / 2);
+            float x3Trans = x3 - (Width / 2);
+            float y3Trans = y3 - (Height / 2);
+            float x3Norm = x3Trans / (Width / 2);
+            float y3Norm = y3Trans / (Height / 2);
+            float x4Trans = x4 - (Width / 2);
+            float y4Trans = y4 - (Height / 2);
+            float x4Norm = x4Trans / (Width / 2);
+            float y4Norm = y4Trans / (Height / 2);
+
+            float[] vertices =
+            {
+                x1Norm, -y1Norm, z1, u1, v1,
+                x2Norm, -y2Norm, z2, u2, v2,
+                x3Norm, -y3Norm, z3, u3, v3,
+
+                x2Norm, -y2Norm, z2, u2, v2,
+                x3Norm, -y3Norm, z3, u3, v3,
+                x4Norm, -y4Norm, z4, u4, v4
+            };
+
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
+
+            texture.Use();
+            _2dTextured.Use();
+
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            var positionLocation = _2dTextured.GetAttribLocation("aPosition");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+
+            var texCoordLocation = _2dTextured.GetAttribLocation("aTexCoord");
+            GL.EnableVertexAttribArray(texCoordLocation);
+            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            GL.BindVertexArray(mainObject);
+
+            texture.Use();
+            _2dTextured.Use();
+
+            _2dTextured.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
+
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+
+            GL.DeleteBuffer(vertexBufferObject);
+            GL.DeleteTexture(texture.Handle);
+            GL.DeleteVertexArray(mainObject);
+
+        }
+
+        protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1,
+                                      float x2, float y2, float z2, float u2, float v2,
+                                      float x3, float y3, float z3, float u3, float v3,
+                                      float x4, float y4, float z4, float u4, float v4, Texture texture, Color4 color, TextureMinFilter min, TextureMagFilter mag)
+        {
+            float x1Trans = x1 - (Width / 2);
+            float y1Trans = y1 - (Height / 2);
+            float x1Norm = x1Trans / (Width / 2);
+            float y1Norm = y1Trans / (Height / 2);
+            float x2Trans = x2 - (Width / 2);
+            float y2Trans = y2 - (Height / 2);
+            float x2Norm = x2Trans / (Width / 2);
+            float y2Norm = y2Trans / (Height / 2);
+            float x3Trans = x3 - (Width / 2);
+            float y3Trans = y3 - (Height / 2);
+            float x3Norm = x3Trans / (Width / 2);
+            float y3Norm = y3Trans / (Height / 2);
+            float x4Trans = x4 - (Width / 2);
+            float y4Trans = y4 - (Height / 2);
+            float x4Norm = x4Trans / (Width / 2);
+            float y4Norm = y4Trans / (Height / 2);
+
+            float[] vertices =
+            {
+                x1Norm, -y1Norm, z1, u1, v1,
+                x2Norm, -y2Norm, z2, u2, v2,
+                x3Norm, -y3Norm, z3, u3, v3,
+
+                x2Norm, -y2Norm, z2, u2, v2,
+                x3Norm, -y3Norm, z3, u3, v3,
+                x4Norm, -y4Norm, z4, u4, v4
+            };
+
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.DynamicDraw);
+
+            texture.Use();
+            _2dTextured.Use();
+
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            var positionLocation = _2dTextured.GetAttribLocation("aPosition");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), 0);
+
+            var texCoordLocation = _2dTextured.GetAttribLocation("aTexCoord");
+            GL.EnableVertexAttribArray(texCoordLocation);
+            GL.VertexAttribPointer(texCoordLocation, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), 3 * sizeof(float));
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            GL.BindVertexArray(mainObject);
+
+            texture.Use();
+            _2dTextured.Use();
+
+            _2dTextured.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
+
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+
+            GL.DeleteBuffer(vertexBufferObject);
+            GL.DeleteVertexArray(mainObject);
+
+        }
+
         protected void drawQuad(float x1, float y1, float z1, 
                                 float x2, float y2, float z2, 
                                 float x3, float y3, float z3,
@@ -1047,6 +1312,82 @@ namespace Program
         protected void Clear()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        }
+
+
+        
+        public void drawText(string text, Vector2 pos, Color4 col)
+        {
+            byte[] ids = Encoding.ASCII.GetBytes(text);
+            int xoff = 0;
+            foreach (byte b in ids)
+            {
+                int i = Array.IndexOf(data["ids"], b);
+                float u = (float)data["xs"][i] / 256f;
+                float v = (float)data["ys"][i] / 256f;
+                int width = data["widths"][i];
+                int height = data["heights"][i];
+                float uoff = u + ((float)width / 256f);
+                float voff = v + ((float)height / 256f);
+
+                drawTexturedQuad(
+                    pos.X + width + xoff, pos.Y + height, 1f, uoff, voff,
+                    pos.X + width + xoff, pos.Y         , 1f, uoff, v   ,
+                    pos.X + xoff        , pos.Y + height, 1f, u   , voff,
+                    pos.X + xoff        , pos.Y         , 1f, u   , v   , font, col, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+
+                xoff += width;            
+            }
+        }
+        
+        public Dictionary<string, int[]> data = new Dictionary<string, int[]>();
+        public Texture font;
+
+        public void loadFont(string path, string path2)
+        {
+            data = new Dictionary<string, int[]>();
+            font = new Texture(path2, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+            using (StreamReader file = new StreamReader(path))
+            {
+                string ln;
+                List<int> ids = new List<int>();
+                List<int> xs = new List<int>();
+                List<int> ys = new List<int>();
+                List<int> widths = new List<int>();
+                List<int> heights = new List<int>();
+
+
+                while ((ln = file.ReadLine()) != null)
+                {
+                    if(ln.Substring(0, 5) == "char ")
+                    {
+                        string Data = ln.Substring(5);
+                        string[] d = Data.Split(" ");
+                        List<int> f = new List<int>();
+                        foreach (String l in d)
+                        {
+                            if (l.Contains("="))
+                            {
+                                string[] newL = l.Split("=");
+                                Regex.Replace(newL[1], @"\s+", "");
+                                f.Add(int.Parse(newL[1]));
+                            }
+                        }
+                        ids.Add(f[0]);
+                        xs.Add(f[1]);
+                        ys.Add(f[2]);
+                        widths.Add(f[3]);
+                        heights.Add(f[4]);
+                    }
+                }
+
+                data.Add("ids", ids.ToArray());
+                data.Add("xs", xs.ToArray());
+                data.Add("ys", ys.ToArray());
+                data.Add("widths", widths.ToArray());
+                data.Add("heights", heights.ToArray());
+                file.Close();
+            }
         }
     }
 }
