@@ -5,7 +5,7 @@
   },
   "projects": {
     "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj": {
-      "version": "1.5.0",
+      "version": "1.6.0",
       "restore": {
         "projectUniqueName": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj",
         "projectName": "OpenTK.3D.Library",
@@ -56,6 +56,10 @@
               "target": "Package",
               "version": "[4.7.0, )"
             },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
+            },
             "OpenTK": {
               "target": "Package",
               "version": "[3.2.0, )"
@@ -86,6 +90,10 @@
             "Microsoft.Win32.SystemEvents": {
               "target": "Package",
               "version": "[4.7.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.3, )"
             },
             "OpenTK": {
               "target": "Package",

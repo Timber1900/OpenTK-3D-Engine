@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -76,6 +76,11 @@ namespace Program
 
             if (showSet)
             {
+                var mouse = Mouse.GetState();
+                if (mouse.IsButtonDown(MouseButton.Left))
+                {
+                    checkClicks(set);
+                }
                 showSettings(set);
             }
 
@@ -104,10 +109,7 @@ namespace Program
                 lastTime = true;
             }
 
-            if (mouse.IsButtonDown(MouseButton.Left))
-            {
-                checkClicks(set);
-            }
+            
 
 
             if (KeyboardAndMouseInput)
@@ -1333,19 +1335,19 @@ namespace Program
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 
-        public void drawText(string text, Vector2 pos, Color4 col)
+        public void drawText(string text, int px, Vector2 pos, Color4 col)
         {
             byte[] ids = Encoding.ASCII.GetBytes(text);
             int xoff = 0;
             foreach (byte b in ids)
             {
                 int i = Array.IndexOf(data["ids"], b);
-                float u = (float)data["xs"][i] / 256f;
-                float v = (float)data["ys"][i] / 256f;
-                int width = data["widths"][i];
-                int height = data["heights"][i];
-                float uoff = u + ((float)width / 256f);
-                float voff = v - ((float)height / 256f);
+                float u = data["xs"][i] / 256f;
+                float v = data["ys"][i] / 256f;
+                int width = (int)(((float)px / (float)data["heights"][i]) * data["widths"][i]);
+                int height = px;
+                float uoff = u + (data["widths"][i] / 256f);
+                float voff = v - (data["heights"][i] / 256f);
 
                 drawTexturedQuad(
                     pos.X + xoff        , pos.Y         , 1f, u   , voff,
@@ -1356,6 +1358,8 @@ namespace Program
                 xoff += width;            
             }
         }
+
+        
         
         public Dictionary<string, int[]> data = new Dictionary<string, int[]>();
         public Texture font;
@@ -1407,6 +1411,22 @@ namespace Program
                 file.Close();
             }
         }
+
+        public int getPhraseLength(string text, int px)
+        {
+            byte[] ids = Encoding.ASCII.GetBytes(text);
+            int xoff = 0;
+            foreach (byte b in ids)
+            {
+                int i = Array.IndexOf(data["ids"], b);
+                int width = (int)(((float)px / (float)data["heights"][i]) * data["widths"][i]);
+
+                xoff += width;
+            }
+
+            return xoff;
+        }
+
         public Settings set = new Settings();
         public void SetSettings(Settings s)
         {
@@ -1421,8 +1441,14 @@ namespace Program
             {
                 var x = b.pos.X + pos.X;
                 var y = b.pos.Y + pos.Y;
-                drawRectangle(pos.X, pos.Y, pos.X + b.width, pos.Y + b.height, Color4.Red);
-                
+                drawRectangle(x, y, x + b.width, y + b.height, b.col);
+                if(b.l == -1)
+                {
+                    b.l = getPhraseLength(b.Text, Math.Min(b.height, 32));
+                }
+                drawText(b.Text, Math.Min(b.height, 32), new Vector2(x + ((b.width - b.l) / 2), y + ((b.height - Math.Min(b.height, 32)) / 2)), Color4.White);
+                b.setCol(Color4.Blue);
+
             }
         }
 
@@ -1430,41 +1456,109 @@ namespace Program
         {
             public int width, height;
             public List<Button> buttons = new List<Button>();
+            public Dictionary<string, object> settings = new Dictionary<string, object>();
+
             public Settings(int w = 200, int h = 300)
             {
                 width = w;
                 height = h;
             }
 
-            public struct Button
+            public class Button
             {
                 public Vector2 pos;
-                public int width, height;
-                public Func<int> squareLambda;
+                public string Text;
+                public int width, height, l;
+                public Func<int> onClick;
+                public Color4 col;
+
+                public void setCol(Color4 c)
+                {
+                    col = c;
+                }
             }
 
-            public void addButton(float x, float y, int w, int h, Func<int> func)
+            public void addButton(string t, float x, float y, int w, int h, Color4 c, Func<int> func)
             {
-                buttons.Add(new Button { pos = new Vector2(x, y), width = w, height = h, squareLambda = func });
+                buttons.Add(new Button { pos = new Vector2(x, y), width = w, height = h, onClick = func, col = c, Text = t, l = -1 });
+            }
+
+            public void addSetting(string key, object value)
+            {
+                settings.Add(key, value);
+            }
+
+            public void readSettings()
+            {
+                try
+                {
+                    using (StreamReader file = new StreamReader("settings.cfg"))
+                    {
+                        settings = new Dictionary<string, object>();
+                        string ln;
+                        while ((ln = file.ReadLine()) != null)
+                        {
+                            var values = ln.Split("=");
+                            Regex rx = new Regex(@"^[\d.]+$");
+                            if (rx.IsMatch(values[1]))
+                            {
+
+                                settings.Add(values[0], float.Parse(values[1]));
+                            }
+                            else
+                            {
+                                settings.Add(values[0], values[1]);
+                            }
+
+                        }
+                    }
+                }
+                catch (InvalidCastException e)
+                {
+                    Console.WriteLine(e.GetBaseException());
+                }
+            }
+
+            public void writeSettings()
+            {
+                try
+                {
+                    using (FileStream fs = File.Create("settings.cfg"))
+                    {
+                        string final = "";
+
+                        foreach (KeyValuePair<string, object> entry in settings)
+                        {
+                            final += entry.Key + "=" + entry.Value + "\n";
+                        }
+
+                        byte[] info = new UTF8Encoding(true).GetBytes(final);
+                        fs.Write(info, 0, info.Length);
+                    }
+                }
+
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
             }
 
         }
-
         private void checkClicks(Settings s)
         {
-            foreach(Settings.Button b in s.buttons)
+            foreach (Settings.Button b in s.buttons)
             {
                 Vector2 pos = new Vector2((Width - s.width) / 2, (Height - s.height) / 2);
                 var mouseState = Mouse.GetCursorState();
                 var x = mouseState.X - X - 8 - pos.X;
-                var y = -((mouseState.Y - Y - 30 - pos.Y) - pos.Y);
-
-                if(x >= b.pos.X && x <= b.pos.X + Width && y >= b.pos.Y && y <= b.pos.Y + b.height && showSet)
+                var y = -(mouseState.Y - Y - 30 - Height) - pos.Y;
+                if (x >= b.pos.X && x <= b.pos.X + b.width && y >= b.pos.Y && y <= b.pos.Y + b.height)
                 {
-                    Console.WriteLine("CLICK");
+                    b.setCol(Color4.Red);
+                    b.onClick.Invoke();
                 }
             }
-        }
+        }    
 
     }
 }
