@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "U+BV7/m3lpJum3LWmx5SkgPQxOmMVeXyKKDohwU/mDfOSq/wuwKiK9M8v7VvbzcGgZbnOp0UywSKqMEiig3QlA==",
+  "dgSpecHash": "/F9NVxU6e0+M2iWCzX81LEs009oB9rLG70MQz63nNg+P0V78sQ7YTKc7YXgSUUz6Rt04m1/GJni+JJrUbv0tBA==",
   "success": true,
   "projectFilePath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj",
   "expectedPackageFiles": [
@@ -12,6 +12,7 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.targets\\2.1.0\\microsoft.netcore.targets.2.1.0.nupkg.sha512",
     "C:\\Users\\35196\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512",
+    "C:\\Users\\35196\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
     "C:\\Users\\35196\\.nuget\\packages\\opentk\\3.2.0\\opentk.3.2.0.nupkg.sha512",
     "C:\\Users\\35196\\.nuget\\packages\\sixlabors.imagesharp\\1.0.1\\sixlabors.imagesharp.1.0.1.nupkg.sha512",
     "C:\\Users\\35196\\.nuget\\packages\\system.drawing.common\\4.7.0\\system.drawing.common.4.7.0.nupkg.sha512",

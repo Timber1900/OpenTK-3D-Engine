@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -24,9 +25,8 @@ namespace Program
         protected Boolean RenderLight = false;
         private float cameraSpeed = 20f;
         private float sensitivity = 0.2f;
-        protected Boolean UseDepthTest = true;
-        protected Boolean UseAlpha = true;
-        protected Boolean KeyboardAndMouseInput = true, loadedFont = false;
+        protected Boolean UseDepthTest = true, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true;
+
 
         protected MainRenderWindow(int width, int height, string title)
             : base(width, height, GraphicsMode.Default, title)
@@ -74,6 +74,16 @@ namespace Program
                 obj.show(_camera);
             }
 
+            if (showSet)
+            {
+                var mouse = Mouse.GetState();
+                if (mouse.IsButtonDown(MouseButton.Left))
+                {
+                    checkClicks(set);
+                }
+                showSettings(set);
+            }
+
             SwapBuffers();
 
             base.OnRenderFrame(e);
@@ -86,11 +96,21 @@ namespace Program
                 return;
             }
             var input = Keyboard.GetState();
-            
-            if (input.IsKeyDown(Key.Escape))
+            var mouse = Mouse.GetState();
+
+            if (input.IsKeyDown(Key.Escape) && lastTime)
             {
-                Exit();
+                //Exit();
+                showSet = !showSet;
+                lastTime = false;
             }
+            if (input.IsKeyUp(Key.Escape))
+            {
+                lastTime = true;
+            }
+
+            
+
 
             if (KeyboardAndMouseInput)
             {
@@ -126,7 +146,6 @@ namespace Program
                 }
 
                 // Get the mouse state
-                var mouse = Mouse.GetState();
 
                 if (_firstMove) // this bool variable is initially set to true
                 {
@@ -144,6 +163,8 @@ namespace Program
                     _camera.Yaw += deltaX * sensitivity;
                     _camera.Pitch -= deltaY * sensitivity; // reversed since y-coordinates range from bottom to top
                 }
+
+                
 
                 Mouse.SetPosition(1920 / 2, 1080 / 2);
             }
@@ -1314,19 +1335,19 @@ namespace Program
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 
-        public void drawText(string text, Vector2 pos, Color4 col)
+        public void drawText(string text, int px, Vector2 pos, Color4 col)
         {
             byte[] ids = Encoding.ASCII.GetBytes(text);
             int xoff = 0;
             foreach (byte b in ids)
             {
                 int i = Array.IndexOf(data["ids"], b);
-                float u = (float)data["xs"][i] / 256f;
-                float v = (float)data["ys"][i] / 256f;
-                int width = data["widths"][i];
-                int height = data["heights"][i];
-                float uoff = u + ((float)width / 256f);
-                float voff = v - ((float)height / 256f);
+                float u = data["xs"][i] / 256f;
+                float v = data["ys"][i] / 256f;
+                int width = (int)(((float)px / (float)data["heights"][i]) * data["widths"][i]);
+                int height = px;
+                float uoff = u + (data["widths"][i] / 256f);
+                float voff = v - (data["heights"][i] / 256f);
 
                 drawTexturedQuad(
                     pos.X + xoff        , pos.Y         , 1f, u   , voff,
@@ -1337,6 +1358,8 @@ namespace Program
                 xoff += width;            
             }
         }
+
+        
         
         public Dictionary<string, int[]> data = new Dictionary<string, int[]>();
         public Texture font;
@@ -1388,5 +1411,154 @@ namespace Program
                 file.Close();
             }
         }
+
+        public int getPhraseLength(string text, int px)
+        {
+            byte[] ids = Encoding.ASCII.GetBytes(text);
+            int xoff = 0;
+            foreach (byte b in ids)
+            {
+                int i = Array.IndexOf(data["ids"], b);
+                int width = (int)(((float)px / (float)data["heights"][i]) * data["widths"][i]);
+
+                xoff += width;
+            }
+
+            return xoff;
+        }
+
+        public Settings set = new Settings();
+        public void SetSettings(Settings s)
+        {
+            set = s;
+        }
+
+        public void showSettings(Settings s)
+        {
+            Vector2 pos = new Vector2((Width - s.width) / 2, (Height - s.height) / 2);
+            drawRectangle(pos.X, pos.Y, pos.X + s.width, pos.Y + s.height, Color4.Aqua);
+            foreach (Settings.Button b in s.buttons)
+            {
+                var x = b.pos.X + pos.X;
+                var y = b.pos.Y + pos.Y;
+                drawRectangle(x, y, x + b.width, y + b.height, b.col);
+                if(b.l == -1)
+                {
+                    b.l = getPhraseLength(b.Text, Math.Min(b.height, 32));
+                }
+                drawText(b.Text, Math.Min(b.height, 32), new Vector2(x + ((b.width - b.l) / 2), y + ((b.height - Math.Min(b.height, 32)) / 2)), Color4.White);
+                b.setCol(Color4.Blue);
+
+            }
+        }
+
+        public class Settings
+        {
+            public int width, height;
+            public List<Button> buttons = new List<Button>();
+            public Dictionary<string, object> settings = new Dictionary<string, object>();
+
+            public Settings(int w = 200, int h = 300)
+            {
+                width = w;
+                height = h;
+            }
+
+            public class Button
+            {
+                public Vector2 pos;
+                public string Text;
+                public int width, height, l;
+                public Func<int> onClick;
+                public Color4 col;
+
+                public void setCol(Color4 c)
+                {
+                    col = c;
+                }
+            }
+
+            public void addButton(string t, float x, float y, int w, int h, Color4 c, Func<int> func)
+            {
+                buttons.Add(new Button { pos = new Vector2(x, y), width = w, height = h, onClick = func, col = c, Text = t, l = -1 });
+            }
+
+            public void addSetting(string key, object value)
+            {
+                settings.Add(key, value);
+            }
+
+            public void readSettings()
+            {
+                try
+                {
+                    using (StreamReader file = new StreamReader("settings.cfg"))
+                    {
+                        settings = new Dictionary<string, object>();
+                        string ln;
+                        while ((ln = file.ReadLine()) != null)
+                        {
+                            var values = ln.Split("=");
+                            Regex rx = new Regex(@"^[\d.]+$");
+                            if (rx.IsMatch(values[1]))
+                            {
+
+                                settings.Add(values[0], float.Parse(values[1]));
+                            }
+                            else
+                            {
+                                settings.Add(values[0], values[1]);
+                            }
+
+                        }
+                    }
+                }
+                catch (InvalidCastException e)
+                {
+                    Console.WriteLine(e.GetBaseException());
+                }
+            }
+
+            public void writeSettings()
+            {
+                try
+                {
+                    using (FileStream fs = File.Create("settings.cfg"))
+                    {
+                        string final = "";
+
+                        foreach (KeyValuePair<string, object> entry in settings)
+                        {
+                            final += entry.Key + "=" + entry.Value + "\n";
+                        }
+
+                        byte[] info = new UTF8Encoding(true).GetBytes(final);
+                        fs.Write(info, 0, info.Length);
+                    }
+                }
+
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+
+        }
+        private void checkClicks(Settings s)
+        {
+            foreach (Settings.Button b in s.buttons)
+            {
+                Vector2 pos = new Vector2((Width - s.width) / 2, (Height - s.height) / 2);
+                var mouseState = Mouse.GetCursorState();
+                var x = mouseState.X - X - 8 - pos.X;
+                var y = -(mouseState.Y - Y - 30 - Height) - pos.Y;
+                if (x >= b.pos.X && x <= b.pos.X + b.width && y >= b.pos.Y && y <= b.pos.Y + b.height)
+                {
+                    b.setCol(Color4.Red);
+                    b.onClick.Invoke();
+                }
+            }
+        }    
+
     }
 }
