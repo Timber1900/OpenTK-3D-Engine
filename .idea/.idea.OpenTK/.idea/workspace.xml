@@ -24,47 +24,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Program/Shaders.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Program/bin/Release/OpenTK.3D.Library.1.2.0.nupkg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Program/bin/Release/nuget.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Program/obj/Release/OpenTK.3D.Library.1.1.0.nuspec" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Program/obj/Release/OpenTK.3D.Library.1.2.0.nuspec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/contentModel.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM__Default_Changelist_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM__Default_Changelist_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vs/OpenTK/DesignTimeBuild/.dtbcache.v2" beforeDir="false" afterPath="$PROJECT_DIR$/.vs/OpenTK/DesignTimeBuild/.dtbcache.v2" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.vs/OpenTK/v16/.suo" beforeDir="false" afterPath="$PROJECT_DIR$/.vs/OpenTK/v16/.suo" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main Release/Program.deps.json" beforeDir="false" afterPath="$PROJECT_DIR$/Main Release/Program.deps.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main Release/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Main Release/Program.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Main Release/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Main Release/Program.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/MainRenderWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/MainRenderWindow.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/Program.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Program/Program.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/Shader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/Shader.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/bin/Release/OpenTK.3D.Library.1.0.0.nupkg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.deps.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.deps.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.deps.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.deps.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/bin/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program.csprojAssemblyReference.cache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program1.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program1.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program2.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program2.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program3.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program3.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/shelved.patch" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.assets.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.csprojAssemblyReference.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.assets.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.csprojAssemblyReference.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.dgspec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.csprojAssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp2.1/Program.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csproj.CoreCompileInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.csprojAssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Release/netcoreapp3.1/Program.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.targets" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/project.assets.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/project.nuget.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/project.packagespec.json" afterDir="false" />
@@ -200,6 +180,7 @@
       <workItem from="1602981575031" duration="1238000" />
       <workItem from="1602983550824" duration="1011000" />
       <workItem from="1603278452423" duration="28000" />
+      <workItem from="1603837839107" duration="565000" />
     </task>
     <task id="LOCAL-00001" summary="drawEllipse fix">
       <created>1600524127878</created>

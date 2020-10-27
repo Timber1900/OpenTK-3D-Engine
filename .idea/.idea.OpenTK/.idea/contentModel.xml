@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Users\35196\AppData\Local\JetBrains\Rider2020.2\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\35196\AppData\Local\JetBrains\Rider2020.2\resharper-host\Local\Transient\Rider\v202\SolutionCaches\_OpenTK.463162767.00" t="ExcludeRecursive" />
-    <e p="C:\Users\35196\source\repos\OpenTK3DEngine-master" t="IncludeFlat">
+    <e p="C:\Users\Hugo Teixeira\AppData\Local\JetBrains\Rider2020.2\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\Hugo Teixeira\AppData\Local\JetBrains\Rider2020.2\resharper-host\Local\Transient\Rider\v202\SolutionCaches\_OpenTK.130061028.00" t="ExcludeRecursive" />
+    <e p="C:\Users\Hugo Teixeira\RiderProjects\OpenTK3DEngine" t="IncludeFlat">
       <e p="OpenTK.sln" t="IncludeFlat" />
       <e p="packages" t="ExcludeRecursive" />
       <e p="Program" t="IncludeRecursive">
@@ -11,7 +11,7 @@
         <e p="Camera.cs" t="Include" />
         <e p="MainRenderWindow.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
-          <e p="Release" t="Include">
+          <e p="Debug" t="Include">
             <e p="netcoreapp2.1" t="Include">
               <e p="Program.AssemblyInfo.cs" t="Include" />
             </e>
@@ -21,6 +21,11 @@
           </e>
         </e>
         <e p="Program.csproj" t="IncludeRecursive" />
+        <e p="Properties" t="Include">
+          <e p="PublishProfiles" t="Include">
+            <e p="FolderProfile.pubxml" t="Include" />
+          </e>
+        </e>
         <e p="Shader.cs" t="Include" />
         <e p="Shaders.cs" t="Include" />
         <e p="Texture.cs" t="Include" />

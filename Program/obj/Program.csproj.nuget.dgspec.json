@@ -1,24 +1,21 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj": {}
+    "C:\\Users\\Hugo Teixeira\\RiderProjects\\OpenTK3DEngine\\Program\\Program.csproj": {}
   },
   "projects": {
-    "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj": {
+    "C:\\Users\\Hugo Teixeira\\RiderProjects\\OpenTK3DEngine\\Program\\Program.csproj": {
       "version": "1.7.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj",
+        "projectUniqueName": "C:\\Users\\Hugo Teixeira\\RiderProjects\\OpenTK3DEngine\\Program\\Program.csproj",
         "projectName": "OpenTK.3D.Library",
-        "projectPath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj",
-        "packagesPath": "C:\\Users\\35196\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\obj\\",
+        "projectPath": "C:\\Users\\Hugo Teixeira\\RiderProjects\\OpenTK3DEngine\\Program\\Program.csproj",
+        "packagesPath": "C:\\Users\\Hugo Teixeira\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Hugo Teixeira\\RiderProjects\\OpenTK3DEngine\\Program\\obj\\",
         "projectStyle": "PackageReference",
         "crossTargeting": true,
-        "fallbackFolders": [
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\35196\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Hugo Teixeira\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -83,7 +80,7 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.402\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.301\\RuntimeIdentifierGraph.json"
         },
         "netcoreapp3.1": {
           "dependencies": {
@@ -123,7 +120,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.402\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.301\\RuntimeIdentifierGraph.json"
         }
       }
     }
