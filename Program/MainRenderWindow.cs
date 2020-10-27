@@ -49,21 +49,29 @@ namespace Program
 
     protected override void OnLoad(EventArgs e)
     {
+      Console.WriteLine("Test1");
+
       if (this.UseDepthTest)
         GL.Enable(EnableCap.DepthTest);
       if (this.UseAlpha)
         GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
       GL.Enable(EnableCap.Blend);
-      this._lightingShader = new Shader(Shaders.ShaderVert, Shaders.LightingFrag);
-      this._lampShader = new Shader(Shaders.ShaderVert, Shaders.ShaderFrag);
-      this._2dShader = new Shader(Shaders.Shader2DVert, Shaders.Shader2DFrag);
-      this._textureShader = new Shader(Shaders.TextureVert, Shaders.TextureFrag);
-      this._2dTextured = new Shader(Shaders.Texture2DVert, Shaders.Texture2DFrag);
-      this._lightingShader.Use();
-      this._lampShader.Use();
-      this._textureShader.Use();
-      this._2dShader.Use();
-      this._2dTextured.Use();
+      Console.WriteLine("Test1");
+      //this._lightingShader = new Shader(Shaders.ShaderVert, Shaders.LightingFrag);
+      Console.WriteLine("Test2");
+      //this._lampShader = new Shader(Shaders.ShaderVert, Shaders.ShaderFrag);
+      Console.WriteLine("Test3");
+      //this._2dShader = new Shader(Shaders.Shader2DVert, Shaders.Shader2DFrag);
+      Console.WriteLine("Test4");
+      //this._textureShader = new Shader(Shaders.TextureVert, Shaders.TextureFrag);
+      Console.WriteLine("Test5");
+      //this._2dTextured = new Shader(Shaders.Texture2DVert, Shaders.Texture2DFrag);
+      Console.WriteLine("Test1");
+      //this._lightingShader.Use();
+      //this._lampShader.Use();
+      //this._textureShader.Use();
+      //this._2dShader.Use();
+      //this._2dTextured.Use();
       this._camera = new Camera(Vector3.UnitZ * 3f, (float) this.Width / (float) this.Height);
       this.CursorVisible = !this.KeyboardAndMouseInput;
     }
