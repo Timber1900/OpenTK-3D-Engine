@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v2.1": {
-      "Program/1.6.0": {
+      "Program/1.7.0": {
         "dependencies": {
           "Microsoft.Win32.SystemEvents": "4.7.0",
           "Newtonsoft.Json": "12.0.3",
@@ -102,7 +102,7 @@
     }
   },
   "libraries": {
-    "Program/1.6.0": {
+    "Program/1.7.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
