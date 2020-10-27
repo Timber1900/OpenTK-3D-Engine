@@ -25,7 +25,7 @@ namespace Program
         protected Boolean RenderLight = false;
         private float cameraSpeed = 20f;
         private float sensitivity = 0.2f;
-        protected Boolean UseDepthTest = true, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true;
+        protected Boolean UseDepthTest = true, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true, useSettings = false;
 
 
         protected MainRenderWindow(int width, int height, string title)
@@ -100,9 +100,16 @@ namespace Program
 
             if (input.IsKeyDown(Key.Escape) && lastTime)
             {
-                //Exit();
-                showSet = !showSet;
-                lastTime = false;
+                if (!useSettings)
+                {
+                    //Exit();
+                }
+                else
+                {
+                    showSet = !showSet;
+                    lastTime = false;
+                }
+                
             }
             if (input.IsKeyUp(Key.Escape))
             {
@@ -197,10 +204,7 @@ namespace Program
             }
 
             _mainLamp?.Dispose();
-            if (loadedFont)
-            {
-                GL.DeleteTexture(font.Handle);
-            }
+
             base.OnUnload(e);
         }
         private static float[] loadObj(string path)
@@ -1335,25 +1339,25 @@ namespace Program
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 
-        public void drawText(string text, int px, Vector2 pos, Color4 col)
+        public void drawText(string text, int px, float x, float y, Font f, Color4 col)
         {
             byte[] ids = Encoding.ASCII.GetBytes(text);
             int xoff = 0;
             foreach (byte b in ids)
             {
-                int i = Array.IndexOf(data["ids"], b);
-                float u = data["xs"][i] / 256f;
-                float v = data["ys"][i] / 256f;
-                int width = (int)(((float)px / (float)data["heights"][i]) * data["widths"][i]);
+                int i = Array.IndexOf(f.data["ids"], b);
+                float u = (float)f.data["xs"][i] / (float)f.fontWidth;
+                float v = (float)f.data["ys"][i] / (float)f.fontWidth;
+                int width = (int)(((float)px / (float)f.data["heights"][i]) * f.data["widths"][i]);
                 int height = px;
-                float uoff = u + (data["widths"][i] / 256f);
-                float voff = v - (data["heights"][i] / 256f);
+                float uoff = u + ((float)f.data["widths"][i] / (float)f.fontWidth);
+                float voff = v - ((float)f.data["heights"][i] / (float)f.fontWidth);
 
                 drawTexturedQuad(
-                    pos.X + xoff        , pos.Y         , 1f, u   , voff,
-                    pos.X + xoff        , pos.Y + height, 1f, u   , v,
-                    pos.X + width + xoff, pos.Y + height, 1f, uoff, v,
-                    pos.X + width + xoff, pos.Y         , 1f, uoff, voff, font, col, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+                    x + xoff        , y         , 1f, u   , voff,
+                    x + xoff        , y + height, 1f, u   , v,
+                    x + width + xoff, y + height, 1f, uoff, v,
+                    x + width + xoff, y         , 1f, uoff, voff, f.font, col, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
 
                 xoff += width;            
             }
@@ -1361,69 +1365,82 @@ namespace Program
 
         
         
-        public Dictionary<string, int[]> data = new Dictionary<string, int[]>();
-        public Texture font;
-
-        public void loadFont(string path, string path2)
+        
+        public class Font
         {
-            loadedFont = true;
-            data = new Dictionary<string, int[]>();
-            font = new Texture(path2, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
-            using (StreamReader file = new StreamReader(path))
+            public Dictionary<string, int[]> data = new Dictionary<string, int[]>();
+            public Texture font;
+            public int fontWidth;
+
+            public Font(string path, string path2)
             {
-                string ln;
-                List<int> ids = new List<int>();
-                List<int> xs = new List<int>();
-                List<int> ys = new List<int>();
-                List<int> widths = new List<int>();
-                List<int> heights = new List<int>();
-
-
-                while ((ln = file.ReadLine()) != null)
+                data = new Dictionary<string, int[]>();
+                font = new Texture(path2, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+                Bitmap b = new Bitmap(path2);
+                using (StreamReader file = new StreamReader(path))
                 {
-                    if(ln.Substring(0, 5) == "char ")
-                    {
-                        string Data = ln.Substring(5);
-                        string[] d = Data.Split(" ");
-                        List<int> f = new List<int>();
-                        foreach (String l in d)
-                        {
-                            if (l.Contains("="))
-                            {
-                                string[] newL = l.Split("=");
-                                Regex.Replace(newL[1], @"\s+", "");
-                                f.Add(int.Parse(newL[1]));
-                            }
-                        }
-                        ids.Add(f[0]);
-                        xs.Add(f[1]);
-                        ys.Add(-(f[2] - 256));
-                        widths.Add(f[3]);
-                        heights.Add(f[4]);
-                    }
-                }
+                    fontWidth = b.Width;
+                    string ln;
+                    List<int> ids = new List<int>();
+                    List<int> xs = new List<int>();
+                    List<int> ys = new List<int>();
+                    List<int> widths = new List<int>();
+                    List<int> heights = new List<int>();
 
-                data.Add("ids", ids.ToArray());
-                data.Add("xs", xs.ToArray());
-                data.Add("ys", ys.ToArray());
-                data.Add("widths", widths.ToArray());
-                data.Add("heights", heights.ToArray());
-                file.Close();
+
+                    while ((ln = file.ReadLine()) != null)
+                    {
+                        if (ln.Substring(0, 5) == "char ")
+                        {
+                            string Data = ln.Substring(5);
+                            string[] d = Data.Split(" ");
+                            List<int> f = new List<int>();
+                            foreach (string l in d)
+                            {
+                                if (l.Contains("="))
+                                {
+                                    string[] newL = l.Split("=");
+                                    Regex.Replace(newL[1], @"\s+", "");
+                                    f.Add(int.Parse(newL[1]));
+                                }
+                            }
+                            ids.Add(f[0]);
+                            xs.Add(f[1]);
+                            ys.Add(-(f[2] - fontWidth));
+                            widths.Add(f[3]);
+                            heights.Add(f[4]);
+                        }
+                    }
+
+                    data.Add("ids", ids.ToArray());
+                    data.Add("xs", xs.ToArray());
+                    data.Add("ys", ys.ToArray());
+                    data.Add("widths", widths.ToArray());
+                    data.Add("heights", heights.ToArray());
+                    file.Close();
+                }
             }
+
+            public void Dispose()
+            {
+                GL.DeleteTexture(font.Handle);
+            }
+
         }
 
-        public int getPhraseLength(string text, int px)
+        
+
+        public int getPhraseLength(string text, int px, Font f)
         {
             byte[] ids = Encoding.ASCII.GetBytes(text);
             int xoff = 0;
             foreach (byte b in ids)
             {
-                int i = Array.IndexOf(data["ids"], b);
-                int width = (int)(((float)px / (float)data["heights"][i]) * data["widths"][i]);
+                int i = Array.IndexOf(f.data["ids"], b);
+                int width = (int)(((float)px / (float)f.data["heights"][i]) * f.data["widths"][i]);
 
                 xoff += width;
             }
-
             return xoff;
         }
 
@@ -1435,8 +1452,19 @@ namespace Program
 
         public void showSettings(Settings s)
         {
-            Vector2 pos = new Vector2((Width - s.width) / 2, (Height - s.height) / 2);
-            drawRectangle(pos.X, pos.Y, pos.X + s.width, pos.Y + s.height, Color4.Aqua);
+            var w = Convert.ToInt32(s.settings["width"]);
+            var h = Convert.ToInt32(s.settings["height"]);
+            Vector2 pos = new Vector2((Width - w) / 2, (Height - h) / 2);
+            if (Convert.ToBoolean(s.settings["useTexture"]))
+            {
+                var path = Convert.ToString(s.settings["texturePath"]);
+                drawTexturedRectangle(pos.X, pos.Y, 0, 0, pos.X + w, pos.Y + h, 1, 1, path, Color4.White, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+            }
+            else
+            {
+                Color4 col = new Color4(Convert.ToInt32(s.settings["r"]), Convert.ToInt32(s.settings["g"]), Convert.ToInt32(s.settings["b"]), Convert.ToInt32(s.settings["a"]));
+                drawRectangle(pos.X, pos.Y, pos.X + w, pos.Y + h, col);
+            }
             foreach (Settings.Button b in s.buttons)
             {
                 var x = b.pos.X + pos.X;
@@ -1444,9 +1472,9 @@ namespace Program
                 drawRectangle(x, y, x + b.width, y + b.height, b.col);
                 if(b.l == -1)
                 {
-                    b.l = getPhraseLength(b.Text, Math.Min(b.height, 32));
+                    b.l = getPhraseLength(b.Text, Math.Min(b.height, 32), b.font);
                 }
-                drawText(b.Text, Math.Min(b.height, 32), new Vector2(x + ((b.width - b.l) / 2), y + ((b.height - Math.Min(b.height, 32)) / 2)), Color4.White);
+                drawText(b.Text, Math.Min(b.height, 32), x + ((b.width - b.l) / 2), y + ((b.height - Math.Min(b.height, 32)) / 2), b.font, Color4.White);
                 b.setCol(Color4.Blue);
 
             }
@@ -1454,14 +1482,11 @@ namespace Program
 
         public class Settings
         {
-            public int width, height;
             public List<Button> buttons = new List<Button>();
             public Dictionary<string, object> settings = new Dictionary<string, object>();
 
-            public Settings(int w = 200, int h = 300)
+            public Settings()
             {
-                width = w;
-                height = h;
             }
 
             public class Button
@@ -1469,8 +1494,9 @@ namespace Program
                 public Vector2 pos;
                 public string Text;
                 public int width, height, l;
-                public Func<int> onClick;
+                public Func<object> onClick;
                 public Color4 col;
+                public Font font;
 
                 public void setCol(Color4 c)
                 {
@@ -1478,9 +1504,9 @@ namespace Program
                 }
             }
 
-            public void addButton(string t, float x, float y, int w, int h, Color4 c, Func<int> func)
+            public void addButton(string t, float x, float y, int w, int h, Color4 c, Func<object> func, Font f)
             {
-                buttons.Add(new Button { pos = new Vector2(x, y), width = w, height = h, onClick = func, col = c, Text = t, l = -1 });
+                buttons.Add(new Button { pos = new Vector2(x, y), width = w, height = h, onClick = func, col = c, Text = t, l = -1 , font = f});
             }
 
             public void addSetting(string key, object value)
@@ -1546,9 +1572,11 @@ namespace Program
         }
         private void checkClicks(Settings s)
         {
+            var w = Convert.ToInt32(s.settings["width"]);
+            var h = Convert.ToInt32(s.settings["height"]);
             foreach (Settings.Button b in s.buttons)
             {
-                Vector2 pos = new Vector2((Width - s.width) / 2, (Height - s.height) / 2);
+                Vector2 pos = new Vector2((Width - w) / 2, (Height - h) / 2);
                 var mouseState = Mouse.GetCursorState();
                 var x = mouseState.X - X - 8 - pos.X;
                 var y = -(mouseState.Y - Y - 30 - Height) - pos.Y;
