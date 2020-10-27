@@ -14,7 +14,7 @@ on:
 jobs:
   build:
     env:
-      key1: ${{secrets.API_KEY_COMMAND}}
+      api_key: ${{secrets.API_KEY_COMMAND}}
     runs-on: ubuntu-latest
 
     steps:

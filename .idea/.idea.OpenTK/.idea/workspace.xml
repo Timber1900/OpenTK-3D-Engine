@@ -23,33 +23,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program.csprojAssemblyReference.cache" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program.pdb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program1.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program1.pdb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program2.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program2.pdb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program3.dll" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/Program3.pdb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Update_at_10_18_2020_12_45_AM_[Default_Changelist]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.assets.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp2.1/Program.csprojAssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.AssemblyInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.AssemblyInfoInputs.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.assets.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.csprojAssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Debug/netcoreapp3.1/Program.csprojAssemblyReference.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.dgspec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.props" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/Program.csproj.nuget.g.targets" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/project.assets.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/project.nuget.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/project.packagespec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/Program/obj/rider.project.restore.info" afterDir="false" />
-    </list>
+    <list default="true" id="c3dcaea8-337b-400d-b616-a33adbf7aef1" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -180,7 +154,7 @@
       <workItem from="1602981575031" duration="1238000" />
       <workItem from="1602983550824" duration="1011000" />
       <workItem from="1603278452423" duration="28000" />
-      <workItem from="1603837839107" duration="565000" />
+      <workItem from="1603837839107" duration="1159000" />
     </task>
     <task id="LOCAL-00001" summary="drawEllipse fix">
       <created>1600524127878</created>
