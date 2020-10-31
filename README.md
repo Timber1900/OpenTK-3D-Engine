@@ -37,7 +37,7 @@ This library simplifies the use of the openTK library by wrapping it into simple
 2. On your program.cs file add the example code no. 2,
 3. If you dont want the console opening change your project properties to Windows Application
 
-```c# example
+```c#
 using System;
 using OpenTK;
 using OpenTK.Graphics;
@@ -79,7 +79,8 @@ namespace yourNameSpace
     }
 }
 ```
-```c# exaple
+
+```c#
 namespace yourNamespace
 {
     static class Program
