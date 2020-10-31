@@ -25,7 +25,7 @@ namespace Program
         protected Boolean RenderLight = false;
         private float cameraSpeed = 20f;
         private float sensitivity = 0.2f;
-        protected Boolean UseDepthTest = true, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true, useSettings = false;
+        protected Boolean UseDepthTest = false, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true, useSettings = false;
 
 
         protected MainRenderWindow(int width, int height, string title)
@@ -40,10 +40,8 @@ namespace Program
             GL.Enable(EnableCap.Blend);
             _lightingShader = new Shader(Shaders.ShaderVert, Shaders.LightingFrag);
             _lampShader = new Shader(Shaders.ShaderVert, Shaders.ShaderFrag);
-           
             _2dShader = new Shader(Shaders.Shader2DVert, Shaders.Shader2DFrag);
             _textureShader = new Shader(Shaders.TextureVert, Shaders.TextureFrag);
-
             _2dTextured = new Shader(Shaders.Texture2DVert, Shaders.Texture2DFrag);
             _lightingShader.Use();
             _lampShader.Use();
@@ -1095,7 +1093,7 @@ namespace Program
         protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1,
                                       float x2, float y2, float z2, float u2, float v2,
                                       float x3, float y3, float z3, float u3, float v3,
-                                      float x4, float y4, float z4, float u4, float v4, Texture texture, Color4 color, TextureMinFilter min, TextureMagFilter mag)
+                                      float x4, float y4, float z4, float u4, float v4, Texture texture, Color4 color)
         {
             float x1Trans = x1 - (Width / 2);
             float y1Trans = y1 - (Height / 2);
@@ -1357,7 +1355,7 @@ namespace Program
                     x + xoff        , y         , 1f, u   , voff,
                     x + xoff        , y + height, 1f, u   , v,
                     x + width + xoff, y + height, 1f, uoff, v,
-                    x + width + xoff, y         , 1f, uoff, voff, f.font, col, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
+                    x + width + xoff, y         , 1f, uoff, voff, f.font, col);
 
                 xoff += width;            
             }
@@ -1445,10 +1443,6 @@ namespace Program
         }
 
         public Settings set = new Settings();
-        public void SetSettings(Settings s)
-        {
-            set = s;
-        }
 
         public void showSettings(Settings s)
         {
@@ -1485,10 +1479,6 @@ namespace Program
             public List<Button> buttons = new List<Button>();
             public Dictionary<string, object> settings = new Dictionary<string, object>();
 
-            public Settings()
-            {
-            }
-
             public class Button
             {
                 public Vector2 pos;
@@ -1524,17 +1514,21 @@ namespace Program
                         string ln;
                         while ((ln = file.ReadLine()) != null)
                         {
-                            var values = ln.Split("=");
-                            Regex rx = new Regex(@"^[\d.]+$");
-                            if (rx.IsMatch(values[1]))
+                            if (ln[0] != '#')
                             {
+                                var values = ln.Split("=");
+                                Regex rx = new Regex(@"^[\d.]+$");
+                                if (rx.IsMatch(values[1]))
+                                {
 
-                                settings.Add(values[0], float.Parse(values[1]));
+                                    settings.Add(values[0], float.Parse(values[1]));
+                                }
+                                else
+                                {
+                                    settings.Add(values[0], values[1]);
+                                }
                             }
-                            else
-                            {
-                                settings.Add(values[0], values[1]);
-                            }
+                            
 
                         }
                     }
