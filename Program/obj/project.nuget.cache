@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/F9NVxU6e0+M2iWCzX81LEs009oB9rLG70MQz63nNg+P0V78sQ7YTKc7YXgSUUz6Rt04m1/GJni+JJrUbv0tBA==",
+  "dgSpecHash": "i7sWJ0RXEoQwVCuAcbcd00AwzcpbtDwHZDodO7bUWFlUyhbGpkBOW1WrpZYYUuauJKgoZ/VzdJ64JJKL2UoTbg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-master\\Program\\Program.csproj",
+  "projectFilePath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine\\Program\\Program.csproj",
   "expectedPackageFiles": [
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.app\\2.1.0\\microsoft.netcore.app.2.1.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\microsoft.netcore.dotnetapphost\\2.1.0\\microsoft.netcore.dotnetapphost.2.1.0.nupkg.sha512",
