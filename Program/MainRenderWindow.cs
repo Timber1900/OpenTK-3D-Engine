@@ -9,6 +9,7 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using static Program.Shaders;
 using Boolean = System.Boolean;
 
 namespace Program
@@ -38,11 +39,11 @@ namespace Program
             if(UseDepthTest) {GL.Enable(EnableCap.DepthTest);}
             if(UseAlpha) {GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);}
             GL.Enable(EnableCap.Blend);
-            _lightingShader = new Shader(Shaders.ShaderVert, Shaders.LightingFrag);
-            _lampShader = new Shader(Shaders.ShaderVert, Shaders.ShaderFrag);
-            _2dShader = new Shader(Shaders.Shader2DVert, Shaders.Shader2DFrag);
-            _textureShader = new Shader(Shaders.TextureVert, Shaders.TextureFrag);
-            _2dTextured = new Shader(Shaders.Texture2DVert, Shaders.Texture2DFrag);
+            _lightingShader = new Shader(ShaderVert, LightingFrag);
+            _lampShader = new Shader(ShaderVert, ShaderFrag);
+            _2dShader = new Shader(Shader2DVert, Shader2DFrag);
+            _textureShader = new Shader(TextureVert, TextureFrag);
+            _2dTextured = new Shader(Texture2DVert, Texture2DFrag);
             _lightingShader.Use();
             _lampShader.Use();
             _textureShader.Use();
@@ -100,7 +101,7 @@ namespace Program
             {
                 if (!useSettings)
                 {
-                    //Exit();
+                    Exit();
                 }
                 else
                 {
@@ -426,11 +427,13 @@ namespace Program
             public readonly Vector3 Pos;
             public readonly Vector3 LightColor;
             private readonly float[] _vertices;
-            public Lamp(Vector3 pos, Vector3 lightColor, Shader lampShader)
+            public Lamp(Vector3 pos, Vector3 lightColor, Shader lampShader, float Radius)
             {
                 Pos = pos;
                 LightColor = lightColor;
-                _vertices = loadObj("Objs/sphere.obj");
+
+                //_vertices = loadObj("Objs/sphere.obj");   
+                _vertices = CreateSphereVertices(Radius);
 
                 _vertexBufferObject = GL.GenBuffer();
                 GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
@@ -438,7 +441,6 @@ namespace Program
 
                 _mainObject = GL.GenVertexArray();
                 GL.BindVertexArray(_mainObject);
-
                 GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
 
                 var positionLocation = lampShader.GetAttribLocation("aPos");
@@ -549,26 +551,65 @@ namespace Program
             }
 
         }
+        /// <summary>
+        /// Creates a cube that is rendered to the screen (Currently needs a .obj file)
+        /// </summary>
+        /// <param name="color">Color of the cube</param>
+        /// <returns>Returns a integer handle to make modifications to it</returns>
         public int createCube(Vector3 color)
         {
             _mainObjects.Add(new Object("Objs/cube.obj", _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
         }
-        public int createSphere(Vector3 color)
+        /// <summary>
+        /// Creates a sphere that is rendered to the screen
+        /// </summary>
+        /// <param name="color">Color of the sphere</param>
+        /// <param name="r">Radius of the sphere</param>
+        /// <returns>Returns a integer handle to make modifications to it</returns>
+        public int createSphere(Vector3 color, float r)
         {
-            _mainObjects.Add(new Object("Objs/sphere.obj", _lightingShader, _mainLamp, color));
+            float[] v = CreateSphereVertices(r);
+            _mainObjects.Add(new Object(v, _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
         }
+        /// <summary>
+        /// Creates a Torus (Donut) that is rendered to the screen (Currently needs a .obj file)
+        /// </summary>
+        /// <param name="color">Color of the torus</param>
+        /// <returns>Returns a integer handle to make modifications to it</returns>
         public int createTorus(Vector3 color)
         {
             _mainObjects.Add(new Object("Objs/torus.obj", _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
         }
+        /// <summary>
+        /// Creates a Cylinder that is rendered to the screen (Currently needs a .obj file)
+        /// </summary>
+        /// <param name="color">Color of the torus</param>
+        /// <returns>Returns a integer handle to make modifications to it</returns>
         public int createCylinder(Vector3 color)
         {
             _mainObjects.Add(new Object("Objs/cilinder.obj", _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
         }
+        /// <summary>
+        /// Creates a plane that is rendered to the screen(Vertexes must be place in clockwise order)
+        /// </summary>
+        /// <param name="x1">X pos of a vertex of the plane</param>
+        /// <param name="y1">Y pos of a vertex of the plane</param>
+        /// <param name="z1">Z pos of a vertex of the plane</param>
+        /// <param name="x2">X pos of a vertex of the plane</param>
+        /// <param name="y2">Y pos of a vertex of the plane</param>
+        /// <param name="z2">Z pos of a vertex of the plane</param>
+        /// <param name="x3">X pos of a vertex of the plane</param>
+        /// <param name="y3">Y pos of a vertex of the plane</param>
+        /// <param name="z3">Z pos of a vertex of the plane</param>
+        /// <param name="x4">X pos of a vertex of the plane</param>
+        /// <param name="y4">Y pos of a vertex of the plane</param>
+        /// <param name="z4">Z pos of a vertex of the plane</param>
+        /// <param name="color">Color of the plane</param>
+        /// <returns>Returns a integer handle to make modifications to it</returns>
         public int createPlane(float x1, float y1, float z1,
                                float x2, float y2, float z2,
                                float x3, float y3, float z3,
@@ -584,51 +625,223 @@ namespace Program
                 x2, y2, z2, normal.X,  normal.Y, normal.Z,
                 x3, y3, z3, normal.X,  normal.Y, normal.Z,
 
-                x4, y4, z4, normal.X,  normal.Y, normal.Z,
-                x2, y2, z2, normal.X,  normal.Y, normal.Z,
+                x1, y1, z1, normal.X,  normal.Y, normal.Z,
                 x3, y3, z3, normal.X,  normal.Y, normal.Z,
+                x4, y4, z4, normal.X,  normal.Y, normal.Z,
             };
             _mainObjects.Add(new Object(vertices, _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
         }
+        /// <summary>
+        /// Opens and creates a texture object from a .obj file
+        /// </summary>
+        /// <param name="obj">Path to the .obj file</param>
+        /// <param name="texture">Path to the texture .png</param>
         public void openTexturedObj(string obj, string texture)
         {
             _mainTexturedObjects.Add(new TexturedObject(obj, _textureShader, texture));
         }
+        /// <summary>
+        /// Opens and creates an object from a .obj file
+        /// </summary>
+        /// <param name="obj">Path to the .obj file</param>
+        /// <param name="color">Color of the object</param>
         public void openObj(string obj, Vector3 color)
         {
             _mainObjects.Add(new Object(obj, _lightingShader, _mainLamp, color));
         }
+        /// <summary>
+        /// Creates the main light for the 3D scene, must be called before any other 3D function
+        /// </summary>
+        /// <param name="pos">Position of the light</param>
+        /// <param name="color">Color of the light</param>
         public void createMainLight(Vector3 pos, Vector3 color)
         {
-            _mainLamp = new Lamp(pos, color, _lampShader);
+            _mainLamp = new Lamp(pos, color, _lampShader, 1);
         }
+        /// <summary>
+        /// Rotates an object by a certain amount
+        /// </summary>
+        /// <param name="x">Value of the x rotation</param>
+        /// <param name="y">Value of the y rotation</param>
+        /// <param name="z">Value of the z rotation</param>
+        /// <param name="handle">Handle of the object to be rotated</param>
         public void rotateObject(float x, float y, float z, int handle)
         {
             _mainObjects[handle].setRotationX(x);
             _mainObjects[handle].setRotationY(y);
             _mainObjects[handle].setRotationZ(z);
         }
+        /// <summary>
+        /// Rotates a textured object by a certain amount
+        /// </summary>
+        /// <param name="x">Value of the x rotation</param>
+        /// <param name="y">Value of the y rotation</param>
+        /// <param name="z">Value of the z rotation</param>
+        /// <param name="handle">Handle of the textured object to be rotated</param>
         public void rotateTexturedObject(float x, float y, float z, int handle)
         {
             _mainTexturedObjects[handle].setRotationX(x);
             _mainTexturedObjects[handle].setRotationY(y);
             _mainTexturedObjects[handle].setRotationZ(z);
         }
+        /// <summary>
+        /// Scales an object by a certain amount
+        /// </summary>
+        /// <param name="scale">Amount to scale by</param>
+        /// <param name="handle">Handle of the object to be rotated</param>
         public void scaleObject(float scale, int handle)
         {
             _mainObjects[handle].setScale(scale);
         }
+        /// <summary>
+        /// Moves an object to a certain point in space
+        /// </summary>
+        /// <param name="x">X pos of the point in space</param>
+        /// <param name="y">Y pos of the point in space</param>
+        /// <param name="z">Z pos of the point in space</param>
+        /// <param name="handle">Handle of the object to be rotated</param>
         public void translateObject(float x, float y, float z, int handle)
         {
             _mainObjects[handle].setPositionInSpace(x, y, z);
         }
+        /// <summary>
+        /// Moves a textured object to a certain point in space
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <param name="handle">Handle of the textured object to be rotated</param>
         public void translateTexturedObject(float x, float y, float z, int handle)
         {
             _mainTexturedObjects[handle].setPositionInSpace(x, y, z);
         }
+
+        private static float[] CreateSphereVertices(float radius)
+        {
+            var Res = Math.Min(Convert.ToInt32(Math.Ceiling(radius * radius)), 50);
+            List<List<Vector3>> unParsedVertices = new List<List<Vector3>>();
+            List<float> vertices = new List<float>();
+            var i = 0;
+            var j = 0;
+
+
+            for (double psi = 0; psi-Math.PI <= 0.1; psi += Math.PI / Res)
+            {
+                j = 0;
+                List<Vector3> v = new List<Vector3>();
+
+                for (double theta = 0; theta - (2 * Math.PI) < 0.1; theta += Math.PI / Res)
+                {
+                    var vertex = new Vector3(
+                        (float)(radius * Math.Cos(theta) * Math.Sin(psi)),
+                        (float)(radius * Math.Sin(theta) * Math.Sin(psi)),
+                        (float)(radius * Math.Cos(psi)));
+                    var ind = Math.Cos(psi);
+                    v.Add(vertex);
+                    j++;
+                }
+                unParsedVertices.Add(v);
+                i++;
+            }
+
+            for (var index = 0; index < i - 1; index++)
+            {
+                for (var jIndex = 0; jIndex < j - 1; jIndex++)
+                {
+                    Vector3 v01 = unParsedVertices[index][ jIndex];
+                    Vector3 v02 = unParsedVertices[index + 1][ jIndex];
+                    Vector3 v03 = unParsedVertices[index + 1][ jIndex + 1];
+
+                    Vector3 l1 = v02 - v01;
+                    Vector3 l2 = v03 - v01;
+                    //Normals are the same for each triangle
+                    Vector3 n = Vector3.Cross(l2, l1);
+                    //First Vertex
+                    vertices.Add(unParsedVertices[index][ jIndex].X);
+                    vertices.Add(unParsedVertices[index][ jIndex].Y);
+                    vertices.Add(unParsedVertices[index][ jIndex].Z);
+                    //First Normal
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                    //Second Vertex
+                    vertices.Add(unParsedVertices[index + 1][ jIndex].X);
+                    vertices.Add(unParsedVertices[index + 1][ jIndex].Y);
+                    vertices.Add(unParsedVertices[index + 1][ jIndex].Z);
+                    //Second Normal
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                    //Third Vertex
+                    vertices.Add(unParsedVertices[index + 1][ jIndex + 1].X);
+                    vertices.Add(unParsedVertices[index + 1][ jIndex + 1].Y);
+                    vertices.Add(unParsedVertices[index + 1][ jIndex + 1].Z);
+                    //Third Normal
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                    
+                    
+                    //New Triangle
+                    v01 = unParsedVertices[index][ jIndex];
+                    v03 = unParsedVertices[index + 1][ jIndex + 1];
+                    v02 = unParsedVertices[index][ jIndex + 1];
+
+                    l1 = v02 - v01;
+                    l2 = v03 - v01;
+                    //Normals are the same for each triangle
+                    n = Vector3.Cross(l1, l2);
+                    
+                    //First Vertex
+                    vertices.Add(unParsedVertices[index][ jIndex].X);
+                    vertices.Add(unParsedVertices[index][ jIndex].Y);
+                    vertices.Add(unParsedVertices[index][ jIndex].Z);
+                    //First Normal
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                    //Second Vertex
+                    vertices.Add(unParsedVertices[index + 1][ jIndex + 1].X);
+                    vertices.Add(unParsedVertices[index + 1][ jIndex + 1].Y);
+                    vertices.Add(unParsedVertices[index + 1][ jIndex + 1].Z);
+                    //Second Normal
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                    //Third Vertex
+                    vertices.Add(unParsedVertices[index][ jIndex + 1].X);
+                    vertices.Add(unParsedVertices[index][ jIndex + 1].Y);
+                    vertices.Add(unParsedVertices[index][ jIndex + 1].Z);
+                    //Third Normal
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                }
+            }
+
+            return vertices.ToArray();
+        }
         
+        //-------------------------------------------
+        //2D Functions
+        //-------------------------------------------
         
+        /// <summary>
+        /// Draws a 2D textured rectangle to the screen
+        /// </summary>
+        /// <param name="x1">X component of the bottom left corner of the rectangle</param>
+        /// <param name="y1">Y component of the bottom left corner of the rectangle</param>
+        /// <param name="u1">U component of the bottom left corner of the rectangle texture</param>
+        /// <param name="v1">V component of the bottom left corner of the rectangle texture</param>
+        /// <param name="x2">X component of the top right corner of the rectangle</param>
+        /// <param name="y2">Y component of the top right corner of the rectangle</param>
+        /// <param name="u2">U component of the top right corner of the rectangle texture</param>
+        /// <param name="v2">V component of the top right corner of the rectangle texture</param>
+        /// <param name="texturePath">Path to the texture .png</param>
+        /// <param name="color">Color to light the texture with</param>
+        /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
         protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(texturePath, min, mag);
@@ -688,6 +901,21 @@ namespace Program
             GL.DeleteVertexArray(mainObject);
 
         }
+        /// <summary>
+        /// Draws a 2D textured rectangle to the screen
+        /// </summary>
+        /// <param name="x1">X component of the bottom left corner of the rectangle</param>
+        /// <param name="y1">Y component of the bottom left corner of the rectangle</param>
+        /// <param name="u1">U component of the bottom left corner of the rectangle texture</param>
+        /// <param name="v1">V component of the bottom left corner of the rectangle texture</param>
+        /// <param name="x2">X component of the top right corner of the rectangle</param>
+        /// <param name="y2">Y component of the top right corner of the rectangle</param>
+        /// <param name="u2">U component of the top right corner of the rectangle texture</param>
+        /// <param name="v2">V component of the top right corner of the rectangle texture</param>
+        /// <param name="textureBitmap">Bitmap of the texture</param>
+        /// <param name="color">Color to light the texture with</param>
+        /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
         protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(textureBitmap, min, mag);
@@ -747,6 +975,19 @@ namespace Program
             GL.DeleteVertexArray(mainObject);
 
         }
+        /// <summary>
+        /// Draws a 2D textured rectangle to the screen
+        /// </summary>
+        /// <param name="x1">X component of the bottom left corner of the rectangle</param>
+        /// <param name="y1">Y component of the bottom left corner of the rectangle</param>
+        /// <param name="u1">U component of the bottom left corner of the rectangle texture</param>
+        /// <param name="v1">V component of the bottom left corner of the rectangle texture</param>
+        /// <param name="x2">X component of the top right corner of the rectangle</param>
+        /// <param name="y2">Y component of the top right corner of the rectangle</param>
+        /// <param name="u2">U component of the top right corner of the rectangle texture</param>
+        /// <param name="v2">V component of the top right corner of the rectangle texture</param>
+        /// <param name="texture">The texture to use</param>
+        /// <param name="color">Color to light the texture with</param>
         protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
         {
             float x1Trans = x1 - (Width / 2);
@@ -804,7 +1045,14 @@ namespace Program
             GL.DeleteVertexArray(mainObject);
 
         }
-
+        /// <summary>
+        /// Draws a line to the 2D screen
+        /// </summary>
+        /// <param name="x1">X pos of one end of the line</param>
+        /// <param name="y1">Y pos of one end of the line</param>
+        /// <param name="x2">X pos of the other end of the line</param>
+        /// <param name="y2">Y pos of the other end of the line</param>
+        /// <param name="color">Color of the line</param>
         protected void drawLine(float x1, float y1, float x2, float y2, Color4 color)
         {
             float x1Trans = x1 - (Width / 2);
@@ -848,6 +1096,14 @@ namespace Program
             GL.DeleteBuffer(vertexBufferObject);
             GL.DeleteVertexArray(mainObject);
         }
+        /// <summary>
+        /// Draws a 2D rectangle to the 2D screen
+        /// </summary>
+        /// <param name="x1">X component of the bottom left vertex of the rectangle</param>
+        /// <param name="y1">Y component of the bottom left vertex of the rectangle</param>
+        /// <param name="x2">X component of the to right vertex of the rectangle</param>
+        /// <param name="y2">Y component of the to right vertex of the rectangle</param>
+        /// <param name="color">Color of the rectangle</param>
         protected void drawRectangle(float x1, float y1, float x2, float y2, Color4 color)
         {
             float x1Trans = x1 - (Width / 2);
@@ -896,6 +1152,19 @@ namespace Program
             GL.DeleteVertexArray(mainObject);
 
         }
+        /// <summary>
+        /// Draws a line to the 2D screen with a texture
+        /// </summary>
+        /// <param name="x1">X pos of one end of the line</param>
+        /// <param name="y1">X pos of one end of the line</param>
+        /// <param name="u1">U pos of one end of the texture</param>
+        /// <param name="v1">V pos of one end of the texture</param>
+        /// <param name="x2">X pos of the other end of the line</param>
+        /// <param name="y2">X pos of the other end of the line</param>
+        /// <param name="u1">U pos of the other end of the texture</param>
+        /// <param name="v1">V pos of the other end of the texture</param>
+        /// <param name="texture">Path to the texture .png</param>
+        /// <param name="color">Color to be overlaid in the texture</param>
         protected void drawTexturedLine(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
         {
             float x1Trans = x1 - (Width / 2);
@@ -947,7 +1216,33 @@ namespace Program
             GL.DeleteBuffer(vertexBufferObject);
             GL.DeleteVertexArray(mainObject);
         }
-        
+        /// <summary>
+        /// Draws a 2D textured quad to the 2D screen given clockwise vertex's
+        /// </summary>
+        /// <param name="x1">X pos of the first vertex</param>
+        /// <param name="y1">Y pos of the first vertex</param>
+        /// <param name="z1">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u1">U pos of the first texture vertex</param>
+        /// <param name="v1">V pos of the first texture vertex</param>
+        /// <param name="x2">X pos of the second vertex</param>
+        /// <param name="y2">Y pos of the second vertex</param>
+        /// <param name="z2">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u2">U pos of the second texture vertex</param>
+        /// <param name="v2">V pos of the second texture vertex</param>
+        /// <param name="x3">X pos of the third vertex</param>
+        /// <param name="y3">Y pos of the third vertex</param>
+        /// <param name="z3">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u3">U pos of the third texture vertex</param>
+        /// <param name="v3">V pos of the third texture vertex</param>        
+        /// <param name="x4">X pos of the last vertex</param>
+        /// <param name="y4">Y pos of the last vertex</param>
+        /// <param name="z4">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u4">U pos of the last texture vertex</param>
+        /// <param name="v4">V pos of the last texture vertex</param>        
+        /// <param name="texturePath">Path to the texture .png</param>
+        /// <param name="color">Color to be overlaid on the texture</param>
+        /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
         protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1, 
                                       float x2, float y2, float z2, float u2, float v2, 
                                       float x3, float y3, float z3, float u3, float v3,
@@ -1018,7 +1313,33 @@ namespace Program
             GL.DeleteVertexArray(mainObject);
 
         }
-
+        /// <summary>
+        /// Draws a 2D textured quad to the 2D screen given clockwise vertex's
+        /// </summary>
+        /// <param name="x1">X pos of the first vertex</param>
+        /// <param name="y1">Y pos of the first vertex</param>
+        /// <param name="z1">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u1">U pos of the first texture vertex</param>
+        /// <param name="v1">V pos of the first texture vertex</param>
+        /// <param name="x2">X pos of the second vertex</param>
+        /// <param name="y2">Y pos of the second vertex</param>
+        /// <param name="z2">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u2">U pos of the second texture vertex</param>
+        /// <param name="v2">V pos of the second texture vertex</param>
+        /// <param name="x3">X pos of the third vertex</param>
+        /// <param name="y3">Y pos of the third vertex</param>
+        /// <param name="z3">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u3">U pos of the third texture vertex</param>
+        /// <param name="v3">V pos of the third texture vertex</param>        
+        /// <param name="x4">X pos of the last vertex</param>
+        /// <param name="y4">Y pos of the last vertex</param>
+        /// <param name="z4">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u4">U pos of the last texture vertex</param>
+        /// <param name="v4">V pos of the last texture vertex</param>        
+        /// <param name="textureBitmap">Bitmap of the texture</param>
+        /// <param name="color">Color to be overlaid on the texture</param>
+        /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
         protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1,
                                       float x2, float y2, float z2, float u2, float v2,
                                       float x3, float y3, float z3, float u3, float v3,
@@ -1089,7 +1410,31 @@ namespace Program
             GL.DeleteVertexArray(mainObject);
 
         }
-
+        /// <summary>
+        /// Draws a 2D textured quad to the 2D screen given clockwise vertex's
+        /// </summary>
+        /// <param name="x1">X pos of the first vertex</param>
+        /// <param name="y1">Y pos of the first vertex</param>
+        /// <param name="z1">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u1">U pos of the first texture vertex</param>
+        /// <param name="v1">V pos of the first texture vertex</param>
+        /// <param name="x2">X pos of the second vertex</param>
+        /// <param name="y2">Y pos of the second vertex</param>
+        /// <param name="z2">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u2">U pos of the second texture vertex</param>
+        /// <param name="v2">V pos of the second texture vertex</param>
+        /// <param name="x3">X pos of the third vertex</param>
+        /// <param name="y3">Y pos of the third vertex</param>
+        /// <param name="z3">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u3">U pos of the third texture vertex</param>
+        /// <param name="v3">V pos of the third texture vertex</param>        
+        /// <param name="x4">X pos of the last vertex</param>
+        /// <param name="y4">Y pos of the last vertex</param>
+        /// <param name="z4">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="u4">U pos of the last texture vertex</param>
+        /// <param name="v4">V pos of the last texture vertex</param> 
+        /// <param name="texture">Texture of the quad</param>
+        /// <param name="color">Color to be overlaid on the texture</param>
         protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1,
                                       float x2, float y2, float z2, float u2, float v2,
                                       float x3, float y3, float z3, float u3, float v3,
@@ -1157,8 +1502,23 @@ namespace Program
             GL.DeleteBuffer(vertexBufferObject);
             GL.DeleteVertexArray(mainObject);
 
-        }
-
+        }    
+        /// <summary>
+        /// Draws a 2D quad to the 2D screen given clockwise vertex's
+        /// </summary>
+        /// <param name="x1">X pos of the first vertex</param>
+        /// <param name="y1">Y pos of the first vertex</param>
+        /// <param name="z1">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="x2">X pos of the second vertex</param>
+        /// <param name="y2">Y pos of the second vertex</param>
+        /// <param name="z2">Z pos used for depth test (NOT 3D!!)</param>        
+        /// <param name="x3">X pos of the third vertex</param>
+        /// <param name="y3">Y pos of the third vertex</param>
+        /// <param name="z3">Z pos used for depth test (NOT 3D!!)</param>        
+        /// <param name="x4">X pos of the last vertex</param>
+        /// <param name="y4">Y pos of the last vertex</param>
+        /// <param name="z4">Z pos used for depth test (NOT 3D!!)</param>
+        /// <param name="color">Color of the quad</param>
         protected void drawQuad(float x1, float y1, float z1, 
                                 float x2, float y2, float z2, 
                                 float x3, float y3, float z3,
@@ -1222,7 +1582,14 @@ namespace Program
             GL.DeleteVertexArray(mainObject);
         
         }
-        
+        /// <summary>
+        /// Draws a 2D ellipse to the 2D screen
+        /// </summary>
+        /// <param name="x">X pos of the center of the ellipse</param>
+        /// <param name="y">y pos of the center of the ellipse</param>
+        /// <param name="radiusX">Radius of the ellipse in the x direction</param>
+        /// <param name="radiusY">Radius of the ellipse in the y direction</param>
+        /// <param name="color">Color of the ellipse</param>
         protected void drawEllipse(float x, float y, float radiusX, float radiusY, Color4 color)
         {
             int numEllipseVertices = (int)Math.Floor(Math.Sqrt(radiusX * radiusX + radiusY * radiusY));
@@ -1283,7 +1650,17 @@ namespace Program
             GL.DeleteBuffer(vertexBufferObject);
             GL.DeleteVertexArray(mainObject);
         }
-
+        /// <summary>
+        /// Draws a 2D triangle to the 2D screen, given clockwise points
+        /// </summary>
+        /// <param name="x1">X pos of the first vertex</param>
+        /// <param name="x1">X pos of the first vertex</param>
+        /// <param name="y1">Y pos of the first vertex</param>
+        /// <param name="x2">X pos of the second vertex</param>
+        /// <param name="y2">Y pos of the second vertex</param>
+        /// <param name="x3">X pos of the third vertex</param>
+        /// <param name="y3">Y pos of the third vertex</param>
+        /// <param name="color">Color of the triangle</param>
         public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Color4 color)
         {
             float x1Trans = x1 - (Width / 2);
@@ -1332,11 +1709,22 @@ namespace Program
             GL.DeleteVertexArray(mainObject);
 
         }
+        /// <summary>
+        /// Clears the screen
+        /// </summary>
         protected void Clear()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
-
+        /// <summary>
+        /// Draws text to the screen
+        /// </summary>
+        /// <param name="text">Text to be drawn</param>
+        /// <param name="px">Vertical size of the text</param>
+        /// <param name="x">X pos of the bottom left corner of the text</param>
+        /// <param name="y">Y pos of the bottom left corner of the text</param>
+        /// <param name="f">The font to be used to draw the text</param>
+        /// <param name="col">Color of the text</param>
         public void drawText(string text, int px, float x, float y, Font f, Color4 col)
         {
             byte[] ids = Encoding.ASCII.GetBytes(text);
@@ -1361,14 +1749,24 @@ namespace Program
             }
         }
 
-        
-        
-        
+        /// <summary>
+        /// Font wrapper for drawing text
+        /// </summary>
+
         public class Font
         {
             public Dictionary<string, int[]> data = new Dictionary<string, int[]>();
             public Texture font;
             public int fontWidth;
+
+            /// <summary>
+            /// Creates a font given a .fnt file and a .png texture
+            /// Currently only one page for the texture is supported
+            /// Use BMFont to generate this files, make sure to delete the background in the image editor of your choice
+            /// Eventually simpler use will be created, using .net font standard, however I dont know when this will happen
+            /// </summary>
+            /// <param name="path">Path to the .fnt file</param>
+            /// <param name="path2">Path to the .png file</param>
 
             public Font(string path, string path2)
             {
@@ -1410,6 +1808,7 @@ namespace Program
                         }
                     }
 
+
                     data.Add("ids", ids.ToArray());
                     data.Add("xs", xs.ToArray());
                     data.Add("ys", ys.ToArray());
@@ -1418,6 +1817,9 @@ namespace Program
                     file.Close();
                 }
             }
+            /// <summary>
+            /// Deletes the font, make sure to call this function onUnload()
+            /// </summary>
 
             public void Dispose()
             {
@@ -1426,7 +1828,14 @@ namespace Program
 
         }
 
-        
+        /// <summary>
+        /// Gets the width of the text to be drawn on the screen, use this for centering text,
+        /// Eventually a single function will draw the text centered on a point 
+        /// </summary>
+        /// <param name="text">Text to get the lenght of</param>
+        /// <param name="px">Vertical size of the text</param>
+        /// <param name="f">Font of the text</param>
+        /// <returns></returns>
 
         public int getPhraseLength(string text, int px, Font f)
         {
@@ -1444,7 +1853,7 @@ namespace Program
 
         public Settings set = new Settings();
 
-        public void showSettings(Settings s)
+        private void showSettings(Settings s)
         {
             var w = Convert.ToInt32(s.settings["width"]);
             var h = Convert.ToInt32(s.settings["height"]);
@@ -1473,7 +1882,13 @@ namespace Program
 
             }
         }
-
+        /// <summary>
+        /// Classed used to create settings for your project
+        /// TODO add textured buttons
+        /// TODO add sliders
+        /// TODO add labels
+        /// TODO add radio buttons
+        /// </summary>
         public class Settings
         {
             public List<Button> buttons = new List<Button>();
@@ -1493,17 +1908,45 @@ namespace Program
                     col = c;
                 }
             }
-
+            /// <summary>
+            /// Adds a simple button to the settings
+            /// </summary>
+            /// <param name="t">Text on the button</param>
+            /// <param name="x">X pos of the button RELATIVE to the settings, at BOTTOM LEFT corner</param>
+            /// <param name="y">Y pos of the button RELATIVE to the settings, at BOTTOM LEFT corner</param>
+            /// <param name="w">Width of the button</param>
+            /// <param name="h">Height of the button</param>
+            /// <param name="c">Color of the button</param>
+            /// <param name="func">Lambda function that is executed when button is clicked</param>
+            /// <param name="f">Font of the button text</param>
             public void addButton(string t, float x, float y, int w, int h, Color4 c, Func<object> func, Font f)
             {
                 buttons.Add(new Button { pos = new Vector2(x, y), width = w, height = h, onClick = func, col = c, Text = t, l = -1 , font = f});
             }
-
+            /// <summary>
+            /// Adds a setting to the settings dictionary
+            /// </summary>
+            /// <param name="key">Key of the setting</param>
+            /// <param name="value">Value of the setting</param>
             public void addSetting(string key, object value)
             {
                 settings.Add(key, value);
             }
-
+            /// <summary>
+            /// Reads the settings.cfg file
+            /// <para>&nbsp;</para>
+            /// Make sure the following items exist on the file <br />
+            /// width=             (float)</br>
+            /// height=            (float)</br>
+            /// useTexture=        (bool)</br>
+            /// If useTexture=false</br>
+            ///     r=                 (float from 0-1 or int from 0-255)</br>
+            ///     g=                 (float from 0-1 or int from 0-255)</br>
+            ///     b=                 (float from 0-1 or int from 0-255)</br>
+            ///     a=                 (float from 0-1 or int from 0-255)</br>
+            /// If useTexture=false</br>
+            ///     texturePath=       (String path to background texture)</br>
+            /// </summary>
             public void readSettings()
             {
                 try
@@ -1538,7 +1981,9 @@ namespace Program
                     Console.WriteLine(e.GetBaseException());
                 }
             }
-
+            /// <summary>
+            /// Writes settings dictionary to the settings.cfg file
+            /// </summary>
             public void writeSettings()
             {
                 try
