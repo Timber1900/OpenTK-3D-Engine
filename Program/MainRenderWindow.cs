@@ -1748,14 +1748,17 @@ namespace Program
                 xoff += width;            
             }
         }
+
         /// <summary>
         /// Font wrapper for drawing text
         /// </summary>
+
         public class Font
         {
             public Dictionary<string, int[]> data = new Dictionary<string, int[]>();
             public Texture font;
             public int fontWidth;
+
             /// <summary>
             /// Creates a font given a .fnt file and a .png texture
             /// Currently only one page for the texture is supported
@@ -1764,6 +1767,7 @@ namespace Program
             /// </summary>
             /// <param name="path">Path to the .fnt file</param>
             /// <param name="path2">Path to the .png file</param>
+
             public Font(string path, string path2)
             {
                 data = new Dictionary<string, int[]>();
@@ -1804,6 +1808,7 @@ namespace Program
                         }
                     }
 
+
                     data.Add("ids", ids.ToArray());
                     data.Add("xs", xs.ToArray());
                     data.Add("ys", ys.ToArray());
@@ -1815,11 +1820,14 @@ namespace Program
             /// <summary>
             /// Deletes the font, make sure to call this function onUnload()
             /// </summary>
+
             public void Dispose()
             {
                 GL.DeleteTexture(font.Handle);
             }
+
         }
+
         /// <summary>
         /// Gets the width of the text to be drawn on the screen, use this for centering text,
         /// Eventually a single function will draw the text centered on a point 
@@ -1828,6 +1836,7 @@ namespace Program
         /// <param name="px">Vertical size of the text</param>
         /// <param name="f">Font of the text</param>
         /// <returns></returns>
+
         public int getPhraseLength(string text, int px, Font f)
         {
             byte[] ids = Encoding.ASCII.GetBytes(text);

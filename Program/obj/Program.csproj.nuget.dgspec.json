@@ -5,7 +5,11 @@
   },
   "projects": {
     "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine\\Program\\Program.csproj": {
+<<<<<<< HEAD
       "version": "1.6.0",
+=======
+      "version": "1.7.4",
+>>>>>>> master
       "restore": {
         "projectUniqueName": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine\\Program\\Program.csproj",
         "projectName": "OpenTK.3D.Library",

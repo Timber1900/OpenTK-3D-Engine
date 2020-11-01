@@ -1,6 +1,10 @@
 {
   "version": 2,
+<<<<<<< HEAD
   "dgSpecHash": "i7sWJ0RXEoQwVCuAcbcd00AwzcpbtDwHZDodO7bUWFlUyhbGpkBOW1WrpZYYUuauJKgoZ/VzdJ64JJKL2UoTbg==",
+=======
+  "dgSpecHash": "h/z0p0sxMgI5yuqMNyOrK9ARvNlJ379Iv562hPxQw9RsPcWEUGgHuh78IEN8T7B1Coq2/suhsWArmrfuZbTREQ==",
+>>>>>>> master
   "success": true,
   "projectFilePath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine\\Program\\Program.csproj",
   "expectedPackageFiles": [

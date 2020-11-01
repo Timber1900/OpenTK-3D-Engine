@@ -8,12 +8,28 @@
 
 - [x] Add 2D rendering
 
+# Table of Contents
+
+- [Overview](#overview)
+- [Basic Setup Instructions](#using-the-library)
+  - [Example code](#example-code)
+- [Current Available Functions](#current-available-functions)
+  - [On **OnLoad**](#on-onload)
+    - [Before Base.OnLoad](#make-sure-to-add-these-before-baseonload)
+    - [After Base.OnLoad](#make-sure-to-add-these-after-baseonload)
+  - [On **OnRenderFrame**](#on-onrenderframe)
+    - [3D Functions](#3d-functions)
+    - [2D Functions](#2d-functions)
+    - [Fonts Class](#font-class)
+    - [Settings Class](#settings-class)
+
+### Overview
+
+This library simplifies the use of the openTK library by wrapping it into simple to use functions, perferct for C# and VB simple game development. 
+
 ### Using the library:
 
-1. Reference *"Program.dll"* to your application,
-2. Add the OpenTK library from nuget,
-    1. Make sure to also add System.Drawing.Common and Microsoft.Win32.SystemEvents,
-3. Add the Shaders, Objs and Resources folder to the same path of your .exe file
+1. Add the library to your solution from Nuget.
 
 ### Example code:
 
@@ -63,7 +79,8 @@ namespace yourNameSpace
     }
 }
 ```
-```C#
+
+```c#
 namespace yourNamespace
 {
     static class Program
@@ -79,40 +96,73 @@ namespace yourNamespace
 }
 ```
 
-### Current Available Functions
+# Current Available Functions
 
-##### On **OnLoad**
+### On OnLoad
+
+#### Make sure to add these **before** base.OnLoad()
+
+ - `Boolean UseDepthTest (*Default = false*)` => Specifies if rendering engine will use depth test *(When depth test is true alpha will **not** work, if false rendering will work based on the which functions are called first)*,
+ - `Boolean UseAlpha (*Default = true*)` => Specifies if rendering engine will use alpha,
+ - `Boolean KeyboardAndMouseInput (*Default = true*)` => Specifies if rendering engine will use default keyboard and mouse input,
+ - `Boolean showSet (*Default = false*)` => Specifies if rendering engine open settings on esc,
  
-1. Make sure to add these **after** base.OnLoad()
+#### Make sure to add these **after** base.OnLoad()
 
-1. createMainLight(Vector3 pos, Vector3 color) => Creates your main Light (static), make sure to run this function __before__ any other 3D function but after Base.OnLoad(),
+ - `createMainLight(Vector3 pos, Vector3 color)` => Creates your main Light (static), make sure to run this function __before__ any other 3D function but after Base.OnLoad(),
+ - `createCube(Vector3 Color)` => Creates a 3D cube of the color you specify, returns a handle for making modifications to the cube,
+ - `createSphere(Vector3 Color)` => Creates a 3D sphere of the color you specify, returns a handle for making modifications to the sphere,
+ - `createTorus(Vector3 Color)` => Creates a 3D torus of the color you specify, returns a handle for making modifications to the torus,
+ - `createCylinder(Vector3 Color)` => Creates a 3D cylinder of the color you specify, returns a handle for making modifications to the cylinder,
+ - `createPlane(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, Vector3 color)` => Creates a 3D plane of the color you specify, returns a handle for making modifications to the plane,
+ - `openTexturedObj(string obj, string texture)` => Opens .obj file with an attached .png texture, returns a handle for making modifications to the object,
+ - `openObj(string obj, Vector3 color)` => Opens .obj file with no attached .png texture, returns a handle for making modifications to the object,
 
-1. createCube(Vector3 Color) => Creates a 3D cube of the color you specify, returns a handle for making modifications to the cube,
+### On **OnRenderFrame**
 
-1. createSphere(Vector3 Color) => Creates a 3D sphere of the color you specify, returns a handle for making modifications to the sphere,
+#### 3D Functions:
+1. `rotateObject(float x, float y, float z, int handle)`
+1. `rotateTexturedObject(float x, float y, float z, int handle)`
+1. `scaleObject(float scale, int handle)`
+1. `translateObject(float x, float y, float z, int handle)`
+1. `translateTexturedObject(float x, float y, float z, int handle)`
 
-1. createTorus(Vector3 Color) => Creates a 3D torus of the color you specify, returns a handle for making modifications to the torus,
+#### 2D Functions:
+1. `drawRectangle(float x1, float y1, float x2, float y2, Color4 color)`
+1. `drawLine(float x1, float y1, float x2, float y2, Color4 color)`
+1. `drawEllipse(float x, float y, float radiusX, float radiusY, Color4 color)`
+1. `drawTexturedLine(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)`
+1. `drawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, Color4 color)`
+1. `drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Color4 color)`
+1. `drawText(string text, int px, float x, float y, Font f, Color4 col)`
+1. ***drawTexturedRectangle() overloads***
+    1. `drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)`
+    1. `drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)`
+    1. `drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)`
+1. ***drawTexturedQuad() overloads***
+    1. `drawTexturedQuad(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)`
+    1. `drawTexturedQuad(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)`
+    1. `drawTexturedQuad(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4, Texture texture, Color4 color)`
+        
+#### Font Class:
+1. `Font(string path_to_.fnt, string path_to_.png)`
+1. `Dispose() => Deletes the font, make sure to call this on OnUnload()`
+1. `static getPhraseLength(string text, int px, Font f)`
 
-1. createCylinder(Vector3 Color) => Creates a 3D cylinder of the color you specify, returns a handle for making modifications to the cylinder,
+#### Settings Class:
+1. `addButton(string t, float x, float y, int w, int h, Color4 c, Func<object> func, Font f)`
+1. `addSetting(string key, object value)`
+1. `readSettings()` => Reads settings.cfg
+1. `writeSettings()` => Writes to settings.cfg
+```example
+#Settings.cfg Example
+width=200
+height=300
+useTexture=false
+r=0
+g=127
+b=256
+a=1  
+```
 
-1. public int createPlane(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, Vector3 color) => Creates a 3D plane of the color you specify, returns a handle for making modifications to the plane,
-
-1. openTexturedObj(string obj, string texture) => Opens .obj file with an attached .png texture, returns a handle for making modifications to the object,
-
-1. openObj(string obj, Vector3 color) => Opens .obj file with no attached .png texture, returns a handle for making modifications to the object,
-
-##### On **OnRenderFrame**
-
-1. 3D Functions:
-    1. rotateObject(float x, float y, float z, int handle),
-    1. rotateTexturedObject(float x, float y, float z, int handle),
-    1. scaleObject(float scale, int handle),
-    1. translateObject(float x, float y, float z, int handle),
-    1. translateTexturedObject(float x, float y, float z, int handle),
-
-1. 2D Functions:
-    1. drawRectangle(float x1, float y1, float x2, float y2, Color4 color),
-    1. drawLine(float x1, float y1, float x2, float y2, Color4 color),
-    1. drawEllipse(float x, float y, float radiusX, float radiusY, Color4 color),
-
- 
+    
