@@ -1,0 +1,447 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Program</name>
+    </assembly>
+    <members>
+        <member name="M:Program.MainRenderWindow.createCube(OpenTK.Vector3,System.Single,System.Single,System.Single)">
+            <summary>
+            Creates a cube that is rendered to the screen (Currently needs a .obj file)
+            </summary>
+            <param name="color">Color of the cube</param>
+            <param name="width">Width of the cube</param>
+            <param name="height">Height of the cube</param>
+            <param name="depth">Depth of the cube</param>
+            <returns>Returns a integer handle to make modifications to it</returns>
+        </member>
+        <member name="M:Program.MainRenderWindow.createSphere(OpenTK.Vector3,System.Single)">
+            <summary>
+            Creates a sphere that is rendered to the screen
+            </summary>
+            <param name="color">Color of the sphere</param>
+            <param name="r">Radius of the sphere</param>
+            <returns>Returns a integer handle to make modifications to it</returns>
+        </member>
+        <member name="M:Program.MainRenderWindow.createTorus(OpenTK.Vector3)">
+            <summary>
+            Creates a Torus (Donut) that is rendered to the screen (Currently needs a .obj file)
+            </summary>
+            <param name="color">Color of the torus</param>
+            <returns>Returns a integer handle to make modifications to it</returns>
+        </member>
+        <member name="M:Program.MainRenderWindow.createCylinder(OpenTK.Vector3)">
+            <summary>
+            Creates a Cylinder that is rendered to the screen (Currently needs a .obj file)
+            </summary>
+            <param name="color">Color of the torus</param>
+            <returns>Returns a integer handle to make modifications to it</returns>
+        </member>
+        <member name="M:Program.MainRenderWindow.createPlane(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,OpenTK.Vector3)">
+            <summary>
+            Creates a plane that is rendered to the screen(Vertexes must be place in clockwise order)
+            </summary>
+            <param name="x1">X pos of a vertex of the plane</param>
+            <param name="y1">Y pos of a vertex of the plane</param>
+            <param name="z1">Z pos of a vertex of the plane</param>
+            <param name="x2">X pos of a vertex of the plane</param>
+            <param name="y2">Y pos of a vertex of the plane</param>
+            <param name="z2">Z pos of a vertex of the plane</param>
+            <param name="x3">X pos of a vertex of the plane</param>
+            <param name="y3">Y pos of a vertex of the plane</param>
+            <param name="z3">Z pos of a vertex of the plane</param>
+            <param name="x4">X pos of a vertex of the plane</param>
+            <param name="y4">Y pos of a vertex of the plane</param>
+            <param name="z4">Z pos of a vertex of the plane</param>
+            <param name="color">Color of the plane</param>
+            <returns>Returns a integer handle to make modifications to it</returns>
+        </member>
+        <member name="M:Program.MainRenderWindow.openTexturedObj(System.String,System.String)">
+            <summary>
+            Opens and creates a texture object from a .obj file
+            </summary>
+            <param name="obj">Path to the .obj file</param>
+            <param name="texture">Path to the texture .png</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.openObj(System.String,OpenTK.Vector3)">
+            <summary>
+            Opens and creates an object from a .obj file
+            </summary>
+            <param name="obj">Path to the .obj file</param>
+            <param name="color">Color of the object</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.createMainLight(OpenTK.Vector3,OpenTK.Vector3)">
+            <summary>
+            Creates the main light for the 3D scene, must be called before any other 3D function
+            </summary>
+            <param name="pos">Position of the light</param>
+            <param name="color">Color of the light</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.rotateObject(System.Single,System.Single,System.Single,System.Int32)">
+            <summary>
+            Rotates an object by a certain amount
+            </summary>
+            <param name="x">Value of the x rotation</param>
+            <param name="y">Value of the y rotation</param>
+            <param name="z">Value of the z rotation</param>
+            <param name="handle">Handle of the object to be rotated</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.rotateTexturedObject(System.Single,System.Single,System.Single,System.Int32)">
+            <summary>
+            Rotates a textured object by a certain amount
+            </summary>
+            <param name="x">Value of the x rotation</param>
+            <param name="y">Value of the y rotation</param>
+            <param name="z">Value of the z rotation</param>
+            <param name="handle">Handle of the textured object to be rotated</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.scaleObject(System.Single,System.Int32)">
+            <summary>
+            Scales an object by a certain amount
+            </summary>
+            <param name="scale">Amount to scale by</param>
+            <param name="handle">Handle of the object to be rotated</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.translateObject(System.Single,System.Single,System.Single,System.Int32)">
+            <summary>
+            Moves an object to a certain point in space
+            </summary>
+            <param name="x">X pos of the point in space</param>
+            <param name="y">Y pos of the point in space</param>
+            <param name="z">Z pos of the point in space</param>
+            <param name="handle">Handle of the object to be rotated</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.translateTexturedObject(System.Single,System.Single,System.Single,System.Int32)">
+            <summary>
+            Moves a textured object to a certain point in space
+            </summary>
+            <param name="x"></param>
+            <param name="y"></param>
+            <param name="z"></param>
+            <param name="handle">Handle of the textured object to be rotated</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawTexturedRectangle(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.String,OpenTK.Graphics.Color4,OpenTK.Graphics.OpenGL.TextureMinFilter,OpenTK.Graphics.OpenGL.TextureMagFilter)">
+            <summary>
+            Draws a 2D textured rectangle to the screen
+            </summary>
+            <param name="x1">X component of the bottom left corner of the rectangle</param>
+            <param name="y1">Y component of the bottom left corner of the rectangle</param>
+            <param name="u1">U component of the bottom left corner of the rectangle texture</param>
+            <param name="v1">V component of the bottom left corner of the rectangle texture</param>
+            <param name="x2">X component of the top right corner of the rectangle</param>
+            <param name="y2">Y component of the top right corner of the rectangle</param>
+            <param name="u2">U component of the top right corner of the rectangle texture</param>
+            <param name="v2">V component of the top right corner of the rectangle texture</param>
+            <param name="texturePath">Path to the texture .png</param>
+            <param name="color">Color to light the texture with</param>
+            <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+            <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawTexturedRectangle(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Drawing.Bitmap,OpenTK.Graphics.Color4,OpenTK.Graphics.OpenGL.TextureMinFilter,OpenTK.Graphics.OpenGL.TextureMagFilter)">
+            <summary>
+            Draws a 2D textured rectangle to the screen
+            </summary>
+            <param name="x1">X component of the bottom left corner of the rectangle</param>
+            <param name="y1">Y component of the bottom left corner of the rectangle</param>
+            <param name="u1">U component of the bottom left corner of the rectangle texture</param>
+            <param name="v1">V component of the bottom left corner of the rectangle texture</param>
+            <param name="x2">X component of the top right corner of the rectangle</param>
+            <param name="y2">Y component of the top right corner of the rectangle</param>
+            <param name="u2">U component of the top right corner of the rectangle texture</param>
+            <param name="v2">V component of the top right corner of the rectangle texture</param>
+            <param name="textureBitmap">Bitmap of the texture</param>
+            <param name="color">Color to light the texture with</param>
+            <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+            <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawTexturedRectangle(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,Program.Texture,OpenTK.Graphics.Color4)">
+            <summary>
+            Draws a 2D textured rectangle to the screen
+            </summary>
+            <param name="x1">X component of the bottom left corner of the rectangle</param>
+            <param name="y1">Y component of the bottom left corner of the rectangle</param>
+            <param name="u1">U component of the bottom left corner of the rectangle texture</param>
+            <param name="v1">V component of the bottom left corner of the rectangle texture</param>
+            <param name="x2">X component of the top right corner of the rectangle</param>
+            <param name="y2">Y component of the top right corner of the rectangle</param>
+            <param name="u2">U component of the top right corner of the rectangle texture</param>
+            <param name="v2">V component of the top right corner of the rectangle texture</param>
+            <param name="texture">The texture to use</param>
+            <param name="color">Color to light the texture with</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawLine(System.Single,System.Single,System.Single,System.Single,OpenTK.Graphics.Color4)">
+            <summary>
+            Draws a line to the 2D screen
+            </summary>
+            <param name="x1">X pos of one end of the line</param>
+            <param name="y1">Y pos of one end of the line</param>
+            <param name="x2">X pos of the other end of the line</param>
+            <param name="y2">Y pos of the other end of the line</param>
+            <param name="color">Color of the line</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawRectangle(System.Single,System.Single,System.Single,System.Single,OpenTK.Graphics.Color4)">
+            <summary>
+            Draws a 2D rectangle to the 2D screen
+            </summary>
+            <param name="x1">X component of the bottom left vertex of the rectangle</param>
+            <param name="y1">Y component of the bottom left vertex of the rectangle</param>
+            <param name="x2">X component of the to right vertex of the rectangle</param>
+            <param name="y2">Y component of the to right vertex of the rectangle</param>
+            <param name="color">Color of the rectangle</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawTexturedLine(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,Program.Texture,OpenTK.Graphics.Color4)">
+            <summary>
+            Draws a line to the 2D screen with a texture
+            </summary>
+            <param name="x1">X pos of one end of the line</param>
+            <param name="y1">X pos of one end of the line</param>
+            <param name="u1">U pos of one end of the texture</param>
+            <param name="v1">V pos of one end of the texture</param>
+            <param name="x2">X pos of the other end of the line</param>
+            <param name="y2">X pos of the other end of the line</param>
+            <param name="u2">U pos of the other end of the texture</param>
+            <param name="v2">V pos of the other end of the texture</param>
+            <param name="texture">Path to the texture .png</param>
+            <param name="color">Color to be overlaid in the texture</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawTexturedQuad(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.String,OpenTK.Graphics.Color4,OpenTK.Graphics.OpenGL.TextureMinFilter,OpenTK.Graphics.OpenGL.TextureMagFilter)">
+            <summary>
+            Draws a 2D textured quad to the 2D screen given clockwise vertex's
+            </summary>
+            <param name="x1">X pos of the first vertex</param>
+            <param name="y1">Y pos of the first vertex</param>
+            <param name="z1">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u1">U pos of the first texture vertex</param>
+            <param name="v1">V pos of the first texture vertex</param>
+            <param name="x2">X pos of the second vertex</param>
+            <param name="y2">Y pos of the second vertex</param>
+            <param name="z2">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u2">U pos of the second texture vertex</param>
+            <param name="v2">V pos of the second texture vertex</param>
+            <param name="x3">X pos of the third vertex</param>
+            <param name="y3">Y pos of the third vertex</param>
+            <param name="z3">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u3">U pos of the third texture vertex</param>
+            <param name="v3">V pos of the third texture vertex</param>        
+            <param name="x4">X pos of the last vertex</param>
+            <param name="y4">Y pos of the last vertex</param>
+            <param name="z4">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u4">U pos of the last texture vertex</param>
+            <param name="v4">V pos of the last texture vertex</param>        
+            <param name="texturePath">Path to the texture .png</param>
+            <param name="color">Color to be overlaid on the texture</param>
+            <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+            <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawTexturedQuad(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Drawing.Bitmap,OpenTK.Graphics.Color4,OpenTK.Graphics.OpenGL.TextureMinFilter,OpenTK.Graphics.OpenGL.TextureMagFilter)">
+            <summary>
+            Draws a 2D textured quad to the 2D screen given clockwise vertex's
+            </summary>
+            <param name="x1">X pos of the first vertex</param>
+            <param name="y1">Y pos of the first vertex</param>
+            <param name="z1">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u1">U pos of the first texture vertex</param>
+            <param name="v1">V pos of the first texture vertex</param>
+            <param name="x2">X pos of the second vertex</param>
+            <param name="y2">Y pos of the second vertex</param>
+            <param name="z2">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u2">U pos of the second texture vertex</param>
+            <param name="v2">V pos of the second texture vertex</param>
+            <param name="x3">X pos of the third vertex</param>
+            <param name="y3">Y pos of the third vertex</param>
+            <param name="z3">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u3">U pos of the third texture vertex</param>
+            <param name="v3">V pos of the third texture vertex</param>        
+            <param name="x4">X pos of the last vertex</param>
+            <param name="y4">Y pos of the last vertex</param>
+            <param name="z4">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u4">U pos of the last texture vertex</param>
+            <param name="v4">V pos of the last texture vertex</param>        
+            <param name="textureBitmap">Bitmap of the texture</param>
+            <param name="color">Color to be overlaid on the texture</param>
+            <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+            <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawTexturedQuad(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,Program.Texture,OpenTK.Graphics.Color4)">
+            <summary>
+            Draws a 2D textured quad to the 2D screen given clockwise vertex's
+            </summary>
+            <param name="x1">X pos of the first vertex</param>
+            <param name="y1">Y pos of the first vertex</param>
+            <param name="z1">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u1">U pos of the first texture vertex</param>
+            <param name="v1">V pos of the first texture vertex</param>
+            <param name="x2">X pos of the second vertex</param>
+            <param name="y2">Y pos of the second vertex</param>
+            <param name="z2">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u2">U pos of the second texture vertex</param>
+            <param name="v2">V pos of the second texture vertex</param>
+            <param name="x3">X pos of the third vertex</param>
+            <param name="y3">Y pos of the third vertex</param>
+            <param name="z3">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u3">U pos of the third texture vertex</param>
+            <param name="v3">V pos of the third texture vertex</param>        
+            <param name="x4">X pos of the last vertex</param>
+            <param name="y4">Y pos of the last vertex</param>
+            <param name="z4">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="u4">U pos of the last texture vertex</param>
+            <param name="v4">V pos of the last texture vertex</param> 
+            <param name="texture">Texture of the quad</param>
+            <param name="color">Color to be overlaid on the texture</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawQuad(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,OpenTK.Graphics.Color4)">
+            <summary>
+            Draws a 2D quad to the 2D screen given clockwise vertex's
+            </summary>
+            <param name="x1">X pos of the first vertex</param>
+            <param name="y1">Y pos of the first vertex</param>
+            <param name="z1">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="x2">X pos of the second vertex</param>
+            <param name="y2">Y pos of the second vertex</param>
+            <param name="z2">Z pos used for depth test (NOT 3D!!)</param>        
+            <param name="x3">X pos of the third vertex</param>
+            <param name="y3">Y pos of the third vertex</param>
+            <param name="z3">Z pos used for depth test (NOT 3D!!)</param>        
+            <param name="x4">X pos of the last vertex</param>
+            <param name="y4">Y pos of the last vertex</param>
+            <param name="z4">Z pos used for depth test (NOT 3D!!)</param>
+            <param name="color">Color of the quad</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawEllipse(System.Single,System.Single,System.Single,System.Single,OpenTK.Graphics.Color4)">
+            <summary>
+            Draws a 2D ellipse to the 2D screen
+            </summary>
+            <param name="x">X pos of the center of the ellipse</param>
+            <param name="y">y pos of the center of the ellipse</param>
+            <param name="radiusX">Radius of the ellipse in the x direction</param>
+            <param name="radiusY">Radius of the ellipse in the y direction</param>
+            <param name="color">Color of the ellipse</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawTriangle(System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,OpenTK.Graphics.Color4)">
+            <summary>
+            Draws a 2D triangle to the 2D screen, given clockwise points
+            </summary>
+            <param name="x1">X pos of the first vertex</param>
+            <param name="x1">X pos of the first vertex</param>
+            <param name="y1">Y pos of the first vertex</param>
+            <param name="x2">X pos of the second vertex</param>
+            <param name="y2">Y pos of the second vertex</param>
+            <param name="x3">X pos of the third vertex</param>
+            <param name="y3">Y pos of the third vertex</param>
+            <param name="color">Color of the triangle</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.Clear">
+            <summary>
+            Clears the screen
+            </summary>
+        </member>
+        <member name="M:Program.MainRenderWindow.drawText(System.String,System.Int32,System.Single,System.Single,Program.MainRenderWindow.Font,OpenTK.Graphics.Color4)">
+            <summary>
+            Draws text to the screen
+            </summary>
+            <param name="text">Text to be drawn</param>
+            <param name="px">Vertical size of the text</param>
+            <param name="x">X pos of the bottom left corner of the text</param>
+            <param name="y">Y pos of the bottom left corner of the text</param>
+            <param name="f">The font to be used to draw the text</param>
+            <param name="col">Color of the text</param>
+        </member>
+        <member name="T:Program.MainRenderWindow.Font">
+            <summary>
+            Font wrapper for drawing text
+            </summary>
+        </member>
+        <member name="M:Program.MainRenderWindow.Font.#ctor(System.String,System.String)">
+            <summary>
+            Creates a font given a .fnt file and a .png texture
+            Currently only one page for the texture is supported
+            Use BMFont to generate this files, make sure to delete the background in the image editor of your choice
+            Eventually simpler use will be created, using .net font standard, however I dont know when this will happen
+            </summary>
+            <param name="path">Path to the .fnt file</param>
+            <param name="path2">Path to the .png file</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.Font.Dispose">
+            <summary>
+            Deletes the font, make sure to call this function onUnload()
+            </summary>
+        </member>
+        <member name="M:Program.MainRenderWindow.getPhraseLength(System.String,System.Int32,Program.MainRenderWindow.Font)">
+            <summary>
+            Gets the width of the text to be drawn on the screen, use this for centering text,
+            Eventually a single function will draw the text centered on a point 
+            </summary>
+            <param name="text">Text to get the lenght of</param>
+            <param name="px">Vertical size of the text</param>
+            <param name="f">Font of the text</param>
+            <returns></returns>
+        </member>
+        <member name="T:Program.MainRenderWindow.Settings">
+            <summary>
+            Classed used to create settings for your project
+            TODO add textured buttons
+            TODO add sliders
+            TODO add labels
+            TODO add radio buttons
+            </summary>
+        </member>
+        <member name="M:Program.MainRenderWindow.Settings.addButton(System.String,System.Single,System.Single,System.Int32,System.Int32,OpenTK.Graphics.Color4,System.Func{System.Object},Program.MainRenderWindow.Font)">
+            <summary>
+            Adds a simple button to the settings
+            </summary>
+            <param name="t">Text on the button</param>
+            <param name="x">X pos of the button RELATIVE to the settings, at BOTTOM LEFT corner</param>
+            <param name="y">Y pos of the button RELATIVE to the settings, at BOTTOM LEFT corner</param>
+            <param name="w">Width of the button</param>
+            <param name="h">Height of the button</param>
+            <param name="c">Color of the button</param>
+            <param name="func">Lambda function that is executed when button is clicked</param>
+            <param name="f">Font of the button text</param>
+        </member>
+        <member name="M:Program.MainRenderWindow.Settings.addSetting(System.String,System.Object)">
+            <summary>
+            Adds a setting to the settings dictionary
+            </summary>
+            <param name="key">Key of the setting</param>
+            <param name="value">Value of the setting</param>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Program.MainRenderWindow.Settings.readSettings" -->
+        <member name="M:Program.MainRenderWindow.Settings.writeSettings">
+            <summary>
+            Writes settings dictionary to the settings.cfg file
+            </summary>
+        </member>
+        <member name="M:Program.Shader.SetInt(System.String,System.Int32)">
+            <summary>
+            Set a uniform int on this shader.
+            </summary>
+            <param name="name">The name of the uniform</param>
+            <param name="data">The data to set</param>
+        </member>
+        <member name="M:Program.Shader.SetFloat(System.String,System.Single)">
+            <summary>
+            Set a uniform float on this shader.
+            </summary>
+            <param name="name">The name of the uniform</param>
+            <param name="data">The data to set</param>
+        </member>
+        <member name="M:Program.Shader.SetMatrix4(System.String,OpenTK.Matrix4)">
+            <summary>
+            Set a uniform Matrix4 on this shader
+            </summary>
+            <param name="name">The name of the uniform</param>
+            <param name="data">The data to set</param>
+            <remarks>
+              <para>
+              The matrix is transposed before being sent to the shader.
+              </para>
+            </remarks>
+        </member>
+        <member name="M:Program.Shader.SetVector3(System.String,OpenTK.Vector3)">
+            <summary>
+            Set a uniform Vector3 on this shader.
+            </summary>
+            <param name="name">The name of the uniform</param>
+            <param name="data">The data to set</param>
+        </member>
+    </members>
+</doc>
