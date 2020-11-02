@@ -1,10 +1,10 @@
 ﻿{
-  "version": "1.8.2",
+  "version": "1.8.3",
   "restore": {
-    "projectUniqueName": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine\\Program\\Program.csproj",
+    "projectUniqueName": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-OPENTK-4\\OpenTK-3D-Engine\\Program\\Program.csproj",
     "projectName": "OpenTK.3D.Library",
-    "projectPath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine\\Program\\Program.csproj",
-    "outputPath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine\\Program\\obj\\",
+    "projectPath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-OPENTK-4\\OpenTK-3D-Engine\\Program\\Program.csproj",
+    "outputPath": "C:\\Users\\35196\\source\\repos\\OpenTK3DEngine-OPENTK-4\\OpenTK-3D-Engine\\Program\\obj\\",
     "projectStyle": "PackageReference",
     "fallbackFolders": [
       "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -40,17 +40,9 @@
           "target": "Package",
           "version": "[4.7.0, )"
         },
-        "Newtonsoft.Json": {
-          "target": "Package",
-          "version": "[12.0.3, )"
-        },
         "OpenTK": {
           "target": "Package",
           "version": "[3.2.0, )"
-        },
-        "SixLabors.ImageSharp": {
-          "target": "Package",
-          "version": "[1.0.1, )"
         },
         "System.Drawing.Common": {
           "target": "Package",
