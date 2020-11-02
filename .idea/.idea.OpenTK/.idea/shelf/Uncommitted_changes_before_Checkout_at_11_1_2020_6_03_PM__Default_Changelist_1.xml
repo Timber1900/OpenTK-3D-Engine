@@ -1,9 +1,0 @@
-<changelist name="Uncommitted_changes_before_Checkout_at_11_1_2020_6_03_PM_[Default_Changelist]1" date="1604253789484" recycled="true" deleted="true">
-  <option name="PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Checkout_at_11_1_2020_6_03_PM_[Default_Changelist]1/shelved.patch" />
-  <option name="DESCRIPTION" value="Uncommitted changes before Checkout at 11/1/2020 6:03 PM [Default Changelist]" />
-  <binary>
-    <option name="BEFORE_PATH" value="Program/obj/Release/netcoreapp2.1/Program.csprojAssemblyReference.cache" />
-    <option name="AFTER_PATH" value="Program/obj/Release/netcoreapp2.1/Program.csprojAssemblyReference.cache" />
-    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/.idea.OpenTK/.idea/shelf/Uncommitted_changes_before_Checkout_at_11_1_2020_6_03_PM_[Default_Changelist]1/Program.csprojAssemblyReference.cache" />
-  </binary>
-</changelist>
