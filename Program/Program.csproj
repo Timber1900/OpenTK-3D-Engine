@@ -1,17 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
-    <PackageId>OpenTK.3D.Library</PackageId>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<PackageId>OpenTK.3D.Library</PackageId>
     <Authors>Hugo Humberto Martins Teixeira</Authors>
     <Company />
     <Product>3D Engine</Product>
     <Description>OpenTK 3D/2D engine, very fast for both 3D and 2D applications.
 
-Documentation at https://www.nuget.org/packages/OpenTK.3D.Library</Description>
+Documentation at www.timber1900.tk</Description>
     <PackageTags>3D, 2D, OpenTK, Engine</PackageTags>
-    <Version>1.7.4</Version>
-    <PackageReleaseNotes>Settings class 1st implementation</PackageReleaseNotes>
+    <Version>1.8.3</Version>
+    <PackageReleaseNotes>Summaries, better spheres, better documentation</PackageReleaseNotes>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netcoreapp2.1|AnyCPU'">
+    <DocumentationFile>C:\Users\35196\source\repos\OpenTK3DEngine\Program\Program.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

@@ -11,16 +11,14 @@
         <e p="Camera.cs" t="Include" />
         <e p="MainRenderWindow.cs" t="Include" />
         <e p="obj" t="ExcludeRecursive">
-          <e p="Debug" t="Include">
+          <e p="Release" t="Include">
             <e p="netcoreapp2.1" t="Include">
-              <e p="Program.AssemblyInfo.cs" t="Include" />
-            </e>
-            <e p="netcoreapp3.1" t="Include">
               <e p="Program.AssemblyInfo.cs" t="Include" />
             </e>
           </e>
         </e>
         <e p="Program.csproj" t="IncludeRecursive" />
+        <e p="Program.xml" t="Include" />
         <e p="Properties" t="Include">
           <e p="PublishProfiles" t="Include">
             <e p="FolderProfile.pubxml" t="Include" />
