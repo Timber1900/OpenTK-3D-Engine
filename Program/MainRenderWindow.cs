@@ -555,10 +555,14 @@ namespace Program
         /// Creates a cube that is rendered to the screen (Currently needs a .obj file)
         /// </summary>
         /// <param name="color">Color of the cube</param>
+        /// <param name="width">Width of the cube</param>
+        /// <param name="height">Height of the cube</param>
+        /// <param name="depth">Depth of the cube</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createCube(Vector3 color)
+        public int createCube(Vector3 color, float width, float height, float depth)
         {
-            _mainObjects.Add(new Object("Objs/cube.obj", _lightingShader, _mainLamp, color));
+            var cubeVertex = CreateRectangularPrismVertices(width, height, depth);
+            _mainObjects.Add(new Object(cubeVertex, _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
         }
         /// <summary>
@@ -818,6 +822,84 @@ namespace Program
                     vertices.Add(n.Y);
                     vertices.Add(n.Z);
                 }
+            }
+
+            return vertices.ToArray();
+        }
+
+        private static float[] CreateRectangularPrismVertices(float width, float height, float depth)
+        {
+            var w = width / 2;
+            var h = height / 2;
+            var d = depth / 2;
+            List<float> vertices = new List<float>();
+
+            float[] v =
+            {
+                -w, -h, -d,
+                 w, -h, -d,
+                 w, -h,  d,
+                -w, -h,  d,
+                -w,  h, -d,
+                 w,  h, -d,
+                 w,  h,  d,
+                -w,  h,  d
+            };
+
+            int[] f =
+            {
+                //Front
+                0, 5, 4,
+                0, 1, 5,
+                //Right
+                1, 6, 5,
+                1, 2, 6,
+                //Back
+                2, 7, 6,
+                2, 3, 7,
+                //Left
+                3, 4, 7,
+                3, 0, 4,
+                //Bottom
+                3, 1, 0,
+                3, 2, 1,
+                //Top
+                4, 6, 7,
+                4, 5, 6
+            };
+
+            for (int i = 0; i < f.Length; i+=3)
+            {
+                var v01 = new Vector3(v[f[i    ] * 3], v[f[i    ] * 3 + 1], v[f[i    ] * 3 + 2]);
+                var v02 = new Vector3(v[f[i + 1] * 3], v[f[i + 1] * 3 + 1], v[f[i + 1] * 3 + 2]);
+                var x = v[f[i + 2] * 3];
+                var y = v[f[i + 2] * 3 + 1];
+                var z = v[f[i + 2] * 3 + 2];
+                var v03 = new Vector3(x, y, z);
+        
+                Vector3 l1 = v02 - v01;
+                Vector3 l2 = v03 - v01;
+                //Normals are the same for each triangle
+                Vector3 n = Vector3.Cross(l1, l2);
+                n.Normalize();
+                vertices.Add(v01.X);
+                vertices.Add(v01.Y);
+                vertices.Add(v01.Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(v02.X);
+                vertices.Add(v02.Y);
+                vertices.Add(v02.Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(v03.X);
+                vertices.Add(v03.Y);
+                vertices.Add(v03.Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
             }
 
             return vertices.ToArray();
@@ -1161,8 +1243,8 @@ namespace Program
         /// <param name="v1">V pos of one end of the texture</param>
         /// <param name="x2">X pos of the other end of the line</param>
         /// <param name="y2">X pos of the other end of the line</param>
-        /// <param name="u1">U pos of the other end of the texture</param>
-        /// <param name="v1">V pos of the other end of the texture</param>
+        /// <param name="u2">U pos of the other end of the texture</param>
+        /// <param name="v2">V pos of the other end of the texture</param>
         /// <param name="texture">Path to the texture .png</param>
         /// <param name="color">Color to be overlaid in the texture</param>
         protected void drawTexturedLine(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
