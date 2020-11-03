@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL4;
 
 using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
 
@@ -29,7 +29,7 @@ namespace Program
                     image.Width,
                     image.Height,
                     0,
-                    PixelFormat.Bgra,
+                    OpenTK.Graphics.OpenGL4.PixelFormat.Bgra,
                     PixelType.UnsignedByte,
                     data.Scan0);
             }
@@ -58,7 +58,7 @@ namespace Program
                     image.Width,
                     image.Height,
                     0,
-                    PixelFormat.Bgra,
+                    OpenTK.Graphics.OpenGL4.PixelFormat.Bgra,
                     PixelType.UnsignedByte,
                     data.Scan0);
             }
