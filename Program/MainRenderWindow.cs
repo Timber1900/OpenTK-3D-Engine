@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using OpenTK;
@@ -18,6 +19,47 @@ using Boolean = System.Boolean;
 
 namespace Program
 {
+    public static class Screen
+    {
+        [DllImport("user32.dll")]
+        static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
+        [StructLayout(LayoutKind.Sequential)]
+        private struct DEVMODE
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+            public string dmDeviceName;
+            public short dmSpecVersion;
+            public short dmDriverVersion;
+            public short dmSize;
+            public short dmDriverExtra;
+            public int dmFields;
+            public int dmPositionX;
+            public int dmPositionY;
+            public int dmDisplayOrientation;
+            public int dmDisplayFixedOutput;
+            public short dmColor;
+            public short dmDuplex;
+            public short dmYResolution;
+            public short dmTTOption;
+            public short dmCollate;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+            public string dmFormName;
+            public short dmLogPixels;
+            public int dmBitsPerPel;
+            public int dmPelsWidth;
+            public int dmPelsHeight;
+        }
+
+        public static Vector2 getScreenSize()
+        {
+            const int ENUM_CURRENT_SETTINGS = -1;
+
+            DEVMODE devMode = default;
+            devMode.dmSize = (short)Marshal.SizeOf(devMode);
+            EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode);
+            return new Vector2( devMode.dmPelsWidth, devMode.dmPelsHeight);
+        }
+    }
     public class MainRenderWindow : GameWindow
     {
         private readonly List<TexturedObject> _mainTexturedObjects = new List<TexturedObject>();
@@ -44,10 +86,13 @@ namespace Program
         
         private static NativeWindowSettings createNativeWindowSettings(int width = 1000, int height = 1000, string title = "OpenTK Window")
         {
+            var MonitorSize = Screen.getScreenSize();
+
             var nws = new NativeWindowSettings()
             {
                 Size = new Vector2i(width, height),
-                Title = title
+                Title = title,
+                Location = new Vector2i((int) ((MonitorSize.X - width) / 2), (int) ((MonitorSize.Y - height - 10) / 2))
             };
             return nws;
         }
