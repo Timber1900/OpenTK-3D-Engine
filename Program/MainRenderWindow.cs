@@ -2,17 +2,75 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using OpenTK;
 using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.GL;
+using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
+using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Common.Input;
+using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using static Program.Shaders;
 using Boolean = System.Boolean;
 
 namespace Program
 {
+    public static class Screen
+    {
+        [DllImport("user32.dll")]
+        static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
+        [StructLayout(LayoutKind.Sequential)]
+        struct DEVMODE
+        {
+          [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+          public string dmDeviceName;
+          public short dmSpecVersion;
+          public short dmDriverVersion;
+          public short dmSize;
+          public short dmDriverExtra;
+          public int dmFields;
+          public int dmPositionX;
+          public int dmPositionY;
+          public int dmDisplayOrientation;
+          public int dmDisplayFixedOutput;
+          public short dmColor;
+          public short dmDuplex;
+          public short dmYResolution;
+          public short dmTTOption;
+          public short dmCollate;
+          [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+          public string dmFormName;
+          public short dmLogPixels;
+          public int dmBitsPerPel;
+          public int dmPelsWidth;
+          public int dmPelsHeight;
+          public int dmDisplayFlags;
+          public int dmDisplayFrequency;
+          public int dmICMMethod;
+          public int dmICMIntent;
+          public int dmMediaType;
+          public int dmDitherType;
+          public int dmReserved1;
+          public int dmReserved2;
+          public int dmPanningWidth;
+          public int dmPanningHeight;
+        }
+
+        public static Vector2 getScreenSize()
+        {
+            const int ENUM_CURRENT_SETTINGS = -1;
+
+            DEVMODE devMode = default;
+            devMode.dmSize = (short)Marshal.SizeOf(devMode);
+            EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode);
+            return new Vector2( devMode.dmPelsWidth, devMode.dmPelsHeight);
+        }
+    }
     public class MainRenderWindow : GameWindow
     {
         private readonly List<TexturedObject> _mainTexturedObjects = new List<TexturedObject>();
@@ -26,16 +84,37 @@ namespace Program
         private float cameraSpeed = 20f;
         private float sensitivity = 0.2f;
         protected Boolean UseDepthTest = false, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true, useSettings = false;
+        public int Width, Height;
+        private static GameWindowSettings createGameWindowSettings(double FPS = 60.0)
+        {
+            var gws = new GameWindowSettings()
+            {
+                UpdateFrequency = FPS,
+                RenderFrequency = FPS
+            };
+            return gws;
+        }
+        
+        private static NativeWindowSettings createNativeWindowSettings(int width = 1000, int height = 1000, string title = "OpenTK Window")
+        {
+            var MonitorSize = Screen.getScreenSize();
+            var nws = new NativeWindowSettings()
+            {
+                Size = new Vector2i(width, height),
+                Title = title,
+                Location = new Vector2i((int) ((MonitorSize.X - width) / 2), (int) ((MonitorSize.Y - height - 10) / 2))
+            };
+            return nws;
+        }
 
-
-        protected MainRenderWindow(int width, int height, string title)
-            : base(width, height, GraphicsMode.Default, title)
+        public MainRenderWindow(int width, int height, string title, double FPS) :
+            base(createGameWindowSettings(FPS), createNativeWindowSettings(width, height, title))
         {
         }
         
-        protected override void OnLoad(EventArgs e)
+        protected override void OnLoad()
         {
-            if(UseDepthTest) {GL.Enable(EnableCap.DepthTest);}
+            if (UseDepthTest) { GL.Enable(EnableCap.DepthTest); }
             if(UseAlpha) {GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);}
             GL.Enable(EnableCap.Blend);
             _lightingShader = new Shader(ShaderVert, LightingFrag);
@@ -48,9 +127,14 @@ namespace Program
             _textureShader.Use();
             _2dShader.Use();
             _2dTextured.Use();
-                                                        
-            _camera = new Camera(Vector3.UnitZ * 3, Width / (float)Height);
-            
+
+            _lastPos = MouseState.PreviousPosition;
+
+            _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
+            Width = Size.X;
+            Height = Size.Y;
+            base.OnLoad();
+            CursorGrabbed = KeyboardAndMouseInput;
             CursorVisible = !KeyboardAndMouseInput;
         }
 
@@ -74,42 +158,46 @@ namespace Program
 
             if (showSet)
             {
-                var mouse = Mouse.GetState();
-                if (mouse.IsButtonDown(MouseButton.Left))
+                if (MouseState.IsButtonDown(MouseButton.Left))
                 {
                     checkClicks(set);
                 }
                 showSettings(set);
             }
-
+            
             SwapBuffers();
 
             base.OnRenderFrame(e);
         }
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-
-            if (!Focused) // check to see if the window is focused
+            if (!IsFocused) // check to see if the window is focused
             {
                 return;
             }
-            var input = Keyboard.GetState();
-            var mouse = Mouse.GetState();
+            var input = KeyboardState;
+            var mouse = MouseState;
 
-            if (input.IsKeyDown(Key.Escape) && lastTime)
+            if (input.IsKeyDown(Keys.Escape) && lastTime)
             {
                 if (!useSettings)
                 {
-                    Exit();
+                    Close();
                 }
                 else
                 {
                     showSet = !showSet;
                     lastTime = false;
+
+                    if (KeyboardAndMouseInput)
+                    {
+                        CursorVisible = !CursorVisible;
+                        CursorGrabbed = !CursorVisible;
+                    }
                 }
                 
             }
-            if (input.IsKeyUp(Key.Escape))
+            if (!input.IsKeyDown(Keys.Escape))
             {
                 lastTime = true;
             }
@@ -117,70 +205,62 @@ namespace Program
             
 
 
-            if (KeyboardAndMouseInput)
+            if (KeyboardAndMouseInput && !showSet)
             {
                 
-                if (input.IsKeyDown(Key.W))
+                if (input.IsKeyDown(Keys.W))
                 {
                     _camera.Position += _camera.Front * cameraSpeed * (float) e.Time; // Forward
                 }
 
-                if (input.IsKeyDown(Key.S))
+                if (input.IsKeyDown(Keys.S))
                 {
                     _camera.Position -= _camera.Front * cameraSpeed * (float) e.Time; // Backwards
                 }
 
-                if (input.IsKeyDown(Key.A))
+                if (input.IsKeyDown(Keys.A))
                 {
                     _camera.Position -= _camera.Right * cameraSpeed * (float) e.Time; // Left
                 }
 
-                if (input.IsKeyDown(Key.D))
+                if (input.IsKeyDown(Keys.D))
                 {
                     _camera.Position += _camera.Right * cameraSpeed * (float) e.Time; // Right
                 }
 
-                if (input.IsKeyDown(Key.Space))
+                if (input.IsKeyDown(Keys.Space))
                 {
                     _camera.Position += _camera.Up * cameraSpeed * (float) e.Time; // Up
                 }
 
-                if (input.IsKeyDown(Key.LShift))
+                if (input.IsKeyDown(Keys.LeftShift))
                 {
                     _camera.Position -= _camera.Up * cameraSpeed * (float) e.Time; // Down
                 }
-
-                // Get the mouse state
-
-                if (_firstMove) // this bool variable is initially set to true
-                {
-                    _lastPos = new Vector2(mouse.X, mouse.Y);
-                    _firstMove = false;
-                }
-                else
-                {
-                    // Calculate the offset of the mouse position
-                    var deltaX = mouse.X - _lastPos.X;
-                    var deltaY = mouse.Y - _lastPos.Y;
-                    _lastPos = new Vector2(mouse.X, mouse.Y);
-
-                    // Apply the camera pitch and yaw (we clamp the pitch in the camera class)
-                    _camera.Yaw += deltaX * sensitivity;
-                    _camera.Pitch -= deltaY * sensitivity; // reversed since y-coordinates range from bottom to top
-                }
-
+                // Calculate the offset of the mouse position
                 
+                var deltaX = mouse.X - _lastPos.X;
+                var deltaY = mouse.Y - _lastPos.Y;
+                _lastPos = new Vector2(mouse.X, mouse.Y);
 
-                Mouse.SetPosition(1920 / 2, 1080 / 2);
+                // Apply the camera pitch and yaw (we clamp the pitch in the camera class)
+                _camera.Yaw += deltaX * sensitivity;
+                _camera.Pitch -= deltaY * sensitivity; // reversed since y-coordinates range from bottom to top
+
             }
+            
+                
             base.OnUpdateFrame(e);
         }
-        protected override void OnResize(EventArgs e)
+
+        protected override void OnResize(ResizeEventArgs resizeEventArgs)
         {
-            GL.Viewport(0, 0, Width, Height);
-            base.OnResize(e);
+            Width = resizeEventArgs.Width;
+            Height = resizeEventArgs.Height;
+            GL.Viewport(0, 0, resizeEventArgs.Width, resizeEventArgs.Height);
+            base.OnResize(resizeEventArgs);
         }
-        protected override void OnUnload(EventArgs e)
+        protected override void OnUnload()
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindVertexArray(0);
@@ -203,7 +283,7 @@ namespace Program
 
             _mainLamp?.Dispose();
 
-            base.OnUnload(e);
+            base.OnUnload();
         }
         private static float[] loadObj(string path)
         {
@@ -320,11 +400,11 @@ namespace Program
             private readonly float[] _vertices;
             private float _rotX, _rotY, _rotZ;
             private Vector3 _pos;
-            private readonly Vector3 _color;
+            private readonly Color4 _color;
             private readonly Shader _shader;
             private readonly Lamp _lamp;
             private float _scale = 1.0f;
-            public Object(string path, Shader lightingShader, Lamp lamp, Vector3 col)
+            public Object(string path, Shader lightingShader, Lamp lamp, Color4 col)
             {
                 _vertices = loadObj(path);
 
@@ -350,7 +430,7 @@ namespace Program
                 _lamp = lamp;
                 _color = col;
             }
-            public Object(float[] vertices, Shader lightingShader, Lamp lamp, Vector3 col)
+            public Object(float[] vertices, Shader lightingShader, Lamp lamp, Color4 col)
             {
                 _vertices = vertices;
 
@@ -387,7 +467,7 @@ namespace Program
                 _shader.SetMatrix4("view", camera.GetViewMatrix());
                 _shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
-                _shader.SetVector3("objectColor", _color);
+                _shader.SetVector4("objectColor", new Vector4(_color.R, _color.G, _color.B, _color.A));
                 _shader.SetVector3("lightColor", _lamp.LightColor);
                 _shader.SetVector3("lightPos", _lamp.Pos);
 
@@ -558,7 +638,7 @@ namespace Program
         /// <param name="height">Height of the cube</param>
         /// <param name="depth">Depth of the cube</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createCube(Vector3 color, float width, float height, float depth)
+        public int createCube(Color4 color, float width, float height, float depth)
         {
             var cubeVertex = CreateRectangularPrismVertices(width, height, depth);
             _mainObjects.Add(new Object(cubeVertex, _lightingShader, _mainLamp, color));
@@ -570,7 +650,7 @@ namespace Program
         /// <param name="color">Color of the sphere</param>
         /// <param name="r">Radius of the sphere</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createSphere(Vector3 color, float r)
+        public int createSphere(Color4 color, float r)
         {
             float[] v = CreateSphereVertices(r);
             _mainObjects.Add(new Object(v, _lightingShader, _mainLamp, color));
@@ -581,7 +661,7 @@ namespace Program
         /// </summary>
         /// <param name="color">Color of the torus</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createTorus(Vector3 color)
+        public int createTorus(Color4 color)
         {
             _mainObjects.Add(new Object("Objs/torus.obj", _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
@@ -591,7 +671,7 @@ namespace Program
         /// </summary>
         /// <param name="color">Color of the torus</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createCylinder(Vector3 color)
+        public int createCylinder(Color4 color)
         {
             _mainObjects.Add(new Object("Objs/cilinder.obj", _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
@@ -616,17 +696,18 @@ namespace Program
         public int createPlane(float x1, float y1, float z1,
                                float x2, float y2, float z2,
                                float x3, float y3, float z3,
-                               float x4, float y4, float z4, Vector3 color)
+                               float x4, float y4, float z4, Color4 color)
         {
             Vector3 l1 = new Vector3(x2 - x1, y2 - y1, z2 - z1);
             Vector3 l2 = new Vector3(x3 - x1, y3 - y1, z3 - z1);
-            Vector3 normal = Vector3.Cross(l1, l2);
+            Vector3 normal = Vector3.Cross(l2, l1);
+
 
             float[] vertices =
             {
                 x1, y1, z1, normal.X,  normal.Y, normal.Z,
-                x2, y2, z2, normal.X,  normal.Y, normal.Z,
                 x3, y3, z3, normal.X,  normal.Y, normal.Z,
+                x2, y2, z2, normal.X,  normal.Y, normal.Z,
 
                 x1, y1, z1, normal.X,  normal.Y, normal.Z,
                 x3, y3, z3, normal.X,  normal.Y, normal.Z,
@@ -649,7 +730,7 @@ namespace Program
         /// </summary>
         /// <param name="obj">Path to the .obj file</param>
         /// <param name="color">Color of the object</param>
-        public void openObj(string obj, Vector3 color)
+        public void openObj(string obj, Color4 color)
         {
             _mainObjects.Add(new Object(obj, _lightingShader, _mainLamp, color));
         }
@@ -926,14 +1007,14 @@ namespace Program
         protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(texturePath, min, mag);
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
             
             float[] vertices =
             {
@@ -1000,14 +1081,14 @@ namespace Program
         protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(textureBitmap, min, mag);
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
 
             float[] vertices =
             {
@@ -1071,14 +1152,14 @@ namespace Program
         /// <param name="color">Color to light the texture with</param>
         protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
         {
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
 
             float[] vertices =
             {
@@ -1136,14 +1217,14 @@ namespace Program
         /// <param name="color">Color of the line</param>
         protected void drawLine(float x1, float y1, float x2, float y2, Color4 color)
         {
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
             float[] vertices =
             {
                 x1Norm, y1Norm, 0f,
@@ -1187,14 +1268,14 @@ namespace Program
         /// <param name="color">Color of the rectangle</param>
         protected void drawRectangle(float x1, float y1, float x2, float y2, Color4 color)
         {
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
             float[] vertices =
             {
                 x1Norm, y1Norm, 0f,
@@ -1248,14 +1329,14 @@ namespace Program
         /// <param name="color">Color to be overlaid in the texture</param>
         protected void drawTexturedLine(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
         {
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
             float[] vertices =
             {
                 x1Norm, y1Norm, 0f, u1, v1,
@@ -1330,22 +1411,22 @@ namespace Program
                                       float x4, float y4, float z4, float u4, float v4, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(texturePath, min, mag);
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
-            float x3Trans = x3 - (Width / 2);
-            float y3Trans = y3 - (Height / 2);
-            float x3Norm = x3Trans / (Width / 2);
-            float y3Norm = y3Trans / (Height / 2);
-            float x4Trans = x4 - (Width / 2);
-            float y4Trans = y4 - (Height / 2);
-            float x4Norm = x4Trans / (Width / 2);
-            float y4Norm = y4Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
+            float x3Trans = x3 - (Size.X / 2);
+            float y3Trans = y3 - (Size.Y / 2);
+            float x3Norm = x3Trans / (Size.X / 2);
+            float y3Norm = y3Trans / (Size.Y / 2);
+            float x4Trans = x4 - (Size.X / 2);
+            float y4Trans = y4 - (Size.Y / 2);
+            float x4Norm = x4Trans / (Size.X / 2);
+            float y4Norm = y4Trans / (Size.Y / 2);
 
             float[] vertices =
             {
@@ -1427,22 +1508,22 @@ namespace Program
                                       float x4, float y4, float z4, float u4, float v4, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(textureBitmap, min, mag);
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
-            float x3Trans = x3 - (Width / 2);
-            float y3Trans = y3 - (Height / 2);
-            float x3Norm = x3Trans / (Width / 2);
-            float y3Norm = y3Trans / (Height / 2);
-            float x4Trans = x4 - (Width / 2);
-            float y4Trans = y4 - (Height / 2);
-            float x4Norm = x4Trans / (Width / 2);
-            float y4Norm = y4Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
+            float x3Trans = x3 - (Size.X / 2);
+            float y3Trans = y3 - (Size.Y / 2);
+            float x3Norm = x3Trans / (Size.X / 2);
+            float y3Norm = y3Trans / (Size.Y / 2);
+            float x4Trans = x4 - (Size.X / 2);
+            float y4Trans = y4 - (Size.Y / 2);
+            float x4Norm = x4Trans / (Size.X / 2);
+            float y4Norm = y4Trans / (Size.Y / 2);
 
             float[] vertices =
             {
@@ -1521,22 +1602,22 @@ namespace Program
                                       float x3, float y3, float z3, float u3, float v3,
                                       float x4, float y4, float z4, float u4, float v4, Texture texture, Color4 color)
         {
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
-            float x3Trans = x3 - (Width / 2);
-            float y3Trans = y3 - (Height / 2);
-            float x3Norm = x3Trans / (Width / 2);
-            float y3Norm = y3Trans / (Height / 2);
-            float x4Trans = x4 - (Width / 2);
-            float y4Trans = y4 - (Height / 2);
-            float x4Norm = x4Trans / (Width / 2);
-            float y4Norm = y4Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
+            float x3Trans = x3 - (Size.X / 2);
+            float y3Trans = y3 - (Size.Y / 2);
+            float x3Norm = x3Trans / (Size.X / 2);
+            float y3Norm = y3Trans / (Size.Y / 2);
+            float x4Trans = x4 - (Size.X / 2);
+            float y4Trans = y4 - (Size.Y / 2);
+            float x4Norm = x4Trans / (Size.X / 2);
+            float y4Norm = y4Trans / (Size.Y / 2);
 
             float[] vertices =
             {
@@ -1605,22 +1686,22 @@ namespace Program
                                 float x3, float y3, float z3,
                                 float x4, float y4, float z4, Color4 color)
         {
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
-            float x3Trans = x3 - (Width / 2);
-            float y3Trans = y3 - (Height / 2);
-            float x3Norm = x3Trans / (Width / 2);
-            float y3Norm = y3Trans / (Height / 2);
-            float x4Trans = x4 - (Width / 2);
-            float y4Trans = y4 - (Height / 2);
-            float x4Norm = x4Trans / (Width / 2);
-            float y4Norm = y4Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
+            float x3Trans = x3 - (Size.X / 2);
+            float y3Trans = y3 - (Size.Y / 2);
+            float x3Norm = x3Trans / (Size.X / 2);
+            float y3Norm = y3Trans / (Size.Y / 2);
+            float x4Trans = x4 - (Size.X / 2);
+            float y4Trans = y4 - (Size.Y / 2);
+            float x4Norm = x4Trans / (Size.X / 2);
+            float y4Norm = y4Trans / (Size.Y / 2);
                     
             float[] vertices =
             {
@@ -1676,12 +1757,12 @@ namespace Program
             int numEllipseVertices = (int)Math.Floor(Math.Sqrt(radiusX * radiusX + radiusY * radiusY));
             Vector3[] tempVertices = new Vector3[numEllipseVertices];
             
-            float xTrans = x - (Width / 2);
-            float yTrans = y - (Height / 2);
-            float xNorm = xTrans / (Width / 2);
-            float yNorm = yTrans / (Height / 2);
-            float radiusXNorm = radiusX / (Width / 2);
-            float radiusYNorm = radiusY / (Height / 2);
+            float xTrans = x - (Size.X / 2);
+            float yTrans = y - (Size.Y / 2);
+            float xNorm = xTrans / (Size.X / 2);
+            float yNorm = yTrans / (Size.Y / 2);
+            float radiusXNorm = radiusX / (Size.X / 2);
+            float radiusYNorm = radiusY / (Size.Y / 2);
 
 
             var step = (float)(Math.PI * 2) / (numEllipseVertices - 1);
@@ -1744,18 +1825,18 @@ namespace Program
         /// <param name="color">Color of the triangle</param>
         public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Color4 color)
         {
-            float x1Trans = x1 - (Width / 2);
-            float y1Trans = y1 - (Height / 2);
-            float x1Norm = x1Trans / (Width / 2);
-            float y1Norm = y1Trans / (Height / 2);
-            float x2Trans = x2 - (Width / 2);
-            float y2Trans = y2 - (Height / 2);
-            float x2Norm = x2Trans / (Width / 2);
-            float y2Norm = y2Trans / (Height / 2);
-            float x3Trans = x3 - (Width / 2);
-            float y3Trans = y3 - (Height / 2);
-            float x3Norm = x3Trans / (Width / 2);
-            float y3Norm = y3Trans / (Height / 2);
+            float x1Trans = x1 - (Size.X / 2);
+            float y1Trans = y1 - (Size.Y / 2);
+            float x1Norm = x1Trans / (Size.X / 2);
+            float y1Norm = y1Trans / (Size.Y / 2);
+            float x2Trans = x2 - (Size.X / 2);
+            float y2Trans = y2 - (Size.Y / 2);
+            float x2Norm = x2Trans / (Size.X / 2);
+            float y2Norm = y2Trans / (Size.Y / 2);
+            float x3Trans = x3 - (Size.X / 2);
+            float y3Trans = y3 - (Size.Y / 2);
+            float x3Norm = x3Trans / (Size.X / 2);
+            float y3Norm = y3Trans / (Size.Y / 2);
             float[] vertices =
             {
                 x1Norm, -y1Norm, 0f,
@@ -1821,10 +1902,10 @@ namespace Program
                 float voff = v - ((float)f.data["heights"][i] / (float)f.fontWidth);
 
                 drawTexturedQuad(
-                    x + xoff        , y         , 1f, u   , voff,
-                    x + xoff        , y + height, 1f, u   , v,
-                    x + width + xoff, y + height, 1f, uoff, v,
-                    x + width + xoff, y         , 1f, uoff, voff, f.font, col);
+                    x + xoff        , y         , 0f, u   , voff,
+                    x + xoff        , y + height, 0f, u   , v,
+                    x + width + xoff, y + height, 0f, uoff, v,
+                    x + width + xoff, y         , 0f, uoff, voff, f.font, col);
 
                 xoff += width;            
             }
@@ -1938,7 +2019,7 @@ namespace Program
         {
             var w = Convert.ToInt32(s.settings["width"]);
             var h = Convert.ToInt32(s.settings["height"]);
-            Vector2 pos = new Vector2((Width - w) / 2, (Height - h) / 2);
+            Vector2 pos = new Vector2((Size.X - w) / 2, (Size.Y - h) / 2);
             if (Convert.ToBoolean(s.settings["useTexture"]))
             {
                 var path = Convert.ToString(s.settings["texturePath"]);
@@ -2030,7 +2111,7 @@ namespace Program
             /// </summary>
             public void readSettings()
             {
-                try
+                if (File.Exists("settings.cfg"))
                 {
                     using (StreamReader file = new StreamReader("settings.cfg"))
                     {
@@ -2052,14 +2133,22 @@ namespace Program
                                     settings.Add(values[0], values[1]);
                                 }
                             }
-                            
-
                         }
-                    }
+                    } 
                 }
-                catch (InvalidCastException e)
+                else
                 {
-                    Console.WriteLine(e.GetBaseException());
+                    settings = new Dictionary<string, object>();
+
+                    settings.Add("width", 200);
+                    settings.Add("height", 300);
+                    settings.Add("useTexture", false);
+                    settings.Add("r", 0);
+                    settings.Add("g", 127);
+                    settings.Add("b", 256);
+                    settings.Add("a", 1);
+                    
+                    writeSettings();
                 }
             }
             /// <summary>
@@ -2096,10 +2185,9 @@ namespace Program
             var h = Convert.ToInt32(s.settings["height"]);
             foreach (Settings.Button b in s.buttons)
             {
-                Vector2 pos = new Vector2((Width - w) / 2, (Height - h) / 2);
-                var mouseState = Mouse.GetCursorState();
-                var x = mouseState.X - X - 8 - pos.X;
-                var y = -(mouseState.Y - Y - 30 - Height) - pos.Y;
+                Vector2 pos = new Vector2((Size.X - w) / 2, (Size.Y - h) / 2);
+                var x = MousePosition.X - pos.X;
+                var y = -(MousePosition.Y - Size.Y) - pos.Y;
                 if (x >= b.pos.X && x <= b.pos.X + b.width && y >= b.pos.Y && y <= b.pos.Y + b.height)
                 {
                     b.setCol(Color4.Red);
