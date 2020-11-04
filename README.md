@@ -2,11 +2,14 @@
 
 ### Todo:
 
-- [x] Add simple Cube and Sphere functions,
-
 - [ ] Add drawPolygon Function (p5.js Triangle strip style),
 
-- [x] Add 2D rendering
+- [ ] Add internal support for fonts using the microsoft Font class to create a bitmap and font data, removing the need for external programs,
+
+- [ ] Complete settings class
+
+- [ ] Make other 3D objects(cylinder, torus) not need .obj files to work
+
 
 # Table of Contents
 
@@ -47,8 +50,8 @@ namespace yourNameSpace
 {
     public class yourClass : MainRenderWindow
     {
-        public yourClass(int width, int height, string title)
-            : base(width, height, title)
+        public yourClass(int width, int height, string title, double fps),
+            : base(width, height, title, fps)
         {
         }
 
@@ -87,10 +90,10 @@ namespace yourNamespace
     {
         static void Main(string[] args)
         {
-            using youClass game = new youClass(1000, 1000, "Test App");
+            using youClass game = new youClass(1000, 1000, "Test App", 60.0);
             //Run takes a double, which is how many frames per second it should strive to reach.
             //You can leave that out and it'll just update as fast as the hardware will allow it.
-            game.Run(60.0);
+            game.Run();
         }
     }
 }
@@ -109,14 +112,14 @@ namespace yourNamespace
  
 #### Make sure to add these **after** base.OnLoad()
 
- - `createMainLight(Vector3 pos, Vector3 color)` => Creates your main Light (static), make sure to run this function __before__ any other 3D function but after Base.OnLoad(),
- - `createCube(Vector3 Color)` => Creates a 3D cube of the color you specify, returns a handle for making modifications to the cube,
- - `createSphere(Vector3 Color)` => Creates a 3D sphere of the color you specify, returns a handle for making modifications to the sphere,
- - `createTorus(Vector3 Color)` => Creates a 3D torus of the color you specify, returns a handle for making modifications to the torus,
- - `createCylinder(Vector3 Color)` => Creates a 3D cylinder of the color you specify, returns a handle for making modifications to the cylinder,
- - `createPlane(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, Vector3 color)` => Creates a 3D plane of the color you specify, returns a handle for making modifications to the plane,
+ - `createMainLight(Vector3 pos, Color4 color)` => Creates your main Light (static), make sure to run this function __before__ any other 3D function but after Base.OnLoad(),
+ - `createCube(Color4 Color)` => Creates a 3D cube of the color you specify, returns a handle for making modifications to the cube,
+ - `createSphere(Color4 Color)` => Creates a 3D sphere of the color you specify, returns a handle for making modifications to the sphere,
+ - `createTorus(Color4 Color)` => Creates a 3D torus of the color you specify, returns a handle for making modifications to the torus,
+ - `createCylinder(Color4 Color)` => Creates a 3D cylinder of the color you specify, returns a handle for making modifications to the cylinder,
+ - `createPlane(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, Color4 color)` => Creates a 3D plane of the color you specify, returns a handle for making modifications to the plane,
  - `openTexturedObj(string obj, string texture)` => Opens .obj file with an attached .png texture, returns a handle for making modifications to the object,
- - `openObj(string obj, Vector3 color)` => Opens .obj file with no attached .png texture, returns a handle for making modifications to the object,
+ - `openObj(string obj, Color4 color)` => Opens .obj file with no attached .png texture, returns a handle for making modifications to the object,
 
 ### On **OnRenderFrame**
 
