@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using OpenTK;
 using OpenTK.Graphics;
+using OpenTK.Graphics.GL;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
 using OpenTK.Mathematics;
@@ -24,30 +25,40 @@ namespace Program
         [DllImport("user32.dll")]
         static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
         [StructLayout(LayoutKind.Sequential)]
-        private struct DEVMODE
+        struct DEVMODE
         {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-            public string dmDeviceName;
-            public short dmSpecVersion;
-            public short dmDriverVersion;
-            public short dmSize;
-            public short dmDriverExtra;
-            public int dmFields;
-            public int dmPositionX;
-            public int dmPositionY;
-            public int dmDisplayOrientation;
-            public int dmDisplayFixedOutput;
-            public short dmColor;
-            public short dmDuplex;
-            public short dmYResolution;
-            public short dmTTOption;
-            public short dmCollate;
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-            public string dmFormName;
-            public short dmLogPixels;
-            public int dmBitsPerPel;
-            public int dmPelsWidth;
-            public int dmPelsHeight;
+          [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+          public string dmDeviceName;
+          public short dmSpecVersion;
+          public short dmDriverVersion;
+          public short dmSize;
+          public short dmDriverExtra;
+          public int dmFields;
+          public int dmPositionX;
+          public int dmPositionY;
+          public int dmDisplayOrientation;
+          public int dmDisplayFixedOutput;
+          public short dmColor;
+          public short dmDuplex;
+          public short dmYResolution;
+          public short dmTTOption;
+          public short dmCollate;
+          [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+          public string dmFormName;
+          public short dmLogPixels;
+          public int dmBitsPerPel;
+          public int dmPelsWidth;
+          public int dmPelsHeight;
+          public int dmDisplayFlags;
+          public int dmDisplayFrequency;
+          public int dmICMMethod;
+          public int dmICMIntent;
+          public int dmMediaType;
+          public int dmDitherType;
+          public int dmReserved1;
+          public int dmReserved2;
+          public int dmPanningWidth;
+          public int dmPanningHeight;
         }
 
         public static Vector2 getScreenSize()
@@ -73,7 +84,7 @@ namespace Program
         private float cameraSpeed = 20f;
         private float sensitivity = 0.2f;
         protected Boolean UseDepthTest = false, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true, useSettings = false;
-
+        public int Width, Height;
         private static GameWindowSettings createGameWindowSettings(double FPS = 60.0)
         {
             var gws = new GameWindowSettings()
@@ -87,7 +98,6 @@ namespace Program
         private static NativeWindowSettings createNativeWindowSettings(int width = 1000, int height = 1000, string title = "OpenTK Window")
         {
             var MonitorSize = Screen.getScreenSize();
-
             var nws = new NativeWindowSettings()
             {
                 Size = new Vector2i(width, height),
@@ -104,7 +114,7 @@ namespace Program
         
         protected override void OnLoad()
         {
-            if(UseDepthTest) {GL.Enable(EnableCap.DepthTest);}
+            if (UseDepthTest) { GL.Enable(EnableCap.DepthTest); }
             if(UseAlpha) {GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);}
             GL.Enable(EnableCap.Blend);
             _lightingShader = new Shader(ShaderVert, LightingFrag);
@@ -121,11 +131,11 @@ namespace Program
             _lastPos = MouseState.PreviousPosition;
 
             _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
-            
-            CursorVisible = !KeyboardAndMouseInput;
+            Width = Size.X;
+            Height = Size.Y;
             base.OnLoad();
-            CursorGrabbed = true;
-
+            CursorGrabbed = KeyboardAndMouseInput;
+            CursorVisible = !KeyboardAndMouseInput;
         }
 
         protected void setClearColor(Color4 color)
@@ -154,6 +164,7 @@ namespace Program
                 }
                 showSettings(set);
             }
+            
             SwapBuffers();
 
             base.OnRenderFrame(e);
@@ -177,6 +188,12 @@ namespace Program
                 {
                     showSet = !showSet;
                     lastTime = false;
+
+                    if (KeyboardAndMouseInput)
+                    {
+                        CursorVisible = !CursorVisible;
+                        CursorGrabbed = !CursorVisible;
+                    }
                 }
                 
             }
@@ -188,7 +205,7 @@ namespace Program
             
 
 
-            if (KeyboardAndMouseInput)
+            if (KeyboardAndMouseInput && !showSet)
             {
                 
                 if (input.IsKeyDown(Keys.W))
@@ -231,12 +248,15 @@ namespace Program
                 _camera.Pitch -= deltaY * sensitivity; // reversed since y-coordinates range from bottom to top
 
             }
+            
                 
             base.OnUpdateFrame(e);
         }
 
         protected override void OnResize(ResizeEventArgs resizeEventArgs)
         {
+            Width = resizeEventArgs.Width;
+            Height = resizeEventArgs.Height;
             GL.Viewport(0, 0, resizeEventArgs.Width, resizeEventArgs.Height);
             base.OnResize(resizeEventArgs);
         }
@@ -380,11 +400,11 @@ namespace Program
             private readonly float[] _vertices;
             private float _rotX, _rotY, _rotZ;
             private Vector3 _pos;
-            private readonly Vector3 _color;
+            private readonly Color4 _color;
             private readonly Shader _shader;
             private readonly Lamp _lamp;
             private float _scale = 1.0f;
-            public Object(string path, Shader lightingShader, Lamp lamp, Vector3 col)
+            public Object(string path, Shader lightingShader, Lamp lamp, Color4 col)
             {
                 _vertices = loadObj(path);
 
@@ -410,7 +430,7 @@ namespace Program
                 _lamp = lamp;
                 _color = col;
             }
-            public Object(float[] vertices, Shader lightingShader, Lamp lamp, Vector3 col)
+            public Object(float[] vertices, Shader lightingShader, Lamp lamp, Color4 col)
             {
                 _vertices = vertices;
 
@@ -447,7 +467,7 @@ namespace Program
                 _shader.SetMatrix4("view", camera.GetViewMatrix());
                 _shader.SetMatrix4("projection", camera.GetProjectionMatrix());
 
-                _shader.SetVector3("objectColor", _color);
+                _shader.SetVector4("objectColor", new Vector4(_color.R, _color.G, _color.B, _color.A));
                 _shader.SetVector3("lightColor", _lamp.LightColor);
                 _shader.SetVector3("lightPos", _lamp.Pos);
 
@@ -618,7 +638,7 @@ namespace Program
         /// <param name="height">Height of the cube</param>
         /// <param name="depth">Depth of the cube</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createCube(Vector3 color, float width, float height, float depth)
+        public int createCube(Color4 color, float width, float height, float depth)
         {
             var cubeVertex = CreateRectangularPrismVertices(width, height, depth);
             _mainObjects.Add(new Object(cubeVertex, _lightingShader, _mainLamp, color));
@@ -630,7 +650,7 @@ namespace Program
         /// <param name="color">Color of the sphere</param>
         /// <param name="r">Radius of the sphere</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createSphere(Vector3 color, float r)
+        public int createSphere(Color4 color, float r)
         {
             float[] v = CreateSphereVertices(r);
             _mainObjects.Add(new Object(v, _lightingShader, _mainLamp, color));
@@ -641,7 +661,7 @@ namespace Program
         /// </summary>
         /// <param name="color">Color of the torus</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createTorus(Vector3 color)
+        public int createTorus(Color4 color)
         {
             _mainObjects.Add(new Object("Objs/torus.obj", _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
@@ -651,7 +671,7 @@ namespace Program
         /// </summary>
         /// <param name="color">Color of the torus</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createCylinder(Vector3 color)
+        public int createCylinder(Color4 color)
         {
             _mainObjects.Add(new Object("Objs/cilinder.obj", _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
@@ -676,7 +696,7 @@ namespace Program
         public int createPlane(float x1, float y1, float z1,
                                float x2, float y2, float z2,
                                float x3, float y3, float z3,
-                               float x4, float y4, float z4, Vector3 color)
+                               float x4, float y4, float z4, Color4 color)
         {
             Vector3 l1 = new Vector3(x2 - x1, y2 - y1, z2 - z1);
             Vector3 l2 = new Vector3(x3 - x1, y3 - y1, z3 - z1);
@@ -710,7 +730,7 @@ namespace Program
         /// </summary>
         /// <param name="obj">Path to the .obj file</param>
         /// <param name="color">Color of the object</param>
-        public void openObj(string obj, Vector3 color)
+        public void openObj(string obj, Color4 color)
         {
             _mainObjects.Add(new Object(obj, _lightingShader, _mainLamp, color));
         }
@@ -2091,7 +2111,7 @@ namespace Program
             /// </summary>
             public void readSettings()
             {
-                try
+                if (File.Exists("settings.cfg"))
                 {
                     using (StreamReader file = new StreamReader("settings.cfg"))
                     {
@@ -2113,14 +2133,22 @@ namespace Program
                                     settings.Add(values[0], values[1]);
                                 }
                             }
-                            
-
                         }
-                    }
+                    } 
                 }
-                catch (InvalidCastException e)
+                else
                 {
-                    Console.WriteLine(e.GetBaseException());
+                    settings = new Dictionary<string, object>();
+
+                    settings.Add("width", 200);
+                    settings.Add("height", 300);
+                    settings.Add("useTexture", false);
+                    settings.Add("r", 0);
+                    settings.Add("g", 127);
+                    settings.Add("b", 256);
+                    settings.Add("a", 1);
+                    
+                    writeSettings();
                 }
             }
             /// <summary>

@@ -12,11 +12,16 @@ Documentation at https://open.timber1900.tk</Description>
     <PackageTags>3D, 2D, OpenTK, Engine</PackageTags>
     <Version>1.8.5</Version>
     <PackageReleaseNotes>Summaries, better spheres, better documentation</PackageReleaseNotes>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netcoreapp2.1|AnyCPU'">
     <DocumentationFile>C:\Users\35196\source\repos\OpenTK3DEngine\Program\Program.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
