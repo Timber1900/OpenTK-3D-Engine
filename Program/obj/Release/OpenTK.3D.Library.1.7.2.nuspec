@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>OpenTK.3D.Library</id>
+    <version>1.7.2</version>
+    <authors>Hugo Humberto Martins Teixeira</authors>
+    <owners>Hugo Humberto Martins Teixeira</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>OpenTK 3D/2D engine, very fast for both 3D and 2D applications.
+
+Documentation at https://www.nuget.org/packages/OpenTK.3D.Library</description>
+    <releaseNotes>Settings class 1st implementation</releaseNotes>
+    <tags>3D, 2D, OpenTK, Engine</tags>
+    <dependencies>
+      <group targetFramework=".NETCoreApp2.1">
+        <dependency id="Microsoft.Win32.SystemEvents" version="4.7.0" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="12.0.3" exclude="Build,Analyzers" />
+        <dependency id="OpenTK" version="3.2.0" exclude="Build,Analyzers" />
+        <dependency id="SixLabors.ImageSharp" version="1.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Drawing.Common" version="4.7.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETCoreApp3.1">
+        <dependency id="Microsoft.Win32.SystemEvents" version="4.7.0" exclude="Build,Analyzers" />
+        <dependency id="Newtonsoft.Json" version="12.0.3" exclude="Build,Analyzers" />
+        <dependency id="OpenTK" version="3.2.0" exclude="Build,Analyzers" />
+        <dependency id="SixLabors.ImageSharp" version="1.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Drawing.Common" version="4.7.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Users\Hugo Teixeira\RiderProjects\OpenTK3DEngine\Program\bin\Release\netcoreapp2.1\Program.dll" target="lib\netcoreapp2.1\Program.dll" />
+    <file src="C:\Users\Hugo Teixeira\RiderProjects\OpenTK3DEngine\Program\bin\Release\netcoreapp3.1\Program.dll" target="lib\netcoreapp3.1\Program.dll" />
+  </files>
+</package>
