@@ -4,7 +4,7 @@
 
 - [ ] Add drawPolygon Function (p5.js Triangle strip style),
 
-- [ ] Add internal support for fonts using the microsoft Font class to create a bitmap and font data, removing the need for external programs,
+- [x] Add internal support for fonts using the microsoft Font class to create a bitmap and font data, removing the need for external programs,
 
 - [ ] Complete settings class
 
@@ -50,19 +50,18 @@ namespace yourNameSpace
 {
     public class yourClass : MainRenderWindow
     {
-        public yourClass(int width, int height, string title, double fps),
-            : base(width, height, title, fps)
+        public Game(int width, int height, string title, double FPS) : base(width, height, title, FPS)
         {
         }
 
-        protected override void OnLoad(EventArgs e)
+        protected override void OnLoad()
         {
             setClearColor(new Color4(0.0f, 0.0f, 0.0f, 1.0f)); //Sets Background Color
             UseDepthTest = false; //Enables Depth Testing for 3D
             RenderLight = false; //Makes the 3D light visible
             UseAlpha = true; //Enables alpha use
             KeyboardAndMouseInput = false; //Enables keyboard and mouse input for 3D movement
-            base.OnLoad(e);
+            base.OnLoad();
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -72,7 +71,6 @@ namespace yourNameSpace
             drawEllipse(500, 500, 10f, 10f, new Color4(1.0f, 1.0f, 1.0f, 1.0f)); //Draws a circle
 
             base.OnRenderFrame(e);
-
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
@@ -137,7 +135,7 @@ namespace yourNamespace
 1. `drawTexturedLine(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)`
 1. `drawQuad(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4, Color4 color)`
 1. `drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Color4 color)`
-1. `drawText(string text, int px, float x, float y, Font f, Color4 col)`
+1. `drawText(string text, float x, float y, Font f, Color4 col, int TextAlign)`
 1. ***drawTexturedRectangle() overloads***
     1. `drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)`
     1. `drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)`
@@ -146,19 +144,14 @@ namespace yourNamespace
     1. `drawTexturedQuad(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)`
     1. `drawTexturedQuad(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)`
     1. `drawTexturedQuad(float x1, float y1, float z1, float u1, float v1, float x2, float y2, float z2, float u2, float v2, float x3, float y3, float z3, float u3, float v3, float x4, float y4, float z4, float u4, float v4, Texture texture, Color4 color)`
-        
-#### Font Class:
-1. `Font(string path_to_.fnt, string path_to_.png)`
-1. `Dispose() => Deletes the font, make sure to call this on OnUnload()`
-1. `static getPhraseLength(string text, int px, Font f)`
 
 #### Settings Class:
 1. `addButton(string t, float x, float y, int w, int h, Color4 c, Func<object> func, Font f)`
 1. `addSetting(string key, object value)`
 1. `readSettings()` => Reads settings.cfg
 1. `writeSettings()` => Writes to settings.cfg
-```example
-#Settings.cfg Example
+##### Settings.cfg Example
+```
 width=200
 height=300
 useTexture=false
