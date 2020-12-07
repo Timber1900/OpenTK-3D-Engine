@@ -136,7 +136,6 @@ namespace Program
         protected void setClearColor(Color4 color)
         {
             GL.ClearColor(color);
-
         }
         protected override void OnRenderFrame(FrameEventArgs e)
         {
@@ -196,10 +195,6 @@ namespace Program
             {
                 lastTime = true;
             }
-
-            
-
-
             if (KeyboardAndMouseInput && !showSet)
             {
                 
@@ -664,7 +659,7 @@ namespace Program
         /// <summary>
         /// Creates a Cylinder that is rendered to the screen (Currently needs a .obj file)
         /// </summary>
-        /// <param name="color">Color of the torus</param>
+        /// <param name="color">Color of the cilinder</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
         public int createCylinder(Color4 color)
         {
