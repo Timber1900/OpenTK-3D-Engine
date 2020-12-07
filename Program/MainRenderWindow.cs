@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -1881,37 +1882,36 @@ namespace Program
         /// <param name="textAlign">Alignment of the text, default bottom left</param>
         public void drawText(string text, float x, float y, Font f, Color4 col, int textAlign = 0b00001000)
         {
-            Bitmap bmt = new Bitmap(Width, Height);
-            Graphics grx = Graphics.FromImage(bmt);
-            //grx.MeasureString(text, f);
+            Bitmap tbmt = new Bitmap(1, 1);
+            Graphics tgrx = Graphics.FromImage(tbmt);
             Vector2i regPos = new Vector2i(Convert.ToInt16(x), Convert.ToInt16(y));
             Vector2i pos = new Vector2i(0, 0);
-            int length = Convert.ToInt16(grx.MeasureString(text, f).Width);
+            SizeF l = tgrx.MeasureString(text, f);
             switch (textAlign)
             {
                 case 0b0000000:
-                    pos = new Vector2i(regPos.X - length, regPos.Y - f.Height);
+                    pos = new Vector2i(regPos.X - Convert.ToInt16(l.Width), regPos.Y - f.Height);
                     break;
                 case 0b0000001:
-                    pos = new Vector2i(regPos.X - (length / 2), regPos.Y - f.Height);
+                    pos = new Vector2i(regPos.X - (Convert.ToInt16(l.Width) / 2), regPos.Y - f.Height);
                     break;
                 case 0b0000010:
                     pos = new Vector2i(regPos.X, regPos.Y - f.Height);
                     break;
                 case 0b0000011:
-                    pos = new Vector2i(regPos.X - length, regPos.Y - (f.Height / 2));
+                    pos = new Vector2i(regPos.X - Convert.ToInt16(l.Width), regPos.Y - (f.Height / 2));
                     break;
                 case 0b0000100:
-                    pos = new Vector2i(regPos.X - (length / 2), regPos.Y - (f.Height / 2));
+                    pos = new Vector2i(regPos.X - (Convert.ToInt16(l.Width) / 2), regPos.Y - (f.Height / 2));
                     break;
                 case 0b0000101:
                     pos = new Vector2i(regPos.X, regPos.Y - (f.Height / 2));
                     break;
                 case 0b0000110:
-                    pos = new Vector2i(regPos.X - length, regPos.Y);
+                    pos = new Vector2i(regPos.X - Convert.ToInt16(l.Width), regPos.Y);
                     break;
                 case 0b0000111:
-                    pos = new Vector2i(regPos.X - (length / 2), regPos.Y);
+                    pos = new Vector2i(regPos.X - (Convert.ToInt16(l.Width) / 2), regPos.Y);
                     break;
                 case 0b0001000:
                     pos = regPos;
@@ -1919,8 +1919,14 @@ namespace Program
                 default:
                     throw new Exception("Wrong textAlign value, use the interface \"TextAlign\"");
             }
-            grx.DrawString(text, f, Brushes.White, pos.X, Math.Abs(pos.Y - Height) - f.Height);
-            drawTexturedRectangle(0, 0, 0, 0, Width, Height, 1, 1, bmt, col, TextureMinFilter.Linear, TextureMagFilter.Linear);
+            Bitmap bmt = new Bitmap(Convert.ToInt16(l.Width), Convert.ToInt16(l.Height));
+            Graphics grx = Graphics.FromImage(bmt);
+            GraphicsPath textPath = new GraphicsPath();
+            float emSize = grx.DpiY * f.SizeInPoints / 72;
+            textPath.AddString(text, f.FontFamily, (int)f.Style, emSize, new Point(0, 0), StringFormat.GenericDefault);
+            grx.SmoothingMode = SmoothingMode.HighQuality;
+            grx.FillPath(Brushes.White, textPath);
+            drawTexturedRectangle(pos.X,pos.Y,0,0,pos.X + l.Width,pos.Y + l.Height,1,1,bmt,col,TextureMinFilter.Linear,TextureMagFilter.Linear);
         }
 
         /// <summary>
@@ -1956,7 +1962,7 @@ namespace Program
             /// Text is drawn from bottom right corner
             /// </summary>
             public static int BottomRight  = 0b00000110;
-            /// <summaryb
+            /// <summary>
             /// Text is drawn from the bottom side and centered horizontally
             /// </summary>
             public static int BottomCenter = 0b00000111;
