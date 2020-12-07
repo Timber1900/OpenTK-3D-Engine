@@ -4,7 +4,7 @@
 
 - [ ] Add drawPolygon Function (p5.js Triangle strip style),
 
-- [ ] Add internal support for fonts using the microsoft Font class to create a bitmap and font data, removing the need for external programs,
+- [x] Add internal support for fonts using the microsoft Font class to create a bitmap and font data, removing the need for external programs,
 
 - [ ] Complete settings class
 
