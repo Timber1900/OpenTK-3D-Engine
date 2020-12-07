@@ -10,10 +10,11 @@
 
 Documentation at https://open.timber1900.tk</Description>
     <PackageTags>3D, 2D, OpenTK, Engine</PackageTags>
-    <Version>2.0.1</Version>
+    <Version>2.1</Version>
     <PackageReleaseNotes>OpenTK 4.0.6 support</PackageReleaseNotes>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netcoreapp2.1|AnyCPU'">
