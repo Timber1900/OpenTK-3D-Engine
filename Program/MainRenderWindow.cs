@@ -1873,6 +1873,7 @@ namespace Program
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
+
         /// <summary>
         /// Draws text to the screen
         /// </summary>
@@ -1882,130 +1883,92 @@ namespace Program
         /// <param name="y">Y pos of the bottom left corner of the text</param>
         /// <param name="f">The font to be used to draw the text</param>
         /// <param name="col">Color of the text</param>
-        public void drawText(string text, int px, float x, float y, Font f, Color4 col)
+        /// <param name="textAlign">Alignment of the text, default bottom left</param>
+        public void drawText(string text, float x, float y, Font f, Color4 col, int textAlign = 0b00001000)
         {
-            byte[] ids = Encoding.ASCII.GetBytes(text);
-            int xoff = 0;
-            foreach (byte b in ids)
+            Bitmap bmt = new Bitmap(Width, Height);
+            Graphics grx = Graphics.FromImage(bmt);
+            //grx.MeasureString(text, f);
+            Vector2i regPos = new Vector2i(Convert.ToInt16(x), Convert.ToInt16(y));
+            Vector2i pos = new Vector2i(0, 0);
+            int length = Convert.ToInt16(grx.MeasureString(text, f).Width);
+            switch (textAlign)
             {
-                int i = Array.IndexOf(f.data["ids"], b);
-                float u = (float)f.data["xs"][i] / (float)f.fontWidth;
-                float v = (float)f.data["ys"][i] / (float)f.fontWidth;
-                int width = (int)(((float)px / (float)f.data["heights"][i]) * f.data["widths"][i]);
-                int height = px;
-                float uoff = u + ((float)f.data["widths"][i] / (float)f.fontWidth);
-                float voff = v - ((float)f.data["heights"][i] / (float)f.fontWidth);
-
-                drawTexturedQuad(
-                    x + xoff        , y         , 0f, u   , voff,
-                    x + xoff        , y + height, 0f, u   , v,
-                    x + width + xoff, y + height, 0f, uoff, v,
-                    x + width + xoff, y         , 0f, uoff, voff, f.font, col);
-
-                xoff += width;            
+                case 0b0000000:
+                    pos = new Vector2i(regPos.X - length, regPos.Y - f.Height);
+                    break;
+                case 0b0000001:
+                    pos = new Vector2i(regPos.X - (length / 2), regPos.Y - f.Height);
+                    break;
+                case 0b0000010:
+                    pos = new Vector2i(regPos.X, regPos.Y - f.Height);
+                    break;
+                case 0b0000011:
+                    pos = new Vector2i(regPos.X - length, regPos.Y - (f.Height / 2));
+                    break;
+                case 0b0000100:
+                    pos = new Vector2i(regPos.X - (length / 2), regPos.Y - (f.Height / 2));
+                    break;
+                case 0b0000101:
+                    pos = new Vector2i(regPos.X, regPos.Y - (f.Height / 2));
+                    break;
+                case 0b0000110:
+                    pos = new Vector2i(regPos.X - length, regPos.Y);
+                    break;
+                case 0b0000111:
+                    pos = new Vector2i(regPos.X - (length / 2), regPos.Y);
+                    break;
+                case 0b0001000:
+                    pos = regPos;
+                    break;
+                default:
+                    throw new Exception("Wrong textAlign value, use the interface \"TextAlign\"");
             }
+            grx.DrawString(text, f, Brushes.White, pos.X, Math.Abs(pos.Y - Height) - f.Height);
+            drawTexturedRectangle(0, 0, 0, 0, Width, Height, 1, 1, bmt, col, TextureMinFilter.Linear, TextureMagFilter.Linear);
         }
 
         /// <summary>
-        /// Font wrapper for drawing text
+        /// Interface containing the text alignments for the drawText() function
         /// </summary>
-
-        public class Font
+        public interface ITextAlign
         {
-            public Dictionary<string, int[]> data = new Dictionary<string, int[]>();
-            public Texture font;
-            public int fontWidth;
-
             /// <summary>
-            /// Creates a font given a .fnt file and a .png texture
-            /// Currently only one page for the texture is supported
-            /// Use BMFont to generate this files, make sure to delete the background in the image editor of your choice
-            /// Eventually simpler use will be created, using .net font standard, however I dont know when this will happen
+            /// Text is drawn from the upper right corner
             /// </summary>
-            /// <param name="path">Path to the .fnt file</param>
-            /// <param name="path2">Path to the .png file</param>
-
-            public Font(string path, string path2)
-            {
-                data = new Dictionary<string, int[]>();
-                font = new Texture(path2, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
-                Bitmap b = new Bitmap(path2);
-                using (StreamReader file = new StreamReader(path))
-                {
-                    fontWidth = b.Width;
-                    string ln;
-                    List<int> ids = new List<int>();
-                    List<int> xs = new List<int>();
-                    List<int> ys = new List<int>();
-                    List<int> widths = new List<int>();
-                    List<int> heights = new List<int>();
-
-
-                    while ((ln = file.ReadLine()) != null)
-                    {
-                        if (ln.Substring(0, 5) == "char ")
-                        {
-                            string Data = ln.Substring(5);
-                            string[] d = Data.Split(" ");
-                            List<int> f = new List<int>();
-                            foreach (string l in d)
-                            {
-                                if (l.Contains("="))
-                                {
-                                    string[] newL = l.Split("=");
-                                    Regex.Replace(newL[1], @"\s+", "");
-                                    f.Add(int.Parse(newL[1]));
-                                }
-                            }
-                            ids.Add(f[0]);
-                            xs.Add(f[1]);
-                            ys.Add(-(f[2] - fontWidth));
-                            widths.Add(f[3]);
-                            heights.Add(f[4]);
-                        }
-                    }
-
-
-                    data.Add("ids", ids.ToArray());
-                    data.Add("xs", xs.ToArray());
-                    data.Add("ys", ys.ToArray());
-                    data.Add("widths", widths.ToArray());
-                    data.Add("heights", heights.ToArray());
-                    file.Close();
-                }
-            }
+            public static int UpRight      = 0b00000000;
             /// <summary>
-            /// Deletes the font, make sure to call this function onUnload()
+            /// Text is drawn from the upper side and centered horizontally
             /// </summary>
-
-            public void Dispose()
-            {
-                GL.DeleteTexture(font.Handle);
-            }
-
-        }
-
-        /// <summary>
-        /// Gets the width of the text to be drawn on the screen, use this for centering text,
-        /// Eventually a single function will draw the text centered on a point 
-        /// </summary>
-        /// <param name="text">Text to get the lenght of</param>
-        /// <param name="px">Vertical size of the text</param>
-        /// <param name="f">Font of the text</param>
-        /// <returns></returns>
-
-        public int getPhraseLength(string text, int px, Font f)
-        {
-            byte[] ids = Encoding.ASCII.GetBytes(text);
-            int xoff = 0;
-            foreach (byte b in ids)
-            {
-                int i = Array.IndexOf(f.data["ids"], b);
-                int width = (int)(((float)px / (float)f.data["heights"][i]) * f.data["widths"][i]);
-
-                xoff += width;
-            }
-            return xoff;
+            public static int UpCenter     = 0b00000001;
+            /// <summary>
+            /// Text is drawn from upper left corner
+            /// </summary>
+            public static int UpLeft       = 0b00000010;
+            /// <summary>
+            /// Text is drawn from the right side and centered vertically
+            /// </summary>
+            public static int MiddleRight  = 0b00000011;
+            /// <summary>
+            /// Text is drawn from the center of the text
+            /// </summary>
+            public static int MiddleCenter = 0b00000100;
+            /// <summary>
+            /// Text is drawn from the left side and centered vertically
+            /// </summary>
+            public static int MiddleLeft   = 0b00000101;
+            /// <summary>
+            /// Text is drawn from bottom right corner
+            /// </summary>
+            public static int BottomRight  = 0b00000110;
+            /// <summaryb
+            /// Text is drawn from the bottom side and centered horizontally
+            /// </summary>
+            public static int BottomCenter = 0b00000111;
+            /// <summary>
+            /// Text is drawn from bottom left corner
+            /// </summary>
+            public static int BottomLeft   = 0b00001000;
         }
 
         public Settings set = new Settings();
@@ -2030,13 +1993,8 @@ namespace Program
                 var x = b.pos.X + pos.X;
                 var y = b.pos.Y + pos.Y;
                 drawRectangle(x, y, x + b.width, y + b.height, b.col);
-                if(b.l == -1)
-                {
-                    b.l = getPhraseLength(b.Text, Math.Min(b.height, 32), b.font);
-                }
-                drawText(b.Text, Math.Min(b.height, 32), x + ((b.width - b.l) / 2), y + ((b.height - Math.Min(b.height, 32)) / 2), b.font, Color4.White);
+                drawText(b.Text, x + (b.width), y + (b.height), b.font, Color4.White, ITextAlign.BottomCenter);
                 b.setCol(Color4.Blue);
-
             }
         }
         /// <summary>
