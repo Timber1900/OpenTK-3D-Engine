@@ -440,22 +440,28 @@ namespace Program
         /// <summary>
         ///     Creates a Torus (Donut) that is rendered to the screen (Currently needs a .obj file)
         /// </summary>
+        /// <param name="innerR">Inner radius of the torus</param>
         /// <param name="color">Color of the torus</param>
+        /// <param name="outerR">Outer radius of the torus</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int CreateTorus(Color4 color)
+        public int CreateTorus(float outerR, float innerR, Color4 color)
         {
-            _mainObjects.Add(new Object("Objs/torus.obj", _lightingShader, _mainLamp, color));
+            var v = CreateTorusVertices(outerR, innerR);
+            _mainObjects.Add(new Object(v, _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
         }
 
         /// <summary>
         ///     Creates a Cylinder that is rendered to the screen (Currently needs a .obj file)
         /// </summary>
-        /// <param name="color">Color of the cilinder</param>
+        /// <param name="h">Height of the cylinder</param>
+        /// <param name="color">Color of the cylinder</param>
+        /// <param name="r">Radius of the cylinder</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int CreateCylinder(Color4 color)
+        public int CreateCylinder(float r, float h, Color4 color)
         {
-            _mainObjects.Add(new Object("Objs/cilinder.obj", _lightingShader, _mainLamp, color));
+            var v = CreateCylinderVertices(r, h);
+            _mainObjects.Add(new Object(v, _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
         }
 
@@ -769,6 +775,229 @@ namespace Program
                 vertices.Add(n.X);
                 vertices.Add(n.Y);
                 vertices.Add(n.Z);
+            }
+
+            return vertices.ToArray();
+        }
+
+        private static float[] CreateCylinderVertices(float r, float h)
+        {            
+            var res = Math.Min(Convert.ToInt32(Math.Ceiling(r * r)), 50);
+            List<Vector3> circle1Verts = new List<Vector3>();
+            List<Vector3> circle2Verts = new List<Vector3>();
+            for (float a = 0; a <= Math.PI * 2; a += (float) Math.PI / res)
+            {
+                circle1Verts.Add(new Vector3(r * (float) Math.Cos(a), h / 2, r * (float) Math.Sin(a)));
+                circle2Verts.Add(new Vector3(r * (float) Math.Cos(a), -h / 2, r * (float) Math.Sin(a)));
+            }
+            circle1Verts.Add(circle1Verts[0]);
+            circle2Verts.Add(circle2Verts[0]);
+            List<float> vertices = new List<float>();
+            for (var i = 0; i < circle1Verts.Count - 1; i++)
+            {
+                var v01 = new Vector3(0, h / 2, 0);
+                var v02 = circle1Verts[i];
+                var v03 = circle1Verts[i + 1];
+
+                var l1 = v02 - v01;
+                var l2 = v03 - v01;
+                
+                var n = Vector3.Cross(l2, l1);
+                
+                vertices.Add(v01.X);
+                vertices.Add(v01.Y);
+                vertices.Add(v01.Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(circle1Verts[i].X);
+                vertices.Add(circle1Verts[i].Y);
+                vertices.Add(circle1Verts[i].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(circle1Verts[i + 1].X);
+                vertices.Add(circle1Verts[i + 1].Y);
+                vertices.Add(circle1Verts[i + 1].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                
+                v01 = new Vector3(0, -h / 2, 0);
+                v02 = circle2Verts[i];
+                v03 = circle2Verts[i + 1];
+                
+                l1 = v02 - v01;
+                l2 = v03 - v01;
+                
+                n = Vector3.Cross(l2, l1);
+                
+                vertices.Add(v01.X);
+                vertices.Add(v01.Y);
+                vertices.Add(v01.Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(circle2Verts[i].X);
+                vertices.Add(circle2Verts[i].Y);
+                vertices.Add(circle2Verts[i].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(circle2Verts[i + 1].X);
+                vertices.Add(circle2Verts[i + 1].Y);
+                vertices.Add(circle2Verts[i + 1].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+            }
+            for (var i = 0; i < circle1Verts.Count - 1; i++)
+            {
+                var v01 = circle1Verts[i];
+                var v02 = circle2Verts[i];
+                var v03 = circle2Verts[i + 1];
+
+                var l1 = v02 - v01;
+                var l2 = v03 - v01;
+                
+                var n = Vector3.Cross(l1, l2);
+
+                vertices.Add(circle1Verts[i].X);
+                vertices.Add(circle1Verts[i].Y);
+                vertices.Add(circle1Verts[i].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(circle2Verts[i].X);
+                vertices.Add(circle2Verts[i].Y);
+                vertices.Add(circle2Verts[i].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(circle2Verts[i + 1].X);
+                vertices.Add(circle2Verts[i + 1].Y);
+                vertices.Add(circle2Verts[i + 1].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+
+                
+                v01 = circle1Verts[i];
+                v03 = circle2Verts[i + 1];
+                v02 = circle1Verts[i + 1];
+
+                l1 = v02 - v01;
+                l2 = v03 - v01;
+                
+                n = Vector3.Cross(l2, l1);
+                
+                vertices.Add(circle1Verts[i].X);
+                vertices.Add(circle1Verts[i].Y);
+                vertices.Add(circle1Verts[i].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(circle2Verts[i + 1].X);
+                vertices.Add(circle2Verts[i + 1].Y);
+                vertices.Add(circle2Verts[i + 1].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+                vertices.Add(circle1Verts[i + 1].X);
+                vertices.Add(circle1Verts[i + 1].Y);
+                vertices.Add(circle1Verts[i + 1].Z);
+                vertices.Add(n.X);
+                vertices.Add(n.Y);
+                vertices.Add(n.Z);
+            }
+
+            return vertices.ToArray();
+        }
+
+        private static float[] CreateTorusVertices(float outerR, float innerR)
+        {
+            var res1 = Math.Min(Convert.ToInt32(Math.Ceiling(outerR * outerR)), 50);
+            var res2 = Math.Min(Convert.ToInt32(Math.Ceiling(innerR * innerR)), 50);
+            var res = Math.Max(res1, res2);
+            
+            List<List<Vector3>> verts = new List<List<Vector3>>();
+            for (float u = 0; u <= Math.PI * 2; u += (float) Math.PI / res)
+            {
+                List<Vector3> _verts = new List<Vector3>();
+
+                for (float v = 0; v <= Math.PI * 2; v += (float) Math.PI / res)
+                {
+                    _verts.Add(new Vector3(
+                        (outerR + (innerR * (float) Math.Cos(v))) * (float) Math.Cos(u),
+                        (outerR + (innerR * (float) Math.Cos(v))) * (float) Math.Sin(u),
+                        innerR * (float) Math.Sin(v)));
+                }  
+                _verts.Add(_verts[0]);
+                verts.Add(_verts);
+            }
+            verts.Add(verts[0]);
+            List<float> vertices = new List<float>();
+
+            for (var i = 0; i < verts.Count - 1; i++)
+            {
+                for (var j = 0; j < verts[i].Count - 1; j++)
+                {
+                    var v01 = verts[i][j];
+                    var v02 = verts[i + 1][j];
+                    var v03 = verts[i + 1][j + 1];
+
+                    var l1 = v02 - v01;
+                    var l2 = v03 - v01;
+                
+                    var n = Vector3.Cross(l2, l1);
+                    
+                    vertices.Add(verts[i][j].X);
+                    vertices.Add(verts[i][j].Y);
+                    vertices.Add(verts[i][j].Z);
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                    vertices.Add(verts[i + 1][j].X);
+                    vertices.Add(verts[i + 1][j].Y);
+                    vertices.Add(verts[i + 1][j].Z);
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                    vertices.Add(verts[i + 1][j + 1].X);
+                    vertices.Add(verts[i + 1][j + 1].Y);
+                    vertices.Add(verts[i + 1][j + 1].Z);
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                    
+                    v01 = verts[i][j];
+                    v02 = verts[i + 1][j];
+                    v03 = verts[i + 1][j + 1];
+
+                    l1 = v02 - v01;
+                    l2 = v03 - v01;
+                
+                    n = Vector3.Cross(l2, l1);
+                    
+                    vertices.Add(verts[i][j].X);
+                    vertices.Add(verts[i][j].Y);
+                    vertices.Add(verts[i][j].Z);
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);    
+                    vertices.Add(verts[i + 1][j + 1].X);
+                    vertices.Add(verts[i + 1][j + 1].Y);
+                    vertices.Add(verts[i + 1][j + 1].Z);
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                    vertices.Add(verts[i][j + 1].X);
+                    vertices.Add(verts[i][j + 1].Y);
+                    vertices.Add(verts[i][j + 1].Z);
+                    vertices.Add(n.X);
+                    vertices.Add(n.Y);
+                    vertices.Add(n.Z);
+                }
             }
 
             return vertices.ToArray();
