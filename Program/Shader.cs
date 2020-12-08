@@ -1,30 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Collections.Generic;
-using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 
 namespace Program
 {
     /// <summary>
-    /// A simple class meant to help create shaders.
+    ///     A simple class meant to help create shaders.
     /// </summary>
     public class Shader
     {
+        private readonly Dictionary<string, int> _uniformLocations;
+
         /// <summary>
-        /// Handle of the shader
+        ///     Handle of the shader
         /// </summary>
         public readonly int Handle;
 
-        private readonly Dictionary<string, int> _uniformLocations;
-
 
         /// <summary>
-        ///  This is how you create a simple shader.
-        /// Shaders are written in GLSL, which is a language very similar to C in its semantics.
-        /// The GLSL source is compiled *at runtime*, so it can optimize itself for the graphics card it's currently being used on.
+        ///     This is how you create a simple shader.
+        ///     Shaders are written in GLSL, which is a language very similar to C in its semantics.
+        ///     The GLSL source is compiled *at runtime*, so it can optimize itself for the graphics card it's currently being used
+        ///     on.
         /// </summary>
         /// <param name="vert"></param>
         /// <param name="frag"></param>
@@ -115,28 +115,30 @@ namespace Program
 
             // Check for linking errors
             GL.GetProgram(program, GetProgramParameterName.LinkStatus, out var code);
-            if (code != (int)All.True)
-            {
+            if (code != (int) All.True)
                 // We can use `GL.GetProgramInfoLog(program)` to get information about the error.
                 throw new Exception($"Error occurred whilst linking Program({program})");
-            }
         }
-        
+
         /// <summary>
-        /// A wrapper function that enables the shader program.
+        ///     A wrapper function that enables the shader program.
         /// </summary>
         public void Use()
         {
             GL.UseProgram(Handle);
         }
-        
+
         /// <summary>
-        /// The shader sources provided with this project use hardcoded layout(location)-s. If you want to do it dynamically, <!---->
-        /// you can omit the layout(location=X) lines in the vertex shader, and use this in VertexAttribPointer instead of the hardcoded values.
+        ///     The shader sources provided with this project use hardcoded layout(location)-s. If you want to do it dynamically, <!---->
+        ///     you can omit the layout(location=X) lines in the vertex shader, and use this in VertexAttribPointer instead of the
+        ///     hardcoded values.
         /// </summary>
         /// <param name="attribName"></param>
         /// <returns></returns>
-        public int GetAttribLocation(string attribName) => GL.GetAttribLocation(Handle, attribName);
+        public int GetAttribLocation(string attribName)
+        {
+            return GL.GetAttribLocation(Handle, attribName);
+        }
 
         // Just loads the entire file into a string.
         private static string LoadSource(string path)
@@ -155,7 +157,7 @@ namespace Program
         //     3. Use the appropriate GL.Uniform* function to set the uniform.
 
         /// <summary>
-        /// Set a uniform int on this shader.
+        ///     Set a uniform int on this shader.
         /// </summary>
         /// <param name="name">The name of the uniform</param>
         /// <param name="data">The data to set</param>
@@ -166,7 +168,7 @@ namespace Program
         }
 
         /// <summary>
-        /// Set a uniform float on this shader.
+        ///     Set a uniform float on this shader.
         /// </summary>
         /// <param name="name">The name of the uniform</param>
         /// <param name="data">The data to set</param>
@@ -177,14 +179,14 @@ namespace Program
         }
 
         /// <summary>
-        /// Set a uniform Matrix4 on this shader
+        ///     Set a uniform Matrix4 on this shader
         /// </summary>
         /// <param name="name">The name of the uniform</param>
         /// <param name="data">The data to set</param>
         /// <remarks>
-        ///   <para>
-        ///   The matrix is transposed before being sent to the shader.
-        ///   </para>
+        ///     <para>
+        ///         The matrix is transposed before being sent to the shader.
+        ///     </para>
         /// </remarks>
         public void SetMatrix4(string name, Matrix4 data)
         {
@@ -193,7 +195,7 @@ namespace Program
         }
 
         /// <summary>
-        /// Set a uniform Vector3 on this shader.
+        ///     Set a uniform Vector3 on this shader.
         /// </summary>
         /// <param name="name">The name of the uniform</param>
         /// <param name="data">The data to set</param>
@@ -202,9 +204,9 @@ namespace Program
             GL.UseProgram(Handle);
             GL.Uniform3(_uniformLocations[name], data);
         }
-        
+
         /// <summary>
-        /// Set a uniform Vector4 on this shader.
+        ///     Set a uniform Vector4 on this shader.
         /// </summary>
         /// <param name="name">The name of the uniform</param>
         /// <param name="data">The data to set</param>
