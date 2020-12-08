@@ -1,17 +1,18 @@
 ﻿using System;
-using OpenTK;
 using OpenTK.Mathematics;
 
 namespace Program
 {
+    /// <summary>
+    ///     Camera class
+    /// </summary>
     public class Camera
     {
+        // The field of view of the camera (radians)
+        private float _fov = MathHelper.PiOver2;
+
         // Those vectors are directions pointing outwards from the camera to define how it rotated
         private Vector3 _front = -Vector3.UnitZ;
-
-        private Vector3 _up = Vector3.UnitY;
-
-        private Vector3 _right = Vector3.UnitX;
 
         // Rotation around the X axis (radians)
         private float _pitch;
@@ -19,28 +20,42 @@ namespace Program
         // Rotation around the Y axis (radians)
         private float _yaw = -MathHelper.PiOver2; // Without this you would be started rotated 90 degrees right
 
-        // The field of view of the camera (radians)
-        private float _fov = MathHelper.PiOver2;
-
+        /// <summary>
+        ///     Camera constructor
+        /// </summary>
+        /// <param name="position">Position of the camera</param>
+        /// <param name="aspectRatio">Aspect ratio of the camera</param>
         public Camera(Vector3 position, float aspectRatio)
         {
             Position = position;
             AspectRatio = aspectRatio;
         }
 
-        // The position of the camera
+        /// <summary>
+        ///     The position of the camera
+        /// </summary>
         public Vector3 Position { get; set; }
 
-        // This is simply the aspect ratio of the viewport, used for the projection matrix
-        public float AspectRatio { private get; set; }
+        /// <summary>
+        ///     This is simply the aspect ratio of the viewport, used for the projection matrix
+        /// </summary>
+        private float AspectRatio { get; }
 
+        /// <summary>
+        /// </summary>
         public Vector3 Front => _front;
 
-        public Vector3 Up => _up;
+        /// <summary>
+        /// </summary>
+        public Vector3 Up { get; private set; } = Vector3.UnitY;
 
-        public Vector3 Right => _right;
+        /// <summary>
+        /// </summary>
+        public Vector3 Right { get; private set; } = Vector3.UnitX;
 
-        // We convert from degrees to radians as soon as the property is set to improve performance
+        /// <summary>
+        ///     We convert from degrees to radians as soon as the property is set to improve performance
+        /// </summary>
         public float Pitch
         {
             get => MathHelper.RadiansToDegrees(_pitch);
@@ -55,7 +70,9 @@ namespace Program
             }
         }
 
-        // We convert from degrees to radians as soon as the property is set to improve performance
+        /// <summary>
+        ///     We convert from degrees to radians as soon as the property is set to improve performance
+        /// </summary>
         public float Yaw
         {
             get => MathHelper.RadiansToDegrees(_yaw);
@@ -66,9 +83,11 @@ namespace Program
             }
         }
 
-        // The field of view (FOV) is the vertical angle of the camera view, this has been discussed more in depth in a
-        // previous tutorial, but in this tutorial you have also learned how we can use this to simulate a zoom feature.
-        // We convert from degrees to radians as soon as the property is set to improve performance
+        /// <summary>
+        ///     The field of view (FOV) is the vertical angle of the camera view, this has been discussed more in depth in a
+        ///     previous tutorial, but in this tutorial you have also learned how we can use this to simulate a zoom feature.
+        ///     We convert from degrees to radians as soon as the property is set to improve performance
+        /// </summary>
         public float Fov
         {
             get => MathHelper.RadiansToDegrees(_fov);
@@ -79,13 +98,19 @@ namespace Program
             }
         }
 
-        // Get the view matrix using the amazing LookAt function described more in depth on the web tutorials
+        /// <summary>
+        ///     Get the view matrix using the amazing LookAt function described more in depth on the web tutorials
+        /// </summary>
+        /// <returns></returns>
         public Matrix4 GetViewMatrix()
         {
-            return Matrix4.LookAt(Position, Position + _front, _up);
+            return Matrix4.LookAt(Position, Position + _front, Up);
         }
 
-        // Get the projection matrix using the same method we have used up until this point
+        /// <summary>
+        ///     Get the projection matrix using the same method we have used up until this point
+        /// </summary>
+        /// <returns></returns>
         public Matrix4 GetProjectionMatrix()
         {
             return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 1000f);
@@ -95,9 +120,9 @@ namespace Program
         private void UpdateVectors()
         {
             // First the front matrix is calculated using some basic trigonometry
-            _front.X = (float)Math.Cos(_pitch) * (float)Math.Cos(_yaw);
-            _front.Y = (float)Math.Sin(_pitch);
-            _front.Z = (float)Math.Cos(_pitch) * (float)Math.Sin(_yaw);
+            _front.X = (float) Math.Cos(_pitch) * (float) Math.Cos(_yaw);
+            _front.Y = (float) Math.Sin(_pitch);
+            _front.Z = (float) Math.Cos(_pitch) * (float) Math.Sin(_yaw);
 
             // We need to make sure the vectors are all normalized, as otherwise we would get some funky results
             _front = Vector3.Normalize(_front);
@@ -105,8 +130,8 @@ namespace Program
             // Calculate both the right and the up vector using cross product
             // Note that we are calculating the right from the global up, this behaviour might
             // not be what you need for all cameras so keep this in mind if you do not want a FPS camera
-            _right = Vector3.Normalize(Vector3.Cross(_front, Vector3.UnitY));
-            _up = Vector3.Normalize(Vector3.Cross(_right, _front));
+            Right = Vector3.Normalize(Vector3.Cross(_front, Vector3.UnitY));
+            Up = Vector3.Normalize(Vector3.Cross(Right, _front));
         }
     }
-} 
+}
