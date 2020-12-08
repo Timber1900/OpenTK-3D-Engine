@@ -8,7 +8,7 @@
 
 - [ ] Complete settings class
 
-- [ ] Make other 3D objects(cylinder, torus) not need .obj files to work
+- [x] Make other 3D objects(cylinder, torus) not need .obj files to work
 
 ## Table of Contents
 
