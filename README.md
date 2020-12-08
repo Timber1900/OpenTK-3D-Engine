@@ -6,8 +6,6 @@
 
 - [x] Add internal support for fonts using the microsoft Font class to create a bitmap and font data, removing the need for external programs,
 
-- [ ] Complete settings class
-
 - [x] Make other 3D objects(cylinder, torus) not need .obj files to work
 
 ## Table of Contents
