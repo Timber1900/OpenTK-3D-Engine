@@ -8,17 +8,26 @@ using OpenTK.Mathematics;
 
 namespace Program
 {
-    // A simple class meant to help create shaders.
+    /// <summary>
+    /// A simple class meant to help create shaders.
+    /// </summary>
     public class Shader
     {
+        /// <summary>
+        /// Handle of the shader
+        /// </summary>
         public readonly int Handle;
 
         private readonly Dictionary<string, int> _uniformLocations;
 
-        // This is how you create a simple shader.
-        // Shaders are written in GLSL, which is a language very similar to C in its semantics.
-        // The GLSL source is compiled *at runtime*, so it can optimize itself for the graphics card it's currently being used on.
-        // A commented example of GLSL can be found in shader.vert
+
+        /// <summary>
+        ///  This is how you create a simple shader.
+        /// Shaders are written in GLSL, which is a language very similar to C in its semantics.
+        /// The GLSL source is compiled *at runtime*, so it can optimize itself for the graphics card it's currently being used on.
+        /// </summary>
+        /// <param name="vert"></param>
+        /// <param name="frag"></param>
         public Shader(string vert, string frag)
         {
             // There are several different types of shaders, but the only two you need for basic rendering are the vertex and fragment shaders.
@@ -93,12 +102,10 @@ namespace Program
 
             // Check for compilation errors
             GL.GetShader(shader, ShaderParameter.CompileStatus, out var code);
-            if (code != (int)All.True)
-            {
-                // We can use `GL.GetShaderInfoLog(shader)` to get information about the error.
-                var infoLog = GL.GetShaderInfoLog(shader);
-                throw new Exception($"Error occurred whilst compiling Shader({shader}).\n\n{infoLog}");
-            }
+            if (code == (int) All.True) return;
+            // We can use `GL.GetShaderInfoLog(shader)` to get information about the error.
+            var infoLog = GL.GetShaderInfoLog(shader);
+            throw new Exception($"Error occurred whilst compiling Shader({shader}).\n\n{infoLog}");
         }
 
         private static void LinkProgram(int program)
@@ -114,27 +121,28 @@ namespace Program
                 throw new Exception($"Error occurred whilst linking Program({program})");
             }
         }
-
-        // A wrapper function that enables the shader program.
+        
+        /// <summary>
+        /// A wrapper function that enables the shader program.
+        /// </summary>
         public void Use()
         {
             GL.UseProgram(Handle);
         }
-
-        // The shader sources provided with this project use hardcoded layout(location)-s. If you want to do it dynamically,
-        // you can omit the layout(location=X) lines in the vertex shader, and use this in VertexAttribPointer instead of the hardcoded values.
-        public int GetAttribLocation(string attribName)
-        {
-            return GL.GetAttribLocation(Handle, attribName);
-        }
+        
+        /// <summary>
+        /// The shader sources provided with this project use hardcoded layout(location)-s. If you want to do it dynamically, <!---->
+        /// you can omit the layout(location=X) lines in the vertex shader, and use this in VertexAttribPointer instead of the hardcoded values.
+        /// </summary>
+        /// <param name="attribName"></param>
+        /// <returns></returns>
+        public int GetAttribLocation(string attribName) => GL.GetAttribLocation(Handle, attribName);
 
         // Just loads the entire file into a string.
         private static string LoadSource(string path)
         {
-            using (var sr = new StreamReader(path, Encoding.UTF8))
-            {
-                return sr.ReadToEnd();
-            }
+            using var sr = new StreamReader(path, Encoding.UTF8);
+            return sr.ReadToEnd();
         }
 
         // Uniform setters
@@ -195,6 +203,11 @@ namespace Program
             GL.Uniform3(_uniformLocations[name], data);
         }
         
+        /// <summary>
+        /// Set a uniform Vector4 on this shader.
+        /// </summary>
+        /// <param name="name">The name of the uniform</param>
+        /// <param name="data">The data to set</param>
         public void SetVector4(string name, Vector4 data)
         {
             GL.UseProgram(Handle);

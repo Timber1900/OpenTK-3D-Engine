@@ -1,16 +1,25 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using OpenTK.Graphics.OpenGL4;
 
-using PixelFormat = OpenTK.Graphics.OpenGL.PixelFormat;
-
 namespace Program
 {
+    /// <summary>
+    /// Class that defines a openTK texture
+    /// </summary>
     public class Texture
     {
+        /// <summary>
+        /// Handle of the texture
+        /// </summary>
         public readonly int Handle;
 
+        /// <summary>
+        /// Creates a openTk texture
+        /// </summary>
+        /// <param name="path">Path to the .png texture</param>
+        /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
         public Texture(string path, TextureMinFilter min, TextureMagFilter mag)
         {
 
@@ -40,9 +49,14 @@ namespace Program
 
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
-        public Texture(Bitmap text, TextureMinFilter min, TextureMagFilter mag)
+        /// <summary>
+        /// Creates a openTk texture
+        /// </summary>
+        /// <param name="text">Texture bitmap</param>
+        /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
+        public Texture(Image text, TextureMinFilter min, TextureMagFilter mag)
         {
-
             Handle = GL.GenTexture();
             Use();
             using (var image = new Bitmap(text))
@@ -72,6 +86,10 @@ namespace Program
         }
 
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="unit"></param>
         public void Use(TextureUnit unit = TextureUnit.Texture0)
         {
             GL.BindTexture(TextureTarget.Texture2D, Handle);

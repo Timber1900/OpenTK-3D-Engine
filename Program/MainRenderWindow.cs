@@ -4,8 +4,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -16,6 +14,9 @@ using Boolean = System.Boolean;
 
 namespace Program
 {
+    /// <summary>
+    /// Class to get the screen size
+    /// </summary>
     public static class Screen
     {
         [DllImport("user32.dll")]
@@ -23,41 +24,45 @@ namespace Program
         [StructLayout(LayoutKind.Sequential)]
         struct DEVMODE
         {
-          [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-          public string dmDeviceName;
-          public short dmSpecVersion;
-          public short dmDriverVersion;
-          public short dmSize;
-          public short dmDriverExtra;
-          public int dmFields;
-          public int dmPositionX;
-          public int dmPositionY;
-          public int dmDisplayOrientation;
-          public int dmDisplayFixedOutput;
-          public short dmColor;
-          public short dmDuplex;
-          public short dmYResolution;
-          public short dmTTOption;
-          public short dmCollate;
-          [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-          public string dmFormName;
-          public short dmLogPixels;
-          public int dmBitsPerPel;
-          public int dmPelsWidth;
-          public int dmPelsHeight;
-          public int dmDisplayFlags;
-          public int dmDisplayFrequency;
-          public int dmICMMethod;
-          public int dmICMIntent;
-          public int dmMediaType;
-          public int dmDitherType;
-          public int dmReserved1;
-          public int dmReserved2;
-          public int dmPanningWidth;
-          public int dmPanningHeight;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+            public string dmDeviceName;
+            public short dmSpecVersion;
+            public short dmDriverVersion;
+            public short dmSize;
+            public short dmDriverExtra;
+            public int dmFields;
+            public int dmPositionX;
+            public int dmPositionY;
+            public int dmDisplayOrientation;
+            public int dmDisplayFixedOutput;
+            public short dmColor;
+            public short dmDuplex;
+            public short dmYResolution;
+            public short dmTTOption;
+            public short dmCollate;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+            public string dmFormName;
+            public short dmLogPixels;
+            public int dmBitsPerPel;
+            public int dmPelsWidth;
+            public int dmPelsHeight;
+            public int dmDisplayFlags;
+            public int dmDisplayFrequency;
+            public int dmICMMethod;
+            public int dmICMIntent;
+            public int dmMediaType;
+            public int dmDitherType;
+            public int dmReserved1;
+            public int dmReserved2;
+            public int dmPanningWidth;
+            public int dmPanningHeight;
         }
 
-        public static Vector2 getScreenSize()
+        /// <summary>
+        /// Gets the screen size
+        /// </summary>
+        /// <returns>Returns the screen size</returns>
+        public static Vector2 GetScreenSize()
         {
             const int ENUM_CURRENT_SETTINGS = -1;
 
@@ -67,6 +72,8 @@ namespace Program
             return new Vector2( devMode.dmPelsWidth, devMode.dmPelsHeight);
         }
     }
+
+    /// <inheritdoc />
     public class MainRenderWindow : GameWindow
     {
         private readonly List<TexturedObject> _mainTexturedObjects = new List<TexturedObject>();
@@ -74,26 +81,35 @@ namespace Program
         private Lamp _mainLamp;
         private Shader _lampShader, _lightingShader, _textureShader, _2dShader, _2dTextured;
         private Camera _camera;
-        private bool _firstMove = true;
         private Vector2 _lastPos;
-        protected Boolean RenderLight = false;
-        private float cameraSpeed = 20f;
-        private float sensitivity = 0.2f;
-        protected Boolean UseDepthTest = false, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true, useSettings = false;
-        public int Width, Height;
-        private static GameWindowSettings createGameWindowSettings(double FPS = 60.0)
+        private float _cameraSpeed = 20f;
+        private float _sensitivity = 0.2f;
+        /// <summary>
+        /// Flags for the renderer
+        /// </summary>
+        protected Boolean UseDepthTest = false, UseAlpha = true, KeyboardAndMouseInput = true, LastTime = true;
+
+        /// <summary>
+        /// Width of the screen
+        /// </summary>
+        public int Width;
+        /// <summary>
+        /// Height of the screen
+        /// </summary>
+        public int Height;
+        private static GameWindowSettings CreateGameWindowSettings(double fps = 60.0)
         {
             var gws = new GameWindowSettings()
             {
-                UpdateFrequency = FPS,
-                RenderFrequency = FPS
+                UpdateFrequency = fps,
+                RenderFrequency = fps
             };
             return gws;
         }
         
-        private static NativeWindowSettings createNativeWindowSettings(int width = 1000, int height = 1000, string title = "OpenTK Window")
+        private static NativeWindowSettings CreateNativeWindowSettings(int width = 1000, int height = 1000, string title = "OpenTK Window")
         {
-            var MonitorSize = Screen.getScreenSize();
+            var MonitorSize = Screen.GetScreenSize();
             var nws = new NativeWindowSettings()
             {
                 Size = new Vector2i(width, height),
@@ -103,14 +119,15 @@ namespace Program
             return nws;
         }
 
-        public MainRenderWindow(int width, int height, string title, double FPS) :
-            base(createGameWindowSettings(FPS), createNativeWindowSettings(width, height, title))
+        /// <inheritdoc />
+        public MainRenderWindow(int width, int height, string title, double fps) :
+            base(CreateGameWindowSettings(fps), CreateNativeWindowSettings(width, height, title))
         {
         }
-        
+
+        /// <inheritdoc />
         protected override void OnLoad()
         {
-            if (UseDepthTest) { GL.Enable(EnableCap.DepthTest); }
             if(UseAlpha) {GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);}
             GL.Enable(EnableCap.Blend);
             _lightingShader = new Shader(ShaderVert, LightingFrag);
@@ -129,41 +146,53 @@ namespace Program
             _camera = new Camera(Vector3.UnitZ * 3, Size.X / (float)Size.Y);
             Width = Size.X;
             Height = Size.Y;
-            base.OnLoad();
             CursorGrabbed = KeyboardAndMouseInput;
             CursorVisible = !KeyboardAndMouseInput;
+            base.OnLoad();
         }
 
-        protected void setClearColor(Color4 color)
+        /// <summary>
+        /// Changes the background color
+        /// </summary>
+        /// <param name="color">Color of the background</param>
+        protected void SetClearColor(Color4 color)
         {
             GL.ClearColor(color);
         }
-        protected override void OnRenderFrame(FrameEventArgs e)
-        {
-            if (RenderLight) { _mainLamp.show(_camera, _lampShader); }
 
+        /// <summary>
+        /// Renders the 3D objects
+        /// </summary>
+        public void Render3DObjects()
+        {
+            if (UseDepthTest) { GL.Enable(EnableCap.DepthTest); }
             foreach (Object obj in _mainObjects)
             {
-                obj.show(_camera);
+                obj.Show(_camera);
             }
             foreach (TexturedObject obj in _mainTexturedObjects)
             {
-                obj.show(_camera);
-            }
+                obj.Show(_camera);
+            } 
+            GL.Disable(EnableCap.DepthTest);
+        }
+        
+        /// <summary>
+        /// Renders the main light
+        /// </summary>
+        public void RenderLight()
+        {
+            _mainLamp.Show(_camera, _lampShader);
+        }
 
-            if (showSet)
-            {
-                if (MouseState.IsButtonDown(MouseButton.Left))
-                {
-                    checkClicks(set);
-                }
-                showSettings(set);
-            }
-            
+        /// <inheritdoc />
+        protected override void OnRenderFrame(FrameEventArgs e)
+        {
             SwapBuffers();
-
             base.OnRenderFrame(e);
         }
+
+        /// <inheritdoc />
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             if (!IsFocused) // check to see if the window is focused
@@ -172,61 +201,43 @@ namespace Program
             }
             var input = KeyboardState;
             var mouse = MouseState;
-
-            if (input.IsKeyDown(Keys.Escape) && lastTime)
+            
+            if (input.IsKeyDown(Keys.Escape))
             {
-                if (!useSettings)
-                {
-                    Close();
-                }
-                else
-                {
-                    showSet = !showSet;
-                    lastTime = false;
-
-                    if (KeyboardAndMouseInput)
-                    {
-                        CursorVisible = !CursorVisible;
-                        CursorGrabbed = !CursorVisible;
-                    }
-                }
-                
+                Close();
             }
-            if (!input.IsKeyDown(Keys.Escape))
-            {
-                lastTime = true;
-            }
-            if (KeyboardAndMouseInput && !showSet)
+            
+            if (KeyboardAndMouseInput)
             {
                 
                 if (input.IsKeyDown(Keys.W))
                 {
-                    _camera.Position += _camera.Front * cameraSpeed * (float) e.Time; // Forward
+                    _camera.Position += _camera.Front * _cameraSpeed * (float) e.Time; // Forward
                 }
 
                 if (input.IsKeyDown(Keys.S))
                 {
-                    _camera.Position -= _camera.Front * cameraSpeed * (float) e.Time; // Backwards
+                    _camera.Position -= _camera.Front * _cameraSpeed * (float) e.Time; // Backwards
                 }
 
                 if (input.IsKeyDown(Keys.A))
                 {
-                    _camera.Position -= _camera.Right * cameraSpeed * (float) e.Time; // Left
+                    _camera.Position -= _camera.Right * _cameraSpeed * (float) e.Time; // Left
                 }
 
                 if (input.IsKeyDown(Keys.D))
                 {
-                    _camera.Position += _camera.Right * cameraSpeed * (float) e.Time; // Right
+                    _camera.Position += _camera.Right * _cameraSpeed * (float) e.Time; // Right
                 }
 
                 if (input.IsKeyDown(Keys.Space))
                 {
-                    _camera.Position += _camera.Up * cameraSpeed * (float) e.Time; // Up
+                    _camera.Position += _camera.Up * _cameraSpeed * (float) e.Time; // Up
                 }
 
                 if (input.IsKeyDown(Keys.LeftShift))
                 {
-                    _camera.Position -= _camera.Up * cameraSpeed * (float) e.Time; // Down
+                    _camera.Position -= _camera.Up * _cameraSpeed * (float) e.Time; // Down
                 }
                 // Calculate the offset of the mouse position
                 
@@ -235,8 +246,8 @@ namespace Program
                 _lastPos = new Vector2(mouse.X, mouse.Y);
 
                 // Apply the camera pitch and yaw (we clamp the pitch in the camera class)
-                _camera.Yaw += deltaX * sensitivity;
-                _camera.Pitch -= deltaY * sensitivity; // reversed since y-coordinates range from bottom to top
+                _camera.Yaw += deltaX * _sensitivity;
+                _camera.Pitch -= deltaY * _sensitivity; // reversed since y-coordinates range from bottom to top
 
             }
             
@@ -244,6 +255,7 @@ namespace Program
             base.OnUpdateFrame(e);
         }
 
+        /// <inheritdoc />
         protected override void OnResize(ResizeEventArgs resizeEventArgs)
         {
             Width = resizeEventArgs.Width;
@@ -251,6 +263,8 @@ namespace Program
             GL.Viewport(0, 0, resizeEventArgs.Width, resizeEventArgs.Height);
             base.OnResize(resizeEventArgs);
         }
+
+        /// <inheritdoc />
         protected override void OnUnload()
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
@@ -276,9 +290,9 @@ namespace Program
 
             base.OnUnload();
         }
-        private static float[] loadObj(string path)
+        private static float[] LoadObj(string path)
         {
-            string[] lines = System.IO.File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path);
             List<float[]> vertices = new List<float[]>();
             List<float> final = new List<float>();
             foreach (string line in lines)
@@ -323,9 +337,9 @@ namespace Program
 
             return final.ToArray();
         }
-        private static float[] loadObjTextured(string path)
+        private static float[] LoadObjTextured(string path)
         {
-            string[] lines = System.IO.File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path);
             List<float[]> vertices = new List<float[]>();
             List<float[]> textureCords = new List<float[]>();
             List<float> final = new List<float>();
@@ -397,7 +411,7 @@ namespace Program
             private float _scale = 1.0f;
             public Object(string path, Shader lightingShader, Lamp lamp, Color4 col)
             {
-                _vertices = loadObj(path);
+                _vertices = LoadObj(path);
 
                 _vertexBufferObject = GL.GenBuffer();
                 GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
@@ -447,7 +461,7 @@ namespace Program
                 _lamp = lamp;
                 _color = col;
             }
-            public void show(Camera camera)
+            public void Show(Camera camera)
             {
                 GL.BindVertexArray(_mainObject);
 
@@ -464,23 +478,23 @@ namespace Program
 
                 GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Length / 6);
             }
-            public void setRotationX(float angle)
+            public void SetRotationX(float angle)
             {
                 _rotX = angle;
             }
-            public void setRotationY(float angle)
+            public void SetRotationY(float angle)
             {
                 _rotY = angle;
             }
-            public void setRotationZ(float angle)
+            public void SetRotationZ(float angle)
             {
                 _rotZ = angle;
             }
-            public void setPositionInSpace(float x, float y, float z)
+            public void SetPositionInSpace(float x, float y, float z)
             {
                 _pos = new Vector3(x, y, z);
             }
-            public void setScale(float scale)
+            public void SetScale(float scale)
             {
                 _scale = scale; 
             }
@@ -497,13 +511,12 @@ namespace Program
             public readonly Vector3 Pos;
             public readonly Vector3 LightColor;
             private readonly float[] _vertices;
-            public Lamp(Vector3 pos, Vector3 lightColor, Shader lampShader, float Radius)
+            public Lamp(Vector3 pos, Vector3 lightColor, Shader lampShader, float radius)
             {
                 Pos = pos;
                 LightColor = lightColor;
-
-                //_vertices = loadObj("Objs/sphere.obj");   
-                _vertices = CreateSphereVertices(Radius);
+                
+                _vertices = CreateSphereVertices(radius);
 
                 _vertexBufferObject = GL.GenBuffer();
                 GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
@@ -519,7 +532,7 @@ namespace Program
 
                 lampShader.SetVector3("lightColor", lightColor);
             }
-            public void show(Camera camera, Shader lampShader)
+            public void Show(Camera camera, Shader lampShader)
             {
                 GL.BindVertexArray(_mainObject);
 
@@ -552,7 +565,7 @@ namespace Program
             private readonly Shader _shader;
             public TexturedObject(string path, Shader textureShader, string texturePath)
             {
-                _vertices = loadObjTextured(path);
+                _vertices = LoadObjTextured(path);
 
                 _vertexBufferObject = GL.GenBuffer();
                 GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
@@ -581,7 +594,7 @@ namespace Program
                 _shader = textureShader;
             }
 
-            public void show(Camera camera)
+            public void Show(Camera camera)
             {
                 GL.BindVertexArray(_mainObject);
 
@@ -597,19 +610,19 @@ namespace Program
                 //textureShader.SetVector3("lightPos", lamp.pos);
                 GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Length / 8);
             }
-            public void setRotationX(float angle)
+            public void SetRotationX(float angle)
             {
                 _rotX = angle;
             }
-            public void setRotationY(float angle)
+            public void SetRotationY(float angle)
             {
                 _rotY = angle;
             }
-            public void setRotationZ(float angle)
+            public void SetRotationZ(float angle)
             {
                 _rotZ = angle;
             }
-            public void setPositionInSpace(float x, float y, float z)
+            public void SetPositionInSpace(float x, float y, float z)
             {
                 _pos = new Vector3(x, y, z);
             }
@@ -629,7 +642,7 @@ namespace Program
         /// <param name="height">Height of the cube</param>
         /// <param name="depth">Depth of the cube</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createCube(Color4 color, float width, float height, float depth)
+        public int CreateCube(Color4 color, float width, float height, float depth)
         {
             var cubeVertex = CreateRectangularPrismVertices(width, height, depth);
             _mainObjects.Add(new Object(cubeVertex, _lightingShader, _mainLamp, color));
@@ -641,7 +654,7 @@ namespace Program
         /// <param name="color">Color of the sphere</param>
         /// <param name="r">Radius of the sphere</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createSphere(Color4 color, float r)
+        public int CreateSphere(Color4 color, float r)
         {
             float[] v = CreateSphereVertices(r);
             _mainObjects.Add(new Object(v, _lightingShader, _mainLamp, color));
@@ -652,7 +665,7 @@ namespace Program
         /// </summary>
         /// <param name="color">Color of the torus</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createTorus(Color4 color)
+        public int CreateTorus(Color4 color)
         {
             _mainObjects.Add(new Object("Objs/torus.obj", _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
@@ -662,7 +675,7 @@ namespace Program
         /// </summary>
         /// <param name="color">Color of the cilinder</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createCylinder(Color4 color)
+        public int CreateCylinder(Color4 color)
         {
             _mainObjects.Add(new Object("Objs/cilinder.obj", _lightingShader, _mainLamp, color));
             return _mainObjects.Count - 1;
@@ -684,10 +697,10 @@ namespace Program
         /// <param name="z4">Z pos of a vertex of the plane</param>
         /// <param name="color">Color of the plane</param>
         /// <returns>Returns a integer handle to make modifications to it</returns>
-        public int createPlane(float x1, float y1, float z1,
-                               float x2, float y2, float z2,
-                               float x3, float y3, float z3,
-                               float x4, float y4, float z4, Color4 color)
+        public int CreatePlane(float x1, float y1, float z1,
+            float x2, float y2, float z2,
+            float x3, float y3, float z3,
+            float x4, float y4, float z4, Color4 color)
         {
             Vector3 l1 = new Vector3(x2 - x1, y2 - y1, z2 - z1);
             Vector3 l2 = new Vector3(x3 - x1, y3 - y1, z3 - z1);
@@ -712,7 +725,7 @@ namespace Program
         /// </summary>
         /// <param name="obj">Path to the .obj file</param>
         /// <param name="texture">Path to the texture .png</param>
-        public void openTexturedObj(string obj, string texture)
+        public void OpenTexturedObj(string obj, string texture)
         {
             _mainTexturedObjects.Add(new TexturedObject(obj, _textureShader, texture));
         }
@@ -721,7 +734,7 @@ namespace Program
         /// </summary>
         /// <param name="obj">Path to the .obj file</param>
         /// <param name="color">Color of the object</param>
-        public void openObj(string obj, Color4 color)
+        public void OpenObj(string obj, Color4 color)
         {
             _mainObjects.Add(new Object(obj, _lightingShader, _mainLamp, color));
         }
@@ -730,7 +743,7 @@ namespace Program
         /// </summary>
         /// <param name="pos">Position of the light</param>
         /// <param name="color">Color of the light</param>
-        public void createMainLight(Vector3 pos, Vector3 color)
+        public void CreateMainLight(Vector3 pos, Vector3 color)
         {
             _mainLamp = new Lamp(pos, color, _lampShader, 1);
         }
@@ -741,11 +754,11 @@ namespace Program
         /// <param name="y">Value of the y rotation</param>
         /// <param name="z">Value of the z rotation</param>
         /// <param name="handle">Handle of the object to be rotated</param>
-        public void rotateObject(float x, float y, float z, int handle)
+        public void RotateObject(float x, float y, float z, int handle)
         {
-            _mainObjects[handle].setRotationX(x);
-            _mainObjects[handle].setRotationY(y);
-            _mainObjects[handle].setRotationZ(z);
+            _mainObjects[handle].SetRotationX(x);
+            _mainObjects[handle].SetRotationY(y);
+            _mainObjects[handle].SetRotationZ(z);
         }
         /// <summary>
         /// Rotates a textured object by a certain amount
@@ -754,20 +767,20 @@ namespace Program
         /// <param name="y">Value of the y rotation</param>
         /// <param name="z">Value of the z rotation</param>
         /// <param name="handle">Handle of the textured object to be rotated</param>
-        public void rotateTexturedObject(float x, float y, float z, int handle)
+        public void RotateTexturedObject(float x, float y, float z, int handle)
         {
-            _mainTexturedObjects[handle].setRotationX(x);
-            _mainTexturedObjects[handle].setRotationY(y);
-            _mainTexturedObjects[handle].setRotationZ(z);
+            _mainTexturedObjects[handle].SetRotationX(x);
+            _mainTexturedObjects[handle].SetRotationY(y);
+            _mainTexturedObjects[handle].SetRotationZ(z);
         }
         /// <summary>
         /// Scales an object by a certain amount
         /// </summary>
         /// <param name="scale">Amount to scale by</param>
         /// <param name="handle">Handle of the object to be rotated</param>
-        public void scaleObject(float scale, int handle)
+        public void ScaleObject(float scale, int handle)
         {
-            _mainObjects[handle].setScale(scale);
+            _mainObjects[handle].SetScale(scale);
         }
         /// <summary>
         /// Moves an object to a certain point in space
@@ -776,9 +789,9 @@ namespace Program
         /// <param name="y">Y pos of the point in space</param>
         /// <param name="z">Z pos of the point in space</param>
         /// <param name="handle">Handle of the object to be rotated</param>
-        public void translateObject(float x, float y, float z, int handle)
+        public void TranslateObject(float x, float y, float z, int handle)
         {
-            _mainObjects[handle].setPositionInSpace(x, y, z);
+            _mainObjects[handle].SetPositionInSpace(x, y, z);
         }
         /// <summary>
         /// Moves a textured object to a certain point in space
@@ -787,32 +800,31 @@ namespace Program
         /// <param name="y"></param>
         /// <param name="z"></param>
         /// <param name="handle">Handle of the textured object to be rotated</param>
-        public void translateTexturedObject(float x, float y, float z, int handle)
+        public void TranslateTexturedObject(float x, float y, float z, int handle)
         {
-            _mainTexturedObjects[handle].setPositionInSpace(x, y, z);
+            _mainTexturedObjects[handle].SetPositionInSpace(x, y, z);
         }
 
         private static float[] CreateSphereVertices(float radius)
         {
-            var Res = Math.Min(Convert.ToInt32(Math.Ceiling(radius * radius)), 50);
+            var res = Math.Min(Convert.ToInt32(Math.Ceiling(radius * radius)), 50);
             List<List<Vector3>> unParsedVertices = new List<List<Vector3>>();
             List<float> vertices = new List<float>();
             var i = 0;
             var j = 0;
 
 
-            for (double psi = 0; psi-Math.PI <= 0.1; psi += Math.PI / Res)
+            for (double psi = 0; psi-Math.PI <= 0.1; psi += Math.PI / res)
             {
                 j = 0;
                 List<Vector3> v = new List<Vector3>();
 
-                for (double theta = 0; theta - (2 * Math.PI) < 0.1; theta += Math.PI / Res)
+                for (double theta = 0; theta - (2 * Math.PI) < 0.1; theta += Math.PI / res)
                 {
                     var vertex = new Vector3(
                         (float)(radius * Math.Cos(theta) * Math.Sin(psi)),
                         (float)(radius * Math.Sin(theta) * Math.Sin(psi)),
                         (float)(radius * Math.Cos(psi)));
-                    var ind = Math.Cos(psi);
                     v.Add(vertex);
                     j++;
                 }
@@ -908,12 +920,12 @@ namespace Program
             float[] v =
             {
                 -w, -h, -d,
-                 w, -h, -d,
-                 w, -h,  d,
+                w, -h, -d,
+                w, -h,  d,
                 -w, -h,  d,
                 -w,  h, -d,
-                 w,  h, -d,
-                 w,  h,  d,
+                w,  h, -d,
+                w,  h,  d,
                 -w,  h,  d
             };
 
@@ -995,7 +1007,7 @@ namespace Program
         /// <param name="color">Color to light the texture with</param>
         /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
         /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
-        protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)
+        protected void DrawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(texturePath, min, mag);
             float x1Trans = x1 - (Size.X / 2);
@@ -1069,7 +1081,7 @@ namespace Program
         /// <param name="color">Color to light the texture with</param>
         /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
         /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
-        protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)
+        protected void DrawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(textureBitmap, min, mag);
             float x1Trans = x1 - (Size.X / 2);
@@ -1141,7 +1153,7 @@ namespace Program
         /// <param name="v2">V component of the top right corner of the rectangle texture</param>
         /// <param name="texture">The texture to use</param>
         /// <param name="color">Color to light the texture with</param>
-        protected void drawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
+        protected void DrawTexturedRectangle(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
         {
             float x1Trans = x1 - (Size.X / 2);
             float y1Trans = y1 - (Size.Y / 2);
@@ -1206,7 +1218,7 @@ namespace Program
         /// <param name="x2">X pos of the other end of the line</param>
         /// <param name="y2">Y pos of the other end of the line</param>
         /// <param name="color">Color of the line</param>
-        protected void drawLine(float x1, float y1, float x2, float y2, Color4 color)
+        protected void DrawLine(float x1, float y1, float x2, float y2, Color4 color)
         {
             float x1Trans = x1 - (Size.X / 2);
             float y1Trans = y1 - (Size.Y / 2);
@@ -1257,7 +1269,7 @@ namespace Program
         /// <param name="x2">X component of the to right vertex of the rectangle</param>
         /// <param name="y2">Y component of the to right vertex of the rectangle</param>
         /// <param name="color">Color of the rectangle</param>
-        protected void drawRectangle(float x1, float y1, float x2, float y2, Color4 color)
+        protected void DrawRectangle(float x1, float y1, float x2, float y2, Color4 color)
         {
             float x1Trans = x1 - (Size.X / 2);
             float y1Trans = y1 - (Size.Y / 2);
@@ -1318,7 +1330,7 @@ namespace Program
         /// <param name="v2">V pos of the other end of the texture</param>
         /// <param name="texture">Path to the texture .png</param>
         /// <param name="color">Color to be overlaid in the texture</param>
-        protected void drawTexturedLine(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
+        protected void DrawTexturedLine(float x1, float y1, float u1, float v1, float x2, float y2, float u2, float v2, Texture texture, Color4 color)
         {
             float x1Trans = x1 - (Size.X / 2);
             float y1Trans = y1 - (Size.Y / 2);
@@ -1396,10 +1408,10 @@ namespace Program
         /// <param name="color">Color to be overlaid on the texture</param>
         /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
         /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
-        protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1, 
-                                      float x2, float y2, float z2, float u2, float v2, 
-                                      float x3, float y3, float z3, float u3, float v3,
-                                      float x4, float y4, float z4, float u4, float v4, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)
+        protected void DrawTexturedQuad(float x1, float y1, float z1, float u1, float v1, 
+            float x2, float y2, float z2, float u2, float v2, 
+            float x3, float y3, float z3, float u3, float v3,
+            float x4, float y4, float z4, float u4, float v4, string texturePath, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(texturePath, min, mag);
             float x1Trans = x1 - (Size.X / 2);
@@ -1493,10 +1505,10 @@ namespace Program
         /// <param name="color">Color to be overlaid on the texture</param>
         /// <param name="min">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
         /// <param name="mag">OpenGL Texture filtering tipe (Nearest for blocky, linear for fuzzy)</param>
-        protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1,
-                                      float x2, float y2, float z2, float u2, float v2,
-                                      float x3, float y3, float z3, float u3, float v3,
-                                      float x4, float y4, float z4, float u4, float v4, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)
+        protected void DrawTexturedQuad(float x1, float y1, float z1, float u1, float v1,
+            float x2, float y2, float z2, float u2, float v2,
+            float x3, float y3, float z3, float u3, float v3,
+            float x4, float y4, float z4, float u4, float v4, Bitmap textureBitmap, Color4 color, TextureMinFilter min, TextureMagFilter mag)
         {
             Texture texture = new Texture(textureBitmap, min, mag);
             float x1Trans = x1 - (Size.X / 2);
@@ -1588,10 +1600,10 @@ namespace Program
         /// <param name="v4">V pos of the last texture vertex</param> 
         /// <param name="texture">Texture of the quad</param>
         /// <param name="color">Color to be overlaid on the texture</param>
-        protected void drawTexturedQuad(float x1, float y1, float z1, float u1, float v1,
-                                      float x2, float y2, float z2, float u2, float v2,
-                                      float x3, float y3, float z3, float u3, float v3,
-                                      float x4, float y4, float z4, float u4, float v4, Texture texture, Color4 color)
+        protected void DrawTexturedQuad(float x1, float y1, float z1, float u1, float v1,
+            float x2, float y2, float z2, float u2, float v2,
+            float x3, float y3, float z3, float u3, float v3,
+            float x4, float y4, float z4, float u4, float v4, Texture texture, Color4 color)
         {
             float x1Trans = x1 - (Size.X / 2);
             float y1Trans = y1 - (Size.Y / 2);
@@ -1672,10 +1684,10 @@ namespace Program
         /// <param name="y4">Y pos of the last vertex</param>
         /// <param name="z4">Z pos used for depth test (NOT 3D!!)</param>
         /// <param name="color">Color of the quad</param>
-        protected void drawQuad(float x1, float y1, float z1, 
-                                float x2, float y2, float z2, 
-                                float x3, float y3, float z3,
-                                float x4, float y4, float z4, Color4 color)
+        protected void DrawQuad(float x1, float y1, float z1, 
+            float x2, float y2, float z2, 
+            float x3, float y3, float z3,
+            float x4, float y4, float z4, Color4 color)
         {
             float x1Trans = x1 - (Size.X / 2);
             float y1Trans = y1 - (Size.Y / 2);
@@ -1743,7 +1755,7 @@ namespace Program
         /// <param name="radiusX">Radius of the ellipse in the x direction</param>
         /// <param name="radiusY">Radius of the ellipse in the y direction</param>
         /// <param name="color">Color of the ellipse</param>
-        protected void drawEllipse(float x, float y, float radiusX, float radiusY, Color4 color)
+        protected void DrawEllipse(float x, float y, float radiusX, float radiusY, Color4 color)
         {
             int numEllipseVertices = (int)Math.Floor(Math.Sqrt(radiusX * radiusX + radiusY * radiusY));
             Vector3[] tempVertices = new Vector3[numEllipseVertices];
@@ -1803,10 +1815,10 @@ namespace Program
             GL.DeleteBuffer(vertexBufferObject);
             GL.DeleteVertexArray(mainObject);
         }
+
         /// <summary>
         /// Draws a 2D triangle to the 2D screen, given clockwise points
         /// </summary>
-        /// <param name="x1">X pos of the first vertex</param>
         /// <param name="x1">X pos of the first vertex</param>
         /// <param name="y1">Y pos of the first vertex</param>
         /// <param name="x2">X pos of the second vertex</param>
@@ -1814,7 +1826,7 @@ namespace Program
         /// <param name="x3">X pos of the third vertex</param>
         /// <param name="y3">Y pos of the third vertex</param>
         /// <param name="color">Color of the triangle</param>
-        public void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Color4 color)
+        public void DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, Color4 color)
         {
             float x1Trans = x1 - (Size.X / 2);
             float y1Trans = y1 - (Size.Y / 2);
@@ -1874,13 +1886,12 @@ namespace Program
         /// Draws text to the screen
         /// </summary>
         /// <param name="text">Text to be drawn</param>
-        /// <param name="px">Vertical size of the text</param>
         /// <param name="x">X pos of the bottom left corner of the text</param>
         /// <param name="y">Y pos of the bottom left corner of the text</param>
         /// <param name="f">The font to be used to draw the text</param>
         /// <param name="col">Color of the text</param>
         /// <param name="textAlign">Alignment of the text, default bottom left</param>
-        public void drawText(string text, float x, float y, Font f, Color4 col, int textAlign = 0b00001000)
+        public void DrawText(string text, float x, float y, Font f, Color4 col, int textAlign = 0b00001000)
         {
             Bitmap tbmt = new Bitmap(1, 1);
             Graphics tgrx = Graphics.FromImage(tbmt);
@@ -1926,7 +1937,7 @@ namespace Program
             textPath.AddString(text, f.FontFamily, (int)f.Style, emSize, new Point(0, 0), StringFormat.GenericDefault);
             grx.SmoothingMode = SmoothingMode.HighQuality;
             grx.FillPath(Brushes.White, textPath);
-            drawTexturedRectangle(pos.X,pos.Y,0,0,pos.X + l.Width,pos.Y + l.Height,1,1,bmt,col,TextureMinFilter.Linear,TextureMagFilter.Linear);
+            DrawTexturedRectangle(pos.X,pos.Y,0,0,pos.X + l.Width,pos.Y + l.Height,1,1,bmt,col,TextureMinFilter.Linear,TextureMagFilter.Linear);
         }
 
         /// <summary>
@@ -1971,184 +1982,5 @@ namespace Program
             /// </summary>
             public static int BottomLeft   = 0b00001000;
         }
-
-        public Settings set = new Settings();
-
-        private void showSettings(Settings s)
-        {
-            var w = Convert.ToInt32(s.settings["width"]);
-            var h = Convert.ToInt32(s.settings["height"]);
-            Vector2 pos = new Vector2((Size.X - w) / 2, (Size.Y - h) / 2);
-            if (Convert.ToBoolean(s.settings["useTexture"]))
-            {
-                var path = Convert.ToString(s.settings["texturePath"]);
-                drawTexturedRectangle(pos.X, pos.Y, 0, 0, pos.X + w, pos.Y + h, 1, 1, path, Color4.White, TextureMinFilter.Nearest, TextureMagFilter.Nearest);
-            }
-            else
-            {
-                Color4 col = new Color4(Convert.ToInt32(s.settings["r"]), Convert.ToInt32(s.settings["g"]), Convert.ToInt32(s.settings["b"]), Convert.ToInt32(s.settings["a"]));
-                drawRectangle(pos.X, pos.Y, pos.X + w, pos.Y + h, col);
-            }
-            foreach (Settings.Button b in s.buttons)
-            {
-                var x = b.pos.X + pos.X;
-                var y = b.pos.Y + pos.Y;
-                drawRectangle(x, y, x + b.width, y + b.height, b.col);
-                drawText(b.Text, x + (b.width), y + (b.height), b.font, Color4.White, ITextAlign.BottomCenter);
-                b.setCol(Color4.Blue);
-            }
-        }
-        /// <summary>
-        /// Classed used to create settings for your project
-        /// TODO add textured buttons
-        /// TODO add sliders
-        /// TODO add labels
-        /// TODO add radio buttons
-        /// </summary>
-        public class Settings
-        {
-            public List<Button> buttons = new List<Button>();
-            public Dictionary<string, object> settings = new Dictionary<string, object>();
-
-            public class Button
-            {
-                public Vector2 pos;
-                public string Text;
-                public int width, height, l;
-                public Func<object> onClick;
-                public Color4 col;
-                public Font font;
-
-                public void setCol(Color4 c)
-                {
-                    col = c;
-                }
-            }
-            /// <summary>
-            /// Adds a simple button to the settings
-            /// </summary>
-            /// <param name="t">Text on the button</param>
-            /// <param name="x">X pos of the button RELATIVE to the settings, at BOTTOM LEFT corner</param>
-            /// <param name="y">Y pos of the button RELATIVE to the settings, at BOTTOM LEFT corner</param>
-            /// <param name="w">Width of the button</param>
-            /// <param name="h">Height of the button</param>
-            /// <param name="c">Color of the button</param>
-            /// <param name="func">Lambda function that is executed when button is clicked</param>
-            /// <param name="f">Font of the button text</param>
-            public void addButton(string t, float x, float y, int w, int h, Color4 c, Func<object> func, Font f)
-            {
-                buttons.Add(new Button { pos = new Vector2(x, y), width = w, height = h, onClick = func, col = c, Text = t, l = -1 , font = f});
-            }
-            /// <summary>
-            /// Adds a setting to the settings dictionary
-            /// </summary>
-            /// <param name="key">Key of the setting</param>
-            /// <param name="value">Value of the setting</param>
-            public void addSetting(string key, object value)
-            {
-                settings.Add(key, value);
-            }
-            /// <summary>
-            /// Reads the settings.cfg file
-            /// <para>&nbsp;</para>
-            /// Make sure the following items exist on the file <br />
-            /// width=             (float)</br>
-            /// height=            (float)</br>
-            /// useTexture=        (bool)</br>
-            /// If useTexture=false</br>
-            ///     r=                 (float from 0-1 or int from 0-255)</br>
-            ///     g=                 (float from 0-1 or int from 0-255)</br>
-            ///     b=                 (float from 0-1 or int from 0-255)</br>
-            ///     a=                 (float from 0-1 or int from 0-255)</br>
-            /// If useTexture=false</br>
-            ///     texturePath=       (String path to background texture)</br>
-            /// </summary>
-            public void readSettings()
-            {
-                if (File.Exists("settings.cfg"))
-                {
-                    using (StreamReader file = new StreamReader("settings.cfg"))
-                    {
-                        settings = new Dictionary<string, object>();
-                        string ln;
-                        while ((ln = file.ReadLine()) != null)
-                        {
-                            if (ln[0] != '#')
-                            {
-                                var values = ln.Split("=");
-                                Regex rx = new Regex(@"^[\d.]+$");
-                                if (rx.IsMatch(values[1]))
-                                {
-
-                                    settings.Add(values[0], float.Parse(values[1]));
-                                }
-                                else
-                                {
-                                    settings.Add(values[0], values[1]);
-                                }
-                            }
-                        }
-                    } 
-                }
-                else
-                {
-                    settings = new Dictionary<string, object>();
-
-                    settings.Add("width", 200);
-                    settings.Add("height", 300);
-                    settings.Add("useTexture", false);
-                    settings.Add("r", 0);
-                    settings.Add("g", 127);
-                    settings.Add("b", 256);
-                    settings.Add("a", 1);
-                    
-                    writeSettings();
-                }
-            }
-            /// <summary>
-            /// Writes settings dictionary to the settings.cfg file
-            /// </summary>
-            public void writeSettings()
-            {
-                try
-                {
-                    using (FileStream fs = File.Create("settings.cfg"))
-                    {
-                        string final = "";
-
-                        foreach (KeyValuePair<string, object> entry in settings)
-                        {
-                            final += entry.Key + "=" + entry.Value + "\n";
-                        }
-
-                        byte[] info = new UTF8Encoding(true).GetBytes(final);
-                        fs.Write(info, 0, info.Length);
-                    }
-                }
-
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-            }
-
-        }
-        private void checkClicks(Settings s)
-        {
-            var w = Convert.ToInt32(s.settings["width"]);
-            var h = Convert.ToInt32(s.settings["height"]);
-            foreach (Settings.Button b in s.buttons)
-            {
-                Vector2 pos = new Vector2((Size.X - w) / 2, (Size.Y - h) / 2);
-                var x = MousePosition.X - pos.X;
-                var y = -(MousePosition.Y - Size.Y) - pos.Y;
-                if (x >= b.pos.X && x <= b.pos.X + b.width && y >= b.pos.Y && y <= b.pos.Y + b.height)
-                {
-                    b.setCol(Color4.Red);
-                    b.onClick.Invoke();
-                }
-            }
-        }    
-
     }
 }
