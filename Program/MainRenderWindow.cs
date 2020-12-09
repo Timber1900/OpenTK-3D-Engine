@@ -13,69 +13,6 @@ using static Program.Shaders;
 
 namespace Program
 {
-    /// <summary>
-    ///     Class to get the screen size
-    /// </summary>
-    public static class Screen
-    {
-        [DllImport("user32.dll")]
-        private static extern bool EnumDisplaySettings(string deviceName, int modeNum, ref DEVMODE devMode);
-
-        /// <summary>
-        ///     Gets the screen size
-        /// </summary>
-        /// <returns>Returns the screen size</returns>
-        public static Vector2 GetScreenSize()
-        {
-            const int ENUM_CURRENT_SETTINGS = -1;
-
-            DEVMODE devMode = default;
-            devMode.dmSize = (short) Marshal.SizeOf(devMode);
-            EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode);
-            return new Vector2(devMode.dmPelsWidth, devMode.dmPelsHeight);
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct DEVMODE
-        {
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-            public readonly string dmDeviceName;
-
-            public readonly short dmSpecVersion;
-            public readonly short dmDriverVersion;
-            public short dmSize;
-            public readonly short dmDriverExtra;
-            public readonly int dmFields;
-            public readonly int dmPositionX;
-            public readonly int dmPositionY;
-            public readonly int dmDisplayOrientation;
-            public readonly int dmDisplayFixedOutput;
-            public readonly short dmColor;
-            public readonly short dmDuplex;
-            public readonly short dmYResolution;
-            public readonly short dmTTOption;
-            public readonly short dmCollate;
-
-            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-            public readonly string dmFormName;
-
-            public readonly short dmLogPixels;
-            public readonly int dmBitsPerPel;
-            public readonly int dmPelsWidth;
-            public readonly int dmPelsHeight;
-            public readonly int dmDisplayFlags;
-            public readonly int dmDisplayFrequency;
-            public readonly int dmICMMethod;
-            public readonly int dmICMIntent;
-            public readonly int dmMediaType;
-            public readonly int dmDitherType;
-            public readonly int dmReserved1;
-            public readonly int dmReserved2;
-            public readonly int dmPanningWidth;
-            public readonly int dmPanningHeight;
-        }
-    }
-
     /// <inheritdoc />
     public class MainRenderWindow : GameWindow
     {
@@ -108,6 +45,42 @@ namespace Program
             base(CreateGameWindowSettings(fps), CreateNativeWindowSettings(width, height, title))
         {
         }
+        
+        /// <summary>
+        /// Centers the window
+        /// </summary>
+        public void ResizeAndCenterWindow()
+        {
+            int x, y;
+
+            // Find out which monitor the window is already on.  If we can't find that out, then
+            // just try to find the first monitor attached to the computer and use that instead.
+            MonitorHandle currentMonitor = Monitors.GetMonitorFromWindow(this);
+            if (Monitors.TryGetMonitorInfo(currentMonitor, out MonitorInfo monitorInfo)
+                || Monitors.TryGetMonitorInfo(0, out monitorInfo))
+            {
+                // Calculate a suitable upper-left corner for the window, based on this monitor's
+                // coordinates.  This should work correctly even in unusual multi-monitor layouts.
+                Rectangle monitorRectangle = monitorInfo.ClientArea;
+                x = (monitorRectangle.Right + monitorRectangle.Left - Size.X) / 2;
+                y = (monitorRectangle.Bottom + monitorRectangle.Top - Size.Y) / 2;
+
+                // Avoid putting it offscreen.
+                if (x < monitorRectangle.Left) x = monitorRectangle.Left;
+                if (y < monitorRectangle.Top) y = monitorRectangle.Top;
+            }
+            else
+            {
+                // No idea what monitor this is, so just try to put the window somewhere reasonable,
+                // like the upper-left corner of what's hopefully *a* monitor.  Alternatively, you
+                // could throw an exception here.
+                x = 32;
+                y = 64;
+            }
+
+            // Actually move the window.
+            ClientRectangle = new Box2i(x, y, x + Size.X, y + Size.Y);
+        }
 
         private static GameWindowSettings CreateGameWindowSettings(double fps = 60.0)
         {
@@ -122,12 +95,10 @@ namespace Program
         private static NativeWindowSettings CreateNativeWindowSettings(int width = 1000, int height = 1000,
             string title = "OpenTK Window")
         {
-            var MonitorSize = Screen.GetScreenSize();
             var nws = new NativeWindowSettings
             {
-                Size = new Vector2i(width, height),
                 Title = title,
-                Location = new Vector2i((int) ((MonitorSize.X - width) / 2), (int) ((MonitorSize.Y - height - 10) / 2))
+                Size = new Vector2i(width, height)
             };
             return nws;
         }
@@ -135,6 +106,7 @@ namespace Program
         /// <inheritdoc />
         protected override void OnLoad()
         {
+            ResizeAndCenterWindow();
             if (UseAlpha) GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Enable(EnableCap.Blend);
             _lightingShader = new Shader(ShaderVert, LightingFrag);
@@ -917,15 +889,14 @@ namespace Program
         private static float[] CreateTorusVertices(float outerR, float innerR)
         {
             var res1 = Math.Min(Convert.ToInt32(Math.Ceiling(outerR * outerR)), 50);
-            var res2 = Math.Min(Convert.ToInt32(Math.Ceiling(innerR * innerR)), 50);
-            var res = Math.Max(res1, res2);
+            var res2 = Math.Min(Math.Max((int) Math.Ceiling(innerR * innerR) * 5, 10), 50);
             
             List<List<Vector3>> verts = new List<List<Vector3>>();
-            for (float u = 0; u <= Math.PI * 2; u += (float) Math.PI / res)
+            for (float u = 0; u <= Math.PI * 2; u += (float) Math.PI / res1)
             {
                 List<Vector3> _verts = new List<Vector3>();
 
-                for (float v = 0; v <= Math.PI * 2; v += (float) Math.PI / res)
+                for (float v = 0; v <= Math.PI * 2; v += (float) Math.PI / res2)
                 {
                     _verts.Add(new Vector3(
                         (outerR + (innerR * (float) Math.Cos(v))) * (float) Math.Cos(u),
