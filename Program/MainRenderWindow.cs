@@ -46,9 +46,11 @@ namespace Program
         {
         }
         
+        /*
         /// <summary>
         /// Centers the window
         /// </summary>
+        
         public void ResizeAndCenterWindow()
         {
             int x, y;
@@ -81,6 +83,7 @@ namespace Program
             // Actually move the window.
             ClientRectangle = new Box2i(x, y, x + Size.X, y + Size.Y);
         }
+        */
 
         private static GameWindowSettings CreateGameWindowSettings(double fps = 60.0)
         {
@@ -106,7 +109,7 @@ namespace Program
         /// <inheritdoc />
         protected override void OnLoad()
         {
-            ResizeAndCenterWindow();
+            this.TryCenterWindow();
             if (UseAlpha) GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Enable(EnableCap.Blend);
             _lightingShader = new Shader(ShaderVert, LightingFrag);
@@ -1287,6 +1290,8 @@ namespace Program
                 x1Norm, y2Norm, 0f
             };
 
+            DrawShapeStroke(vertices);
+
             var vertexBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices,
@@ -2277,6 +2282,72 @@ namespace Program
             ///     Text is drawn from bottom left corner
             /// </summary>
             public static int BottomLeft = 0b00001000;
+        }
+
+        private void DrawShapeStroke(float[] vertices)
+        {
+            List<float> strokeVertices = new List<float>();
+            for (var i = 0; i < vertices.Length; i+=9)
+            {
+                var a = new Vector2(vertices[i], vertices[i + 1]);
+                var b = new Vector2(vertices[i + 3], vertices[i + 4]);
+                var c = new Vector2(vertices[i + 6], vertices[i + 7]);
+
+                //A^
+                var b1 = new Vector2(-(b.Y - c.Y), b.X - c.X);
+                
+                //B^
+                var b2 = new Vector2(-(c.Y - a.Y), c.X - a.X);
+
+                //C^
+                var b3 = new Vector2(-(a.Y - b.Y), a.X - b.X);
+
+                
+                b1.Normalize(); b2.Normalize(); b3.Normalize();
+                Console.WriteLine(b1.ToString(), b2.ToString(), b3.ToString());
+                b1 *= 50; b2 *= 50; b3 *= 50;
+                b1.X /= Size.X; b1.Y /= Size.Y;
+                b2.X /= Size.X; b2.Y /= Size.Y;
+                b3.X /= Size.X; b3.Y /= Size.Y;
+
+                var na = a - (b1 + b3);
+                var nb = b - (b1 + b2);
+                var nc = c - (b2 + b3);
+                
+                strokeVertices.AddRange(new List<float>
+                {
+                    na.X, na.Y, 0,
+                    nb.X, nb.Y, 0,
+                    nc.X, nc.Y, 0
+                });
+            }
+            
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, strokeVertices.ToArray().Length * sizeof(float), strokeVertices.ToArray(),
+                BufferUsageHint.DynamicDraw);
+
+            _2dShader.Use();
+
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
+
+            var positionLocation = _2dShader.GetAttribLocation("aPos");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            GL.BindVertexArray(mainObject);
+
+            _2dShader.SetVector4("lightColor", new Vector4(0, 0, 0, 1));
+
+            _2dShader.Use();
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+
+            GL.DeleteBuffer(vertexBufferObject);
+            GL.DeleteVertexArray(mainObject);
         }
     }
 }
