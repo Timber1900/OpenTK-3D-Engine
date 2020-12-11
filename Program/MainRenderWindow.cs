@@ -7,7 +7,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using OpenTK;
 using OpenTK.Graphics;
-using OpenTK.Graphics.GL;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Input;
 using OpenTK.Mathematics;
@@ -80,7 +79,7 @@ namespace Program
         private Camera _camera;
         private bool _firstMove = true;
         private Vector2 _lastPos;
-        protected Boolean RenderLight = false;
+        private Boolean RenderLight = false;
         private float cameraSpeed = 20f;
         private float sensitivity = 0.2f;
         protected Boolean UseDepthTest = false, UseAlpha = true, KeyboardAndMouseInput = true, loadedFont = false, showSet = false, lastTime = true, useSettings = false;
