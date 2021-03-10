@@ -27,7 +27,7 @@ Documentation at https://open.timber1900.tk</Description>
 
   <ItemGroup>
     <PackageReference Include="OpenTK" Version="4.5.0" />
-    <PackageReference Include="System.Drawing.Common" Version="5.0.1" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
 
 </Project>
