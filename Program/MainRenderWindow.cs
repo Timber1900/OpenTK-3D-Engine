@@ -18,7 +18,10 @@ namespace Program
     {
         private readonly List<Object> _mainObjects = new List<Object>();
         private readonly List<TexturedObject> _mainTexturedObjects = new List<TexturedObject>();
-        private Camera _camera;
+        /// <summary>
+        /// 
+        /// </summary>
+        public Camera _camera;
         private readonly float _cameraSpeed = 20f;
         private Shader _lampShader, _lightingShader, _textureShader, _2dShader, _2dTextured;
         private Vector2 _lastPos;
@@ -33,7 +36,19 @@ namespace Program
         /// <summary>
         ///     Flags for the renderer
         /// </summary>
-        protected bool UseDepthTest = false, UseAlpha = true, KeyboardAndMouseInput = true, LastTime = true;
+        public bool UseDepthTest { get; set; } = false;
+        /// <summary>
+        ///     Flags for the renderer
+        /// </summary>
+        public bool UseAlpha { get; set; } = true;
+        /// <summary>
+        ///     Flags for the renderer
+        /// </summary>
+        public bool KeyboardAndMouseInput { get; set; } = true;
+        /// <summary>
+        ///     Flags for the renderer
+        /// </summary>
+        public bool LastTime { get; set; } = true;
 
         /// <summary>
         ///     Width of the screen
@@ -46,44 +61,9 @@ namespace Program
         {
         }
         
-        /*
         /// <summary>
         /// Centers the window
         /// </summary>
-        
-        public void ResizeAndCenterWindow()
-        {
-            int x, y;
-
-            // Find out which monitor the window is already on.  If we can't find that out, then
-            // just try to find the first monitor attached to the computer and use that instead.
-            MonitorHandle currentMonitor = Monitors.GetMonitorFromWindow(this);
-            if (Monitors.TryGetMonitorInfo(currentMonitor, out MonitorInfo monitorInfo)
-                || Monitors.TryGetMonitorInfo(0, out monitorInfo))
-            {
-                // Calculate a suitable upper-left corner for the window, based on this monitor's
-                // coordinates.  This should work correctly even in unusual multi-monitor layouts.
-                Rectangle monitorRectangle = monitorInfo.ClientArea;
-                x = (monitorRectangle.Right + monitorRectangle.Left - Size.X) / 2;
-                y = (monitorRectangle.Bottom + monitorRectangle.Top - Size.Y) / 2;
-
-                // Avoid putting it offscreen.
-                if (x < monitorRectangle.Left) x = monitorRectangle.Left;
-                if (y < monitorRectangle.Top) y = monitorRectangle.Top;
-            }
-            else
-            {
-                // No idea what monitor this is, so just try to put the window somewhere reasonable,
-                // like the upper-left corner of what's hopefully *a* monitor.  Alternatively, you
-                // could throw an exception here.
-                x = 32;
-                y = 64;
-            }
-
-            // Actually move the window.
-            ClientRectangle = new Box2i(x, y, x + Size.X, y + Size.Y);
-        }
-        */
 
         private static GameWindowSettings CreateGameWindowSettings(double fps = 60.0)
         {
@@ -109,7 +89,7 @@ namespace Program
         /// <inheritdoc />
         protected override void OnLoad()
         {
-            this.TryCenterWindow();
+            CenterWindow();
             if (UseAlpha) GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Enable(EnableCap.Blend);
             _lightingShader = new Shader(ShaderVert, LightingFrag);
@@ -1256,68 +1236,35 @@ namespace Program
 
             _2dShader.Use();
             GL.DrawArrays(PrimitiveType.Lines, 0, 2);
-
             GL.DeleteBuffer(vertexBufferObject);
             GL.DeleteVertexArray(mainObject);
         }
 
         /// <summary>
-        ///     Draws a 2D rectangle to the 2D screen
+        ///     Fills a 2D rectangle to the 2D screen
         /// </summary>
         /// <param name="x1">X component of the bottom left vertex of the rectangle</param>
         /// <param name="y1">Y component of the bottom left vertex of the rectangle</param>
         /// <param name="x2">X component of the to right vertex of the rectangle</param>
         /// <param name="y2">Y component of the to right vertex of the rectangle</param>
         /// <param name="color">Color of the rectangle</param>
-        protected void DrawRectangle(float x1, float y1, float x2, float y2, Color4 color)
+        protected void rect(float x1, float y1, float x2, float y2)
         {
-            var x1Trans = x1 - Size.X / 2;
-            var y1Trans = y1 - Size.Y / 2;
-            var x1Norm = x1Trans / (Size.X / 2);
-            var y1Norm = y1Trans / (Size.Y / 2);
-            var x2Trans = x2 - Size.X / 2;
-            var y2Trans = y2 - Size.Y / 2;
-            var x2Norm = x2Trans / (Size.X / 2);
-            var y2Norm = y2Trans / (Size.Y / 2);
-            float[] vertices =
-            {
-                x1Norm, y1Norm, 0f,
-                x2Norm, y1Norm, 0f,
-                x1Norm, y2Norm, 0f,
-
-                x2Norm, y1Norm, 0f,
-                x2Norm, y2Norm, 0f,
-                x1Norm, y2Norm, 0f
-            };
-
-            DrawShapeStroke(vertices);
-
-            var vertexBufferObject = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices,
-                BufferUsageHint.DynamicDraw);
-
-            _2dShader.Use();
-
-            var mainObject = GL.GenVertexArray();
-            GL.BindVertexArray(mainObject);
-
-            var positionLocation = _2dShader.GetAttribLocation("aPos");
-            GL.EnableVertexAttribArray(positionLocation);
-            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-
-
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
-
-            GL.BindVertexArray(mainObject);
-
-            _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
-
-            _2dShader.Use();
-            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
-
-            GL.DeleteBuffer(vertexBufferObject);
-            GL.DeleteVertexArray(mainObject);
+            if (!InternalNoFill) FillRectangle(x1, y1, x2, y2, InternalFill);
+            if (!InternalNoStroke) DrawRectangle(x1, y1, x2, y2, InternalStroke, InternalStrokeWeight);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="rx"></param>
+        /// <param name="ry"></param>
+        protected void ellipse(float x, float y, float rx, float ry)
+        {
+            if (!InternalNoFill) FillEllipse(x, y, rx, ry, InternalFill);
+            if (!InternalNoStroke) DrawEllipse(x, y, rx, ry, InternalStroke, InternalStrokeWeight);
         }
 
         /// <summary>
@@ -1762,76 +1709,7 @@ namespace Program
             GL.DeleteBuffer(vertexBufferObject);
             GL.DeleteVertexArray(mainObject);
         }
-
-        /// <summary>
-        ///     Draws a 2D ellipse to the 2D screen
-        /// </summary>
-        /// <param name="x">X pos of the center of the ellipse</param>
-        /// <param name="y">y pos of the center of the ellipse</param>
-        /// <param name="radiusX">Radius of the ellipse in the x direction</param>
-        /// <param name="radiusY">Radius of the ellipse in the y direction</param>
-        /// <param name="color">Color of the ellipse</param>
-        protected void DrawEllipse(float x, float y, float radiusX, float radiusY, Color4 color)
-        {
-            var numEllipseVertices = (int) Math.Floor(Math.Sqrt(radiusX * radiusX + radiusY * radiusY));
-            var tempVertices = new Vector3[numEllipseVertices];
-
-            var xTrans = x - Size.X / 2;
-            var yTrans = y - Size.Y / 2;
-            var xNorm = xTrans / (Size.X / 2);
-            var yNorm = yTrans / (Size.Y / 2);
-            var radiusXNorm = radiusX / (Size.X / 2);
-            var radiusYNorm = radiusY / (Size.Y / 2);
-
-
-            var step = (float) (Math.PI * 2) / (numEllipseVertices - 1);
-
-            for (var i = 0; i < numEllipseVertices; i++)
-            {
-                var rad = i * step;
-                tempVertices[i] = new Vector3((float) Math.Cos(rad) * radiusXNorm + xNorm,
-                    (float) Math.Sin(rad) * radiusYNorm - yNorm, 0.0f);
-            }
-
-
-            var tempVerticesList = new List<float> {xNorm, -yNorm, 0f};
-            for (var i = 0; i < numEllipseVertices; i++)
-                tempVerticesList.AddRange(new[]
-                {
-                    tempVertices[i].X, tempVertices[i].Y, tempVertices[i].Z
-                });
-
-            var vertices = tempVerticesList.ToArray();
-
-
-            var vertexBufferObject = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices,
-                BufferUsageHint.DynamicDraw);
-
-            _2dShader.Use();
-
-            var mainObject = GL.GenVertexArray();
-            GL.BindVertexArray(mainObject);
-
-            var positionLocation = _2dShader.GetAttribLocation("aPos");
-            GL.EnableVertexAttribArray(positionLocation);
-            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-
-
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
-
-            GL.BindVertexArray(mainObject);
-
-            _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
-
-            _2dShader.Use();
-            GL.DrawArrays(PrimitiveType.TriangleFan, 0, numEllipseVertices + 1);
-
-            GL.DeleteBuffer(vertexBufferObject);
-            GL.DeleteVertexArray(mainObject);
-        }
-
+        
         /// <summary>
         ///     Draws a 2D triangle to the 2D screen, given clockwise points
         /// </summary>
@@ -2005,7 +1883,7 @@ namespace Program
             public Object(float[] vertices, Shader lightingShader, Lamp lamp, Color4 col)
             {
                 _vertices = vertices;
-
+                
                 _vertexBufferObject = GL.GenBuffer();
                 GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
                 GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices,
@@ -2049,7 +1927,7 @@ namespace Program
                 _shader.SetVector4("objectColor", new Vector4(_color.R, _color.G, _color.B, _color.A));
                 _shader.SetVector3("lightColor", _lamp.LightColor);
                 _shader.SetVector3("lightPos", _lamp.Pos);
-
+                
                 GL.DrawArrays(PrimitiveType.Triangles, 0, _vertices.Length / 6);
             }
 
@@ -2283,48 +2161,137 @@ namespace Program
             /// </summary>
             public static int BottomLeft = 0b00001000;
         }
+        
+        private int InternalStrokeWeight { set; get; } = 1;
 
-        private void DrawShapeStroke(float[] vertices)
+        /// <summary>
+        /// Defines the weight of the stroke of a 2D object
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Is thrown is value is smaller than 0</exception>
+        public void strokeWeight(int value)
         {
-            List<float> strokeVertices = new List<float>();
-            for (var i = 0; i < vertices.Length; i+=9)
+            if (value <= 0)
             {
-                var a = new Vector2(vertices[i], vertices[i + 1]);
-                var b = new Vector2(vertices[i + 3], vertices[i + 4]);
-                var c = new Vector2(vertices[i + 6], vertices[i + 7]);
-
-                //A^
-                var b1 = new Vector2(-(b.Y - c.Y), b.X - c.X);
-                
-                //B^
-                var b2 = new Vector2(-(c.Y - a.Y), c.X - a.X);
-
-                //C^
-                var b3 = new Vector2(-(a.Y - b.Y), a.X - b.X);
-
-                
-                b1.Normalize(); b2.Normalize(); b3.Normalize();
-                Console.WriteLine(b1.ToString(), b2.ToString(), b3.ToString());
-                b1 *= 50; b2 *= 50; b3 *= 50;
-                b1.X /= Size.X; b1.Y /= Size.Y;
-                b2.X /= Size.X; b2.Y /= Size.Y;
-                b3.X /= Size.X; b3.Y /= Size.Y;
-
-                var na = a - (b1 + b3);
-                var nb = b - (b1 + b2);
-                var nc = c - (b2 + b3);
-                
-                strokeVertices.AddRange(new List<float>
-                {
-                    na.X, na.Y, 0,
-                    nb.X, nb.Y, 0,
-                    nc.X, nc.Y, 0
-                });
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
-            
+            InternalStrokeWeight = value;
+        }
+
+        /// <summary>
+        /// Says if stroke is drawn
+        /// </summary>
+        private bool InternalNoStroke { get; set; } = false;
+
+        /// <summary>
+        /// Color of the stroke
+        /// </summary>
+        private Color4 InternalStroke { get; set; } = Color4.Black;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="g"></param>
+        /// <param name="b"></param>
+        /// <param name="a"></param>
+        public void stroke(float r, float g, float b, float a)
+        {
+            if (r < 0) throw new ArgumentOutOfRangeException(nameof(r));
+            if (g < 0) throw new ArgumentOutOfRangeException(nameof(g));
+            if (b < 0) throw new ArgumentOutOfRangeException(nameof(b));
+            if (a < 0) throw new ArgumentOutOfRangeException(nameof(a));
+            InternalNoStroke = false;
+            InternalStroke = new Color4(r, g, b, a);
+        }
+        
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="a"></param>
+        public void stroke(float g, float a)
+        {
+            if (g < 0) throw new ArgumentOutOfRangeException(nameof(g));
+            if (a < 0) throw new ArgumentOutOfRangeException(nameof(a));
+            InternalNoStroke = false;
+            InternalStroke = new Color4(g, g, g, a);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void noStroke()
+        {
+            InternalNoStroke = true;
+        }
+
+        /// <summary>
+        /// Says if stroke is drawn
+        /// </summary>
+        private bool InternalNoFill { get; set; } = false;
+
+        /// <summary>
+        /// Color of the stroke
+        /// </summary>
+        private Color4 InternalFill { get; set; } = Color4.White;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="g"></param>
+        /// <param name="b"></param>
+        /// <param name="a"></param>
+        public void fill(float r, float g, float b, float a)
+        {
+            if (r < 0) throw new ArgumentOutOfRangeException(nameof(r));
+            if (g < 0) throw new ArgumentOutOfRangeException(nameof(g));
+            if (b < 0) throw new ArgumentOutOfRangeException(nameof(b));
+            if (a < 0) throw new ArgumentOutOfRangeException(nameof(a));
+            InternalNoFill = false;
+            InternalFill = new Color4(r, g, b, a);
+        }
+        
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="a"></param>
+        public void fill(float g, float a)
+        {
+            if (g < 0) throw new ArgumentOutOfRangeException(nameof(g));
+            if (a < 0) throw new ArgumentOutOfRangeException(nameof(a));
+            InternalNoFill = false;
+            InternalFill = new Color4(g, g, g, a);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void noFill()
+        {
+            InternalNoFill = true;
+        }
+        
+        private void FillRectangle(float x1, float y1, float x2, float y2, Color4 color)
+        {
+            float cx = Size.X / 2f; 
+            float cy = Size.Y / 2f;
+
+            float[] vertices =
+            {
+                x1 / cx - 1, y1 / cy - 1, 0f,
+                x2 / cx - 1, y1 / cy - 1, 0f,
+                x1 / cx - 1, y2 / cy - 1, 0f,
+
+                x2 / cx - 1, y1 / cy - 1, 0f,
+                x2 / cx - 1, y2 / cy - 1, 0f,
+                x1 / cx - 1, y2 / cy - 1, 0f
+            };
+
             var vertexBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, strokeVertices.ToArray().Length * sizeof(float), strokeVertices.ToArray(),
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices,
                 BufferUsageHint.DynamicDraw);
 
             _2dShader.Use();
@@ -2341,7 +2308,7 @@ namespace Program
 
             GL.BindVertexArray(mainObject);
 
-            _2dShader.SetVector4("lightColor", new Vector4(0, 0, 0, 1));
+            _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
 
             _2dShader.Use();
             GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
@@ -2349,5 +2316,230 @@ namespace Program
             GL.DeleteBuffer(vertexBufferObject);
             GL.DeleteVertexArray(mainObject);
         }
+        private void DrawRectangle(float x1, float y1, float x2, float y2, Color4 col, int width)
+        {
+            List<float> vertices = new List<float>();
+            var xAmt = (x2 - x1 + (width)) / (x2 - x1);
+            var yAmt = (y2 - y1 + (width)) / (y2 - y1);
+            
+            var oxAmt = (x2 - x1 - (width)) / (x2 - x1);
+            var oyAmt = (y2 - y1 - (width)) / (y2 - y1);
+
+            var a = new Vector2(x1, y1);
+            var b = new Vector2(x2, y1);
+            var c = new Vector2(x1, y2);
+            var d = new Vector2(x2, y2);
+            var oa = new Vector2(x1, y1);
+            var ob = new Vector2(x2, y1);
+            var oc = new Vector2(x1, y2);
+            var od = new Vector2(x2, y2);
+            var cent = (a + b + c + d) / 4;
+            a -= cent; b -= cent; c -= cent; d -= cent;
+            a.X *= xAmt; b.X *= xAmt; c.X *= xAmt; d.X *= xAmt;
+            a.Y *= yAmt; b.Y *= yAmt; c.Y *= yAmt; d.Y *= yAmt;
+            a += cent; b += cent; c += cent; d += cent;
+            
+            oa -= cent; ob -= cent; oc -= cent; od -= cent;
+            oa.X *= oxAmt; ob.X *= oxAmt; oc.X *= oxAmt; od.X *= oxAmt;
+            oa.Y *= oyAmt; ob.Y *= oyAmt; oc.Y *= oyAmt; od.Y *= oyAmt;
+            oa += cent; ob += cent; oc += cent; od += cent;
+
+            float cx = Size.X / 2f; 
+            float cy = Size.Y / 2f;
+                
+            vertices.AddRange(new List<float>
+            {
+                a.X / cx - 1, a.Y / cy - 1, 0,
+                ob.X / cx - 1, ob.Y / cy - 1, 0,
+                b.X / cx - 1, b.Y / cy - 1, 0,
+                    
+                a.X / cx - 1, a.Y / cy - 1, 0,
+                ob.X / cx - 1, ob.Y / cy - 1, 0,
+                oa.X / cx - 1, oa.Y / cy - 1, 0,
+                
+                b.X / cx - 1, b.Y / cy - 1, 0,
+                od.X / cx - 1, od.Y / cy - 1, 0,
+                d.X / cx - 1, d.Y / cy - 1, 0,
+                    
+                b.X / cx - 1, b.Y / cy - 1, 0,
+                od.X / cx - 1, od.Y / cy - 1, 0,
+                ob.X / cx - 1, ob.Y / cy - 1, 0,
+                
+                c.X / cx - 1, c.Y / cy - 1, 0,
+                od.X / cx - 1, od.Y / cy - 1, 0,
+                d.X / cx - 1, d.Y / cy - 1, 0,
+                    
+                c.X / cx - 1, c.Y / cy - 1, 0,
+                od.X / cx - 1, od.Y / cy - 1, 0,
+                oc.X / cx - 1, oc.Y / cy - 1, 0,
+                
+                c.X / cx - 1, c.Y / cy - 1, 0,
+                oa.X / cx - 1, oa.Y / cy - 1, 0,
+                a.X / cx - 1, a.Y / cy - 1, 0,
+                    
+                c.X / cx - 1, c.Y / cy - 1, 0,
+                oa.X / cx - 1, oa.Y / cy - 1, 0,
+                oc.X / cx - 1, oc.Y / cy - 1, 0,
+            });
+            
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.ToArray().Length * sizeof(float), vertices.ToArray(),
+                BufferUsageHint.DynamicDraw);
+            _2dShader.Use();
+
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
+
+            var positionLocation = _2dShader.GetAttribLocation("aPos");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            GL.BindVertexArray(mainObject);
+
+            _2dShader.SetVector4("lightColor", new Vector4(col.R, col.G, col.B, col.A));
+
+            _2dShader.Use();
+            GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Count / 3);
+
+            GL.DeleteBuffer(vertexBufferObject);
+            GL.DeleteVertexArray(mainObject);
+        }
+        private void FillEllipse(float x, float y, float radiusX, float radiusY, Color4 color)
+        {
+            var numEllipseVertices = (int) Math.Floor(Math.Sqrt(radiusX * radiusX + radiusY * radiusY));
+            var tempVertices = new Vector3[numEllipseVertices];
+
+            var xTrans = x - Size.X / 2;
+            var yTrans = y - Size.Y / 2;
+            var xNorm = xTrans / (Size.X / 2);
+            var yNorm = yTrans / (Size.Y / 2);
+            var radiusXNorm = radiusX / (Size.X / 2);
+            var radiusYNorm = radiusY / (Size.Y / 2);
+
+
+            var step = (float) (Math.PI * 2) / (numEllipseVertices - 1);
+
+            for (var i = 0; i < numEllipseVertices; i++)
+            {
+                var rad = i * step;
+                tempVertices[i] = new Vector3((float) Math.Cos(rad) * radiusXNorm + xNorm,
+                    (float) Math.Sin(rad) * radiusYNorm - yNorm, 0.0f);
+            }
+
+
+            var tempVerticesList = new List<float> {xNorm, -yNorm, 0f};
+            for (var i = 0; i < numEllipseVertices; i++)
+                tempVerticesList.AddRange(new[]
+                {
+                    tempVertices[i].X, tempVertices[i].Y, tempVertices[i].Z
+                });
+
+            var vertices = tempVerticesList.ToArray();
+
+
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices,
+                BufferUsageHint.DynamicDraw);
+
+            _2dShader.Use();
+
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
+
+            var positionLocation = _2dShader.GetAttribLocation("aPos");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            GL.BindVertexArray(mainObject);
+
+            _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
+
+            _2dShader.Use();
+            GL.DrawArrays(PrimitiveType.TriangleFan, 0, numEllipseVertices + 1);
+
+            GL.DeleteBuffer(vertexBufferObject);
+            GL.DeleteVertexArray(mainObject);
+        }
+        private void DrawEllipse(float x, float y, float radiusX, float radiusY, Color4 color, int width)
+        {
+            var numEllipseVertices = (int) Math.Floor(Math.Sqrt(radiusX * radiusX + radiusY * radiusY));
+            var tempInnerVertices = new Vector3[numEllipseVertices];
+            var tempOuterVertices = new Vector3[numEllipseVertices];
+             
+            float cx = Size.X / 2f; 
+            float cy = Size.Y / 2f;
+            
+            float innerRX = (radiusX - width) / cx;
+            float innerRY = (radiusY - width) / cx;
+            
+            float outerRX = (radiusX + width) / cx;
+            float outerRY = (radiusY + width) / cx;
+
+            var step = (float) (Math.PI * 2) / (numEllipseVertices - 1);
+
+            for (var i = 0; i < numEllipseVertices; i++)
+            {
+                var rad = i * step;
+                tempInnerVertices[i] = new Vector3((float) Math.Cos(rad) * innerRX + (x / cx - 1),
+                    (float) Math.Sin(rad) * innerRY - (y / cy - 1), 0.0f);
+                tempOuterVertices[i] = new Vector3((float) Math.Cos(rad) * outerRX + (x / cx - 1),
+                    (float) Math.Sin(rad) * outerRY - (y / cy - 1), 0.0f);
+            }
+
+
+            var tempVerticesList = new List<float>();
+            for (var i = 0; i < tempInnerVertices.Length - 1; i++)
+            {
+                tempVerticesList.AddRange(new[]
+                {
+                    tempOuterVertices[i].X, tempOuterVertices[i].Y, tempOuterVertices[i].Z,
+                    tempInnerVertices[i].X, tempInnerVertices[i].Y, tempInnerVertices[i].Z,
+                    tempOuterVertices[i + 1].X, tempOuterVertices[i + 1].Y, tempOuterVertices[i + 1].Z,
+                    tempInnerVertices[i].X, tempInnerVertices[i].Y, tempInnerVertices[i].Z,
+                    tempOuterVertices[i + 1].X, tempOuterVertices[i + 1].Y, tempOuterVertices[i + 1].Z,
+                    tempInnerVertices[i + 1].X, tempInnerVertices[i + 1].Y, tempInnerVertices[i + 1].Z
+                });
+            }
+
+            var vertices = tempVerticesList.ToArray();
+
+
+            var vertexBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices,
+                BufferUsageHint.DynamicDraw);
+
+            _2dShader.Use();
+
+            var mainObject = GL.GenVertexArray();
+            GL.BindVertexArray(mainObject);
+
+            var positionLocation = _2dShader.GetAttribLocation("aPos");
+            GL.EnableVertexAttribArray(positionLocation);
+            GL.VertexAttribPointer(positionLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferObject);
+
+            GL.BindVertexArray(mainObject);
+
+            _2dShader.SetVector4("lightColor", new Vector4(color.R, color.G, color.B, color.A));
+
+            _2dShader.Use();
+            GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length / 3);
+
+            GL.DeleteBuffer(vertexBufferObject);
+            GL.DeleteVertexArray(mainObject);
+        }
+
+
     }
 }
