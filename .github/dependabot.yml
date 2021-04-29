@@ -1,0 +1,12 @@
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: OpenTK
+    versions:
+    - 4.6.1
+    - 4.6.2
